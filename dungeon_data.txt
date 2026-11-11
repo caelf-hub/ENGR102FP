@@ -1,0 +1,136 @@
+# dungeon_data.txt - all the game data for Frodo and the Dungeon Lord.
+# Our team wrote this file. frodo_game.py reads it with split().
+#
+# Every record is one line:   KIND | name | key=value key=value ...
+# Use _ instead of a space inside a value. Lines starting with # are notes.
+# Chambers are not drawn here: the DUNGEON and STYLE lines tell the generator how to build them.
+# Only the boss arena is drawn by hand (the ARENA lines at the bottom).
+
+# ---- SETTINGS ----
+SETTING | game | doom_max=85
+
+# ---- HEROES ---- (Frodo always leads; the player picks up to 3 more)
+# move  = how many tiles the hero may walk on each of their turns
+# speed = when the hero acts in a round (low goes first; a small random roll is added each round)
+HERO | Frodo           | kind=leader hp=18 move=4 speed=30 title=Party_Leader blurb=Small_dog,_big_orders.
+HERO | Brother Biscuit | kind=tank   hp=24 move=3 speed=50 title=Shield_Monk  blurb=Tough._Shields_his_friends.
+HERO | Pip Longshot    | kind=archer hp=16 move=4 speed=25 title=Archer       blurb=Hits_from_far_away.
+HERO | Mabel Ember     | kind=mage   hp=15 move=3 speed=40 title=Hedge_Mage   blurb=Fire,_frost_and_healing.
+HERO | Nettle Quick    | kind=rogue  hp=17 move=5 speed=15 title=Rogue        blurb=Fast,_sneaky,_stabby.
+
+# ---- HERO CARDS ----
+# Each card is ONE action. On a hero's turn the player drags one of the 3 cards in hand onto a target.
+# action = kind:amount:range
+#   attack:3:1  = 3 damage to an enemy next to the hero (range 1 = melee)
+#   heal:2:3    = heal a hero (or yourself) up to 3 tiles away
+#   shield:2    = block 2 damage from every hit until the end of the round (drop on the hero)
+#   move:4      = dash: 4 extra tiles of movement this turn (drop on the hero)
+# Each hero keeps 3 cards in hand. After playing one, a new card is drawn from their deck of 8.
+# element = fire, frost, light or none (see the rules screen).
+CARD | Frodo | name=Heroic_Yap       action=attack:2:1 element=none
+CARD | Frodo | name=Ankle_Nip        action=attack:3:1 element=none
+CARD | Frodo | name=Zoomies          action=move:4     element=none
+CARD | Frodo | name=Brave_Bark       action=heal:2:3   element=none
+CARD | Frodo | name=Helmet_Headbutt  action=attack:4:1 element=none
+CARD | Frodo | name=Tail_Wag         action=heal:3:2   element=light
+CARD | Frodo | name=Guard_Dog        action=shield:2   element=none
+CARD | Frodo | name=Fetch            action=attack:2:3 element=none
+
+CARD | Brother Biscuit | name=Shield_Bash    action=attack:3:1 element=none
+CARD | Brother Biscuit | name=Stand_Firm     action=shield:3   element=none
+CARD | Brother Biscuit | name=Hammer_Blow    action=attack:4:1 element=none
+CARD | Brother Biscuit | name=Crushing_Vow   action=attack:5:1 element=none
+CARD | Brother Biscuit | name=Steady_March   action=move:3     element=none
+CARD | Brother Biscuit | name=Bulwark        action=shield:2   element=none
+CARD | Brother Biscuit | name=Mending_Prayer action=heal:3:1   element=light
+CARD | Brother Biscuit | name=Sweep          action=attack:3:1 element=none
+
+CARD | Pip Longshot | name=Quick_Shot     action=attack:2:4 element=none
+CARD | Pip Longshot | name=Aimed_Shot     action=attack:3:5 element=none
+CARD | Pip Longshot | name=Volley         action=attack:4:4 element=none
+CARD | Pip Longshot | name=Piercing_Arrow action=attack:5:5 element=none
+CARD | Pip Longshot | name=Skirmish       action=attack:2:3 element=none
+CARD | Pip Longshot | name=Flame_Arrow    action=attack:3:4 element=fire
+CARD | Pip Longshot | name=Tumble         action=move:3     element=none
+CARD | Pip Longshot | name=Field_Dressing action=heal:2:2   element=none
+
+CARD | Mabel Ember | name=Ember_Bolt  action=attack:3:3 element=fire
+CARD | Mabel Ember | name=Frost_Shard action=attack:3:4 element=frost
+CARD | Mabel Ember | name=Fireball    action=attack:5:3 element=fire
+CARD | Mabel Ember | name=Ice_Ward    action=shield:2   element=frost
+CARD | Mabel Ember | name=Mend        action=heal:4:3   element=light
+CARD | Mabel Ember | name=Spark       action=attack:2:3 element=none
+CARD | Mabel Ember | name=Blink       action=move:5     element=none
+CARD | Mabel Ember | name=Thunderclap action=attack:4:2 element=none
+
+CARD | Nettle Quick | name=Backstab       action=attack:4:1 element=none
+CARD | Nettle Quick | name=Quick_Stab     action=attack:2:1 element=none
+CARD | Nettle Quick | name=Throwing_Knife action=attack:2:3 element=none
+CARD | Nettle Quick | name=Shadow_Step    action=move:4     element=none
+CARD | Nettle Quick | name=Smoke_Bomb     action=shield:2   element=none
+CARD | Nettle Quick | name=Assassinate    action=attack:5:1 element=none
+CARD | Nettle Quick | name=Pilfer         action=attack:3:1 element=none
+CARD | Nettle Quick | name=Patch_Up       action=heal:2:1   element=none
+
+# ---- SPEARS'S UNITS ----
+# models = how many figures, wounds = hit points per figure,
+# toughness = damage blocked from every hit, leadership = morale (2d6 must roll this or less)
+# role = melee / ranged / heavy / fast.  aoe=1 splashes heroes next to the target.
+UNIT | Orc Brutes      | models=3 move=3 attack=2 toughness=0 wounds=2  leadership=7  role=melee  range=1 aoe=0 look=orc
+UNIT | Goblin Slingers | models=2 move=3 attack=1 toughness=0 wounds=1  leadership=5  role=ranged range=4 aoe=0 look=goblin
+UNIT | Iron Guard      | models=2 move=2 attack=2 toughness=1 wounds=3  leadership=9  role=heavy  range=1 aoe=0 look=guard
+UNIT | Wolf Riders     | models=2 move=5 attack=2 toughness=0 wounds=2  leadership=6  role=fast   range=1 aoe=0 look=wolf
+UNIT | Bomb Flingers   | models=2 move=3 attack=1 toughness=0 wounds=2  leadership=6  role=ranged range=3 aoe=1 look=bomber
+UNIT | Shade Stalkers  | models=2 move=4 attack=2 toughness=0 wounds=1  leadership=8  role=fast   range=1 aoe=0 look=shade
+UNIT | Warlord         | models=1 move=3 attack=4 toughness=1 wounds=18 leadership=12 role=melee  range=1 aoe=0 look=warlord
+
+# ---- ITEMS ---- (rarity 1 = common ... 3 = rare; deeper rooms allow rarer loot)
+# effect = kind:amount   heal, attack (+damage), armor (+shield), move (+tiles every turn),
+#                        doom (pushes the Doom Track back), cheese (Frodo's favourite)
+ITEM | Healing Draught     | rarity=1 effect=heal:4
+ITEM | Bone Broth          | rarity=1 effect=heal:2
+ITEM | Swift Boots         | rarity=2 effect=move:1
+ITEM | Whetstone           | rarity=2 effect=attack:1
+ITEM | Studded Collar      | rarity=2 effect=armor:1
+ITEM | Scroll of Delay     | rarity=2 effect=doom:2
+ITEM | Runed Blade         | rarity=3 effect=attack:2
+ITEM | Cheese of Fortitude | rarity=3 effect=cheese:4
+
+# ---- THE DUNGEON ----
+# The dungeon is one map made of cell_cols x cell_rows cells, each cell_width x cell_height tiles.
+# One random chamber is carved in each cell the plan uses. The boss arena takes a 2 x 2 block of cells.
+# main  = how many chambers on the path from the start to the boss (the boss arena not counted)
+# sides = how many optional side chambers branch off that path (extra loot, extra danger)
+DUNGEON | plan | cell_cols=5 cell_rows=4 cell_width=9 cell_height=8 main=7 sides=4
+
+# ---- ROOM STYLES ----
+# Spears picks a style for each new chamber. The generator then builds it at random.
+# shape = rect / ell / round / cross / cave      pillars, chests, traps, cover, shrines = how many
+# counters = which party habit this style punishes: none / melee / ranged / loot / clump / rest
+STYLE | Crypt           | shape=cave  pillars=1 chests=2 traps=1 cover=1 shrines=1 counters=none
+STYLE | Old Cellar      | shape=rect  pillars=1 chests=1 traps=1 cover=2 shrines=0 counters=none
+STYLE | Guard Hall      | shape=rect  pillars=2 chests=1 traps=1 cover=1 shrines=0 counters=melee
+STYLE | Kennel          | shape=round pillars=0 chests=1 traps=1 cover=3 shrines=1 counters=ranged
+STYLE | Treasure Nook   | shape=ell   pillars=1 chests=3 traps=1 cover=0 shrines=0 counters=loot
+STYLE | Pit Gallery     | shape=cross pillars=0 chests=1 traps=3 cover=0 shrines=1 counters=clump
+STYLE | Mourning Chapel | shape=round pillars=2 chests=1 traps=0 cover=2 shrines=1 counters=rest
+
+# ---- THE BOSS ARENA ----
+# The Throne of Spears, drawn by hand: 16 wide and 14 tall. Its outline is visible from the start.
+# #  rock or pillar   .  floor   Y  throne   B  brazier (fire bowl)   C  chest   ~  cover   P  shrine
+# W  where the Warlord waits   G  where his guards stand
+# Its door is placed automatically in the wall nearest the last main chamber.
+ARENA | row | #####......#####
+ARENA | row | ###..........###
+ARENA | row | ##..B..YY..B..##
+ARENA | row | #......W.......#
+ARENA | row | #..#........#..#
+ARENA | row | #..#..G..G..#..#
+ARENA | row | #..............#
+ARENA | row | #C.~........~.C#
+ARENA | row | #..............#
+ARENA | row | #..#........#..#
+ARENA | row | #..#..~..~..#..#
+ARENA | row | #......P.......#
+ARENA | row | ##............##
+ARENA | row | #####......#####
