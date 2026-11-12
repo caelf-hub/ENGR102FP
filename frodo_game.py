@@ -18,6 +18,7 @@ import combat
 import game_data
 import logbook
 import movement
+import savegame
 import spears_ai
 import ui
 
@@ -70,6 +71,7 @@ def enter_room(game, number):
                 + str(game["depth"]) + " of " + str(len(game["plan"])) + " explored).")
     logbook.say(game, room["banner"])
     logbook.add_banner(game, room["banner"])
+    savegame.save_game(game, "autosave")
     return room["name"]
 
 
@@ -78,6 +80,7 @@ def start_dungeon(game):
     count = spears_ai.build_dungeon(game)
     logbook.say(game, "Spears has dug a dungeon of " + str(count) + " chambers. His throne waits in the dark.")
     enter_room(game, 0)
+    ui.show_quickstart(game)
     return count
 
 
@@ -257,8 +260,28 @@ def use_menu(game, choice):
 
 # ---------------------------------------------------------------- Spears's units
 
+def damage_words(before, game):
+    """receives each hero's health before an enemy attacked and the game; returns words like "hits Pip for 3, Frodo for 2" (or "misses")."""
+    hits = []
+    for hero in game["heroes"]:
+        lost = before[hero["name"]] - hero["hp"]
+        if lost > 0:
+            hits.append(hero["name"].split(" ")[0] + " for " + str(lost))
+    if len(hits) == 0:
+        return "misses"
+    return "hits " + ", ".join(hits)
+
+
+def health_now(game):
+    """receives the game; returns a dictionary of every hero's health right now."""
+    health = {}
+    for hero in game["heroes"]:
+        health[hero["name"]] = hero["hp"]
+    return health
+
+
 def spears_phase(game, unit):
-    """receives the game and one enemy unit; runs its phases Move, Shoot, Charge, Fight, Morale; returns the damage it dealt."""
+    """receives the game and one enemy unit; runs its phases Move, Shoot, Charge, Fight, Morale while the screen shows each step; returns the damage it dealt."""
     target = spears_ai.pick_target(game, unit)
     if target is None:
         return 0
@@ -267,16 +290,25 @@ def spears_phase(game, unit):
     logbook.tell(game, visible, unit["name"] + " activates (initiative " + str(unit["init"]) + ").")
     if visible:
         ui.follow(unit["models"][0]["pos"])
+    ui.caption(game, unit, "moves toward " + target["name"].split(" ")[0])
     spears_ai.move_unit(game, unit, target, unit["move"])
-    ui.pause(game, 350)
+    ui.play_moves(game)
+    before = health_now(game)
     if unit["role"] == "ranged":
+        ui.caption(game, unit, "shoots at " + target["name"].split(" ")[0] + "!")
         damage += spears_ai.unit_shoot(game, unit, target)
     else:
         if spears_ai.unit_charge(game, unit, target):
-            ui.pause(game, 350)
+            ui.caption(game, unit, "CHARGES!")
+            ui.play_moves(game)
+        ui.caption(game, unit, "attacks " + target["name"].split(" ")[0] + "!")
         damage += spears_ai.unit_fight(game, unit, target)
-    ui.pause(game, 450)
+    ui.wait_effects(game)
+    ui.caption(game, unit, damage_words(before, game))
+    ui.pause(game, 500)
     spears_ai.unit_morale(game, unit)
+    ui.play_moves(game)
+    ui.caption(game, None, "")
     return damage
 
 
@@ -310,15 +342,15 @@ def start_round(game):
 
 
 def save_game(game):
-    """receives the game; asks the player to type a file name and saves a status report; returns True if a file was written."""
+    """receives the game; asks the player to type a file name and saves the whole game to name.sav; returns True if it was saved."""
     name = ui.ask_text(game, "Name your save file (letters and numbers):", "name", 0, 0)
     if name is None:
         return False
-    saved = logbook.save_status(game, name)
+    saved = savegame.save_game(game, name)
     if saved:
-        logbook.say(game, "Status saved to " + name + ".txt")
+        logbook.say(game, "Game saved to " + name + ".sav - choose Continue on the title screen to load it.")
     else:
-        logbook.say(game, "Could not save " + name + ".txt")
+        logbook.say(game, "Could not save " + name + ".sav")
     return saved
 
 
@@ -422,6 +454,33 @@ def finish_game(game, result):
     return summary
 
 
+def open_game(data, choice):
+    """receives the loaded data and what the player chose on the title screen ({"party": [...]} or {"file": name}); returns a ready game, or None if a save could not be loaded."""
+    if "file" in choice:
+        game = savegame.load_game(data, choice["file"])
+        if game is not None:
+            logbook.write_log(["Game loaded from " + choice["file"] + ".sav"], game["round"])
+            ui.show_chamber(game, movement.hero_tiles(game["heroes"]))
+        return game
+    game = game_data.new_game(data, choice["party"])
+    logbook.start_log(choice["party"])
+    start_dungeon(game)
+    return game
+
+
+def choose_game(data):
+    """receives the loaded data; shows the title screens until the player starts a new game or loads one; returns the game (None if they quit)."""
+    game = None
+    note = ""
+    while game is None:
+        choice = ui.title_flow(data, note)
+        if len(choice) == 0:
+            return None
+        game = open_game(data, choice)
+        note = "That save file could not be read."
+    return game
+
+
 def main():
     """receives nothing; loads the data, opens the window and runs the game round by round until win, lose or quit; returns nothing."""
     data = game_data.load_dungeon("dungeon_data.txt")
@@ -429,11 +488,8 @@ def main():
         print("Could not open dungeon_data.txt - keep it in the same folder as frodo_game.py")
         return
     ui.init()
-    party = ui.title_flow(data)
-    if len(party) > 0:
-        game = game_data.new_game(data, party)
-        logbook.start_log(party)
-        start_dungeon(game)
+    game = choose_game(data)
+    if game is not None:
         result = ""
         while game["running"] and result == "":
             play_round(game)

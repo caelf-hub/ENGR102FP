@@ -11,7 +11,8 @@ Run the game with `python frodo_game.py`. Run the tests with `python test_frodo.
 | `game_data.py` | Reads `dungeon_data.txt` and builds the starting `game` dictionary. |
 | `combat.py` | Modifier deck, damage maths, turn order. |
 | `cards.py` | The 3-card hand: playing a card, drawing a new one, reshuffling the discard pile; elements, loot. |
-| `spears_ai.py` | Spears: generating and furnishing each chamber, adapting to the party, unit phases, morale, Doom, reinforcements. |
+| `spears_ai.py` | Spears: generating and furnishing each chamber, adapting to the party, unit phases, morale, Doom, preparing chambers ahead. |
+| `savegame.py` | Writes the game to a `.sav` file in our own plain-text format and reads it back. |
 | `chambers.py` | Plans the dungeon (main path, side chambers, boss block) and carves chamber shapes, doors and corridors. |
 | `movement.py` | Tiles, reachable tiles, pathing, fog of war (`refresh_vision`). |
 | `logbook.py` | Combat log, `frodo_log.txt`, summary, win/lose check. |
@@ -64,3 +65,11 @@ Run the game with `python frodo_game.py`. Run the tests with `python test_frodo.
 - Fill in the header line at the top of `frodo_game.py`.
 - Every function is tagged `AI-assisted`. Change a tag to `Team-written` only for functions your team wrote or rewrote.
 - Line numbers in `REQUIREMENTS_CHECK.md` shift when the code changes. Recheck them after your edits.
+
+## Saves, Spears and enemy turns
+
+- `savegame.save_game(game, name)` writes `name.sav`; `savegame.load_game(data, name)` reads it back (None if it is broken). If you add a new value to the `game` dictionary that must survive a save, add it to `game_line()` and `load_game_line()` in `savegame.py`.
+- The game autosaves to `autosave.sav` in `frodo_game.enter_room()`.
+- Spears never edits the chamber the party is in. `spears_ai.reinforce()` adds "trap", "guard" or "trapped chest" to a chamber's `prepared` list, and `apply_preparations()` places them when that chamber is opened.
+- Enemy moves are recorded in `game["moves"]` and attacks as `strike` effects in `game["fx"]`; `ui.play_moves()` and `ui.wait_effects()` animate them, and `ui.caption()` shows what the unit is doing.
+- Tips: `ui.situation_tip()` picks the tip under the map; the quick-start card is `ui.draw_quickstart()`.

@@ -150,8 +150,8 @@ def main_path(dungeon, boss, start):
 def make_chamber(number, kind, cells, parent, dungeon):
     """AI-assisted: receives a chamber number, its kind ("start", "main", "side" or "boss"), its cells, its parent's number and the DUNGEON settings; returns a new, not yet carved chamber dictionary."""
     return {"id": number, "kind": kind, "cells": cells, "zone": cell_zone(dungeon, cells), "parent": parent,
-            "carved": False, "cleared": False, "reinforced": False, "tiles": [], "name": "", "step": 0,
-            "markers": {}}
+            "carved": False, "cleared": False, "tiles": [], "name": "", "step": 0,
+            "markers": {}, "prepared": []}
 
 
 def add_sides(dungeon, plan, path, boss):

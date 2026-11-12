@@ -299,6 +299,7 @@ def generate_room(game, number, counter):
     else:
         furnish(game, room, style, counter)
         deploy_room(game, room, counter)
+        apply_preparations(game, room, chamber)
     return room
 
 
@@ -421,13 +422,14 @@ def best_tile(game, unit, model, steps_map, steps):
 # ---------------------------------------------------------------- unit phases
 
 def move_unit(game, unit, target, steps):
-    """receives the game, a unit, its target hero and a move limit; moves every model toward the goal and returns how many models moved."""
+    """receives the game, a unit, its target hero and a move limit; moves every model toward the goal (remembering where each came from, for the animation); returns how many models moved."""
     unit["goal"] = goal_tile(game, unit, target)
     steps_map = movement.step_map(game["grid"], unit["goal"], [], True)
     moved = 0
     for model in unit["models"]:
         tile = best_tile(game, unit, model, steps_map, steps)
         if tile != model["pos"]:
+            game["moves"].append({"model": model, "from": list(model["pos"])})
             model["pos"] = [tile[0], tile[1]]
             moved += 1
     return moved
@@ -481,6 +483,12 @@ def splash(game, unit, hero):
 def unit_attack(game, unit, model, hero):
     """receives the game, a unit, one of its models and a hero; resolves one enemy attack and returns the damage dealt."""
     shield = hero["shield"] + hero["armor"] + cover_bonus(game, unit, hero)
+    style = "melee"
+    if unit["aoe"] > 0:
+        style = "bomb"
+    elif unit["range"] > 1:
+        style = "ranged"
+    game["fx"].append({"kind": "strike", "from": list(model["pos"]), "to": list(hero["pos"]), "style": style})
     result = combat.roll_attack(game, "enemy", unit["attack"], shield)
     damage = result[0]
     combat.apply_damage(hero, damage)
@@ -622,11 +630,12 @@ def safest_tile(game, model, steps):
 
 
 def fall_back(game, unit):
-    """receives the game and a broken unit; every model runs away from the heroes; returns how many models moved."""
+    """receives the game and a broken unit; every model runs away from the heroes (remembering where each came from, for the animation); returns how many models moved."""
     moved = 0
     for model in unit["models"]:
         tile = safest_tile(game, model, unit["move"])
         if tile != model["pos"]:
+            game["moves"].append({"model": model, "from": list(model["pos"])})
             model["pos"] = [tile[0], tile[1]]
             moved += 1
     return moved
@@ -674,108 +683,48 @@ def advance_doom(doom, amount, doom_max):
     return doom
 
 
-def deploy_unit(game):
-    """receives the game; Spears deploys a fresh unit at a free spawn tile of the chamber the party is fighting in; returns a message ("" if he could not)."""
-    taken = movement.model_tiles(game["units"]) + movement.hero_tiles(game["heroes"])
-    for spawn in game["spawns"]:
-        if spawn not in taken:
-            break
-    else:
-        return ""
-    room = {"id": game["chamber"], "units": []}
-    unit = add_unit(game, room, random.choice(BASIC_UNITS), spawn, taken)
-    if unit is None:
-        return ""
-    game["units"].append(unit)
-    game["event_tile"] = spawn
-    return "Spears reinforces! " + unit["name"] + " march in."
-
-
-def dark_floor(game):
-    """receives the game; returns the empty floor tiles of the current chamber that no hero can see right now."""
-    taken = movement.hero_tiles(game["heroes"]) + movement.model_tiles(game["units"])
-    tiles = []
-    for tile in game["plan"][game["chamber"]]["tiles"]:
-        hidden = not game["seen"][tile[1]][tile[0]]
-        if game["grid"][tile[1]][tile[0]] == "." and hidden and tile not in taken:
-            tiles.append(tile)
-    return tiles
-
-
-def spring_new_trap(game):
-    """receives the game; Spears arms a new trap, in the dark if he can, otherwise near a hero; returns a message ("" if no room)."""
-    standing = movement.hero_tiles(game["heroes"])
-    options = dark_floor(game)
-    if len(options) == 0 and len(standing) > 0:
-        taken = standing + movement.model_tiles(game["units"])
-        options = movement.reachable_tiles(game["grid"], random.choice(standing), 2, [], taken, False)
-    random.shuffle(options)
-    for tile in options:
-        if game["grid"][tile[1]][tile[0]] == ".":
-            game["grid"][tile[1]][tile[0]] = "T"
-            game["event_tile"] = tile
-            return "Spears arms a new trap!"
-    return ""
-
-
-def all_connected(game):
-    """receives the game; returns True if every hero, every enemy and every door of opened chambers can still be walked to."""
-    standing = movement.hero_tiles(game["heroes"])
-    if len(standing) == 0:
-        return True
-    steps = movement.step_map(game["grid"], standing[0], [], True)
-    spots = standing + movement.model_tiles(game["units"])
-    for door in game["doors"]:
-        if game["plan"][door["from"]]["carved"]:
-            spots.append(door["tile"])
-    for tile in spots:
-        if steps[tile[1]][tile[0]] < 0:
-            return False
-    return True
-
-
-def shift_tile(game):
-    """receives the game; Spears turns one empty floor tile of the current chamber into rubble if nobody gets walled off; returns a message ("" if he could not)."""
-    grid = game["grid"]
-    taken = movement.hero_tiles(game["heroes"]) + movement.model_tiles(game["units"])
-    tiles = game["plan"][game["chamber"]]["tiles"]
-    for attempt in range(20):
-        tile = random.choice(tiles)
-        if grid[tile[1]][tile[0]] != "." or tile in taken:
-            continue
-        grid[tile[1]][tile[0]] = "#"
-        game["event_tile"] = tile
-        if all_connected(game):
-            tiles.remove(tile)
-            return "The dungeon shifts! Spears drops rubble into the room."
-        grid[tile[1]][tile[0]] = "."
-    return ""
+def prepare_ahead(game, chamber):
+    """receives the game and a chamber the party has not opened yet; Spears secretly adds a trap, a guard or a trapped chest to it; returns what he added."""
+    choice = random.choice(["trap", "guard", "trapped chest"])
+    chamber["prepared"].append(choice)
+    logbook.note(game, "Spears prepares a " + choice + " in a chamber ahead (unseen by the party).")
+    return choice
 
 
 def reinforce(game):
-    """receives the game; after a round Spears may deploy a unit (once per chamber), arm a trap or shift a tile in the chamber the party is fighting in; returns a message ("" if he waits)."""
-    chamber = game["plan"][game["chamber"]]
-    if chamber["cleared"] or chamber["kind"] == "boss" or random.randint(1, 4) != 1:
+    """receives the game; after a round Spears may secretly strengthen one chamber the party has not opened yet (never the one they are in); returns what he added ("" if he waits)."""
+    if random.randint(1, 3) != 1:
         return ""
-    choice = random.choice(["deploy", "trap", "shift"])
-    if choice == "deploy" and not chamber["reinforced"]:
-        chamber["reinforced"] = True
-        message = deploy_unit(game)
-    elif choice == "trap":
-        message = spring_new_trap(game)
-    else:
-        message = shift_tile(game)
-    if message == "":
+    ahead = []
+    for chamber in game["plan"]:
+        if not chamber["carved"] and chamber["kind"] != "boss" and len(chamber["prepared"]) < 3:
+            ahead.append(chamber)
+    if len(ahead) == 0:
         return ""
-    tile = game["event_tile"]
-    if game["seen"][tile[1]][tile[0]]:
-        logbook.say(game, message)
-        logbook.add_banner(game, message)
-    else:
-        logbook.note(game, message + " (unseen by the party)")
-        logbook.say(game, "Something stirs in the dark...")
-        logbook.add_banner(game, "Something stirs in the dark...")
-    return message
+    choice = prepare_ahead(game, random.choice(ahead))
+    logbook.say(game, "Spears is preparing something in the chambers ahead...")
+    logbook.add_banner(game, "Spears is preparing something in the chambers ahead...")
+    return choice
+
+
+def apply_preparations(game, room, chamber):
+    """receives the game, a freshly carved room and its chamber; puts in the traps, guards and trapped chests Spears prepared; returns how many were added."""
+    free = []
+    for tile in room["tiles"]:
+        spot = game["grid"][tile[1]][tile[0]]
+        if spot == "." and tile not in room["starts"] and movement.tile_distance(tile, room["origin"]) > 2:
+            free.append(tile)
+    taken = movement.hero_tiles(game["heroes"]) + movement.model_tiles(game["units"])
+    for unit in room["units"]:
+        taken = taken + movement.model_tiles([unit])
+    for choice in chamber["prepared"]:
+        if choice == "trap":
+            place_letters(game["grid"], free, "T", 1)
+        elif choice == "trapped chest":
+            place_letters(game["grid"], free, "X", 1)
+        elif len(free) > 0:
+            add_unit(game, room, random.choice(BASIC_UNITS), random.choice(free), taken)
+    return len(chamber["prepared"])
 
 
 # ---------------------------------------------------------------- the boss

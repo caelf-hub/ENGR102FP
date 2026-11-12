@@ -18,6 +18,7 @@ import art
 import cards
 import logbook
 import movement
+import savegame
 import scenery
 
 # ---------------------------------------------------------------- layout
@@ -48,6 +49,7 @@ UI = {"screen": None, "clock": None, "closed": False,
       "drag": None, "card": None, "highlights": [], "glows": [], "steps": [],
       "cursor": [1, 1], "cursor_on": False, "log_scroll": 0,
       "hints": {"walk": False, "card": False, "end": False},
+      "strikes": [], "busy_until": 0, "caption": None,
       "floaters": [], "flashes": [], "mod": None, "banner": None,
       "room": None, "room_key": "", "ripples": [],
       "cam": [384.0, 240.0], "zoom": 1.0, "cam_goal": None, "zoom_goal": None, "pan": None,
@@ -400,7 +402,7 @@ def draw_ripples(game, room):
         x = puddle[0] + random.randint(8, puddle[2] - 8)
         y = puddle[1] + random.randint(5, puddle[3] - 5)
         if game["seen"][min(y // TILE, len(game["seen"]) - 1)][min(x // TILE, len(game["seen"][0]) - 1)]:
-            UI["ripples"].append({"x": x, "y": y, "life": 30})
+            UI["ripples"].append({"x": x, "y": y, "life": 30, "start": art.ART["tick"]})
     for ripple in UI["ripples"]:
         scenery.draw_ripple(ripple["x"] - UI["view"].x, ripple["y"] - UI["view"].y, ripple["life"])
     return fade_list(UI["ripples"])
@@ -484,6 +486,8 @@ def draw_coherency(models):
 def draw_model_token(unit, model):
     """AI-assisted: receives an enemy unit and one of its models; draws the model with its wounds; returns nothing."""
     center = tile_center(model["pos"])
+    if "draw" in model:
+        center = [model["draw"][0] - UI["view"].x, model["draw"][1] - UI["view"].y]
     art.draw_model(unit["look"], center[0], center[1] - 5, 15)
     art.draw_pips(center[0], center[1] + 20, min(model["hp"], 6), art.CRIMSON)
     if model["hp"] > 6:
@@ -599,7 +603,7 @@ def draw_boss_bar(game):
             unit = each
     if unit is None:
         return False
-    plate = pygame.Rect(GRID_X + GRID_W // 2 - 200, GRID_Y + GRID_H - 48, 400, 40)
+    plate = pygame.Rect(GRID_X + GRID_W // 2 - 200, GRID_Y + GRID_H - 72, 400, 40)
     art.panel(plate, "slate", art.CRIMSON)
     phases = ["", " - his guard is summoned", " - ENRAGED"]
     art.text("Spears's Warlord" + phases[game["boss_phase"]], plate.centerx, plate.y + 11, "bold", art.GOLD, "center")
@@ -855,7 +859,7 @@ def draw_hand(hero):
 
 def phase_hint():
     """AI-assisted: receives nothing; returns the lines of help shown in the bottom strip while no hero is taking a turn."""
-    return ["Spears's armies are on the move...", "Watch the map and the combat log.",
+    return ["Spears's armies are on the move...", "Hold SPACE to speed up the enemies' turns.",
             "Enemies in the dark stay hidden until a hero can see them."]
 
 
@@ -874,36 +878,59 @@ def draw_bottom(game):
 
 # ================================================================ effects
 
+def effect_start():
+    """AI-assisted: receives nothing; returns the frame an effect should start on: now, or when the attacks already on screen have landed."""
+    return max(art.ART["tick"], UI["busy_until"])
+
+
 def add_floater(tile, words, color):
-    """AI-assisted: receives a tile, some words and a color; starts floating text over the tile; returns how many floaters exist."""
+    """AI-assisted: receives a tile, some words and a color; starts floating text over the tile (after any attack still flying); returns how many floaters exist."""
     UI["floaters"].append({"text": words, "tile": [tile[0], tile[1]], "rise": 10 + 14 * len(UI["floaters"]),
-                           "color": color, "life": 75})
+                           "color": color, "life": 75, "start": effect_start()})
     return len(UI["floaters"])
 
 
+def add_strike(fx):
+    """AI-assisted: receives a strike effect from the game (an enemy attack); queues its animation after the ones already playing; returns the frame it ends on."""
+    length = 16
+    if fx["style"] == "bomb":
+        length = 26
+    elif fx["style"] == "ranged":
+        length = 20
+    start = effect_start()
+    UI["strikes"].append({"from": fx["from"], "to": fx["to"], "style": fx["style"], "start": start,
+                          "life": length + 10, "length": length})
+    UI["busy_until"] = start + length
+    return UI["busy_until"]
+
+
 def consume_fx(game):
-    """AI-assisted: receives the game; turns the effects the game logic asked for into things on screen; returns how many were handled."""
+    """AI-assisted: receives the game; turns the effects the game logic asked for into things on screen, in order; returns how many were handled."""
     handled = 0
     while len(game["fx"]) > 0:
         fx = game["fx"].pop(0)
         handled += 1
         if fx["kind"] == "float":
             add_floater(fx["tile"], fx["text"], art.COLOR_NAMES[fx["color"]])
-            UI["flashes"].append({"tile": fx["tile"], "life": 14, "color": art.COLOR_NAMES[fx["color"]]})
+            UI["flashes"].append({"tile": fx["tile"], "life": 14, "color": art.COLOR_NAMES[fx["color"]],
+                                  "start": effect_start()})
+        elif fx["kind"] == "strike":
+            add_strike(fx)
         elif fx["kind"] == "mod":
-            UI["mod"] = {"text": fx["text"], "side": fx["side"], "life": 64}
+            UI["mod"] = {"text": fx["text"], "side": fx["side"], "life": 64, "start": effect_start()}
         elif fx["kind"] == "banner":
             UI["banner"] = {"text": fx["text"], "life": 280}
         else:
             add_floater(fx["tile"], "MORALE BROKEN!", art.GOLD)
-            UI["flashes"].append({"tile": fx["tile"], "life": 40, "color": art.GOLD})
+            UI["flashes"].append({"tile": fx["tile"], "life": 40, "color": art.GOLD, "start": effect_start()})
     return handled
 
 
 def fade_list(items):
-    """AI-assisted: receives a list of effects with a "life" counter; ages them and removes the finished ones; returns how many are left."""
+    """AI-assisted: receives a list of effects with "start" and "life"; ages the ones that have started and removes the finished ones; returns how many are left."""
     for index in range(len(items) - 1, -1, -1):
-        items[index]["life"] -= 1
+        if art.ART["tick"] >= items[index]["start"]:
+            items[index]["life"] -= 1
         if items[index]["life"] <= 0:
             items.pop(index)
     return len(items)
@@ -912,7 +939,7 @@ def fade_list(items):
 def draw_mod_card():
     """AI-assisted: receives nothing; flips over and briefly shows the attack modifier card that was just drawn; returns nothing."""
     mod = UI["mod"]
-    if mod is None:
+    if mod is None or art.ART["tick"] < mod["start"]:
         return
     rect = pygame.Rect(GRID_X + GRID_W - 86, GRID_Y + 84, 74, 100)
     art.draw_modifier(rect, mod["text"], mod["side"], min(1.0, (65 - mod["life"]) / 8.0))
@@ -941,19 +968,173 @@ def draw_banner():
 
 
 def draw_effects():
-    """AI-assisted: receives nothing; draws hit flashes, floating numbers, the modifier card and the banner; returns nothing."""
+    """AI-assisted: receives nothing; draws enemy attacks, hit flashes, floating numbers, the modifier card and the banner (each when its turn comes); returns nothing."""
     UI["screen"].set_clip(pygame.Rect(GRID_X, GRID_Y, GRID_W, GRID_H))
+    draw_strikes()
     for flash in UI["flashes"]:
-        art.shade(tile_rect(flash["tile"]), flash["color"], min(190, flash["life"] * 14))
+        if art.ART["tick"] >= flash["start"]:
+            art.shade(tile_rect(flash["tile"]), flash["color"], min(190, flash["life"] * 14))
     for floater in UI["floaters"]:
-        floater["rise"] += 0.6
-        middle = tile_center(floater["tile"])
-        art.text_outline(floater["text"], middle[0], middle[1] - floater["rise"], "head", floater["color"], "center")
+        if art.ART["tick"] >= floater["start"]:
+            floater["rise"] += 0.6
+            middle = tile_center(floater["tile"])
+            art.text_outline(floater["text"], middle[0], middle[1] - floater["rise"], "head", floater["color"], "center")
     UI["screen"].set_clip(None)
     fade_list(UI["flashes"])
     fade_list(UI["floaters"])
+    fade_list(UI["strikes"])
     draw_mod_card()
     draw_banner()
+    draw_caption()
+
+
+def lerp(first, second, part):
+    """AI-assisted: receives two points and a fraction 0-1; returns the point that far along the line between them."""
+    return [first[0] + (second[0] - first[0]) * part, first[1] + (second[1] - first[1]) * part]
+
+
+def draw_slash(point, part):
+    """AI-assisted: receives a screen point and how far the slash has got (0-1); draws three crimson claw marks across it; returns nothing."""
+    size = 14 * UI["zoom"] + 6
+    for offset in [-1, 0, 1]:
+        top = [point[0] - size + offset * 7, point[1] - size]
+        bottom = [point[0] + size + offset * 7, point[1] + size]
+        pygame.draw.line(UI["screen"], art.WHITE, top, lerp(top, bottom, part), 4)
+        pygame.draw.line(UI["screen"], art.CRIMSON, top, lerp(top, bottom, part), 2)
+
+
+def draw_strike(strike, part):
+    """AI-assisted: receives one enemy attack and how far it has got (0-1); draws the lunge and slash, the flying stone, or the arcing bomb and its burst; returns nothing."""
+    start = tile_center(strike["from"])
+    end = tile_center(strike["to"])
+    screen = UI["screen"]
+    if strike["style"] == "melee":
+        reach = lerp(start, end, min(1.0, part * 1.6) * 0.8)
+        pygame.draw.line(screen, art.BLOOD, start, reach, 6)
+        pygame.draw.line(screen, art.CRIMSON, start, reach, 2)
+        if part > 0.5:
+            draw_slash(end, (part - 0.5) * 2)
+    elif strike["style"] == "ranged":
+        spot = lerp(start, end, part)
+        tail = lerp(start, end, max(0.0, part - 0.15))
+        pygame.draw.line(screen, art.PARCHMENT_DARK, tail, spot, 2)
+        pygame.draw.circle(screen, art.BLACK, spot, 5)
+        pygame.draw.circle(screen, art.STEEL, spot, 4)
+    elif part < 0.8:
+        spot = lerp(start, end, part / 0.8)
+        spot[1] -= 70 * UI["zoom"] * (1 - ((part / 0.8) * 2 - 1) ** 2)
+        pygame.draw.circle(screen, art.BLACK, spot, 7)
+        pygame.draw.circle(screen, art.ORANGE, (spot[0] + 4, spot[1] - 6), 3)
+    else:
+        burst = int((part - 0.8) * 5 * 40 * UI["zoom"]) + 6
+        pygame.draw.circle(screen, art.ORANGE, end, burst, 5)
+        pygame.draw.circle(screen, art.GOLD, end, max(2, burst // 2))
+
+
+def draw_strikes():
+    """AI-assisted: receives nothing; draws every enemy attack that is playing right now; returns how many were drawn."""
+    drawn = 0
+    for strike in UI["strikes"]:
+        part = (art.ART["tick"] - strike["start"]) / strike["length"]
+        if 0 <= part <= 1:
+            draw_strike(strike, part)
+            drawn += 1
+    return drawn
+
+
+def caption(game, unit, words):
+    """AI-assisted: receives the game, the enemy unit that is acting (None to clear) and what it is doing; shows it in a caption on the map ("Something in the dark" if the unit is hidden); returns nothing."""
+    if unit is None or UI["screen"] is None:
+        UI["caption"] = None
+        return
+    visible = len(visible_models(game, unit)) > 0
+    if visible:
+        UI["caption"] = {"look": unit["look"], "name": unit["name"], "words": words}
+    else:
+        UI["caption"] = {"look": "", "name": "Something in the dark", "words": "moves where you cannot see..."}
+
+
+def draw_caption():
+    """AI-assisted: receives nothing; draws the caption that says what the acting enemy is doing; returns True if one was drawn."""
+    shown = UI["caption"]
+    if shown is None:
+        return False
+    top = GRID_Y + 30
+    if UI["banner"] is not None:
+        top = GRID_Y + 80
+    width = max(art.ART["fonts"]["bold"].size(shown["name"])[0], art.ART["fonts"]["body"].size(shown["words"])[0]) + 90
+    box = pygame.Rect(GRID_X + 10, top, width, 54)
+    art.panel(box, "slate", art.CRIMSON)
+    if shown["look"] != "":
+        picture = art.sprite(shown["look"], 12)
+        UI["screen"].blit(picture, (box.x + 30 - picture.get_width() // 2, box.centery - picture.get_height() // 2))
+    art.text(shown["name"], box.x + 62, box.y + 7, "bold", art.GOLD, "left")
+    art.text(shown["words"], box.x + 62, box.y + 27, "body", art.PARCHMENT, "left")
+    return True
+
+
+def model_paths(game):
+    """AI-assisted: receives the game; turns the enemy moves the game logic made into walking paths (only for models the party can see); returns a list of [model, path]."""
+    paths = []
+    for move in game["moves"]:
+        model = move["model"]
+        start = move["from"]
+        seen = game["seen"][start[1]][start[0]] or game["seen"][model["pos"][1]][model["pos"][0]]
+        if not seen:
+            continue
+        path = movement.find_path(game["grid"], start, model["pos"], [], True)
+        if len(path) < 2:
+            path = [start, model["pos"]]
+        paths.append([model, path])
+    game["moves"] = []
+    return paths
+
+
+def play_moves(game):
+    """AI-assisted: receives the game; shows the enemies that just moved walking along their paths tile by tile; returns how many models walked."""
+    if UI["screen"] is None:
+        game["moves"] = []
+        return 0
+    paths = model_paths(game)
+    longest = 0
+    for item in paths:
+        longest = max(longest, len(item[1]) - 1)
+    for step in range(longest):
+        for part in range(1, 6):
+            for item in paths:
+                place_model(item[0], item[1], step, part / 5)
+            frame(game)
+            if fast_forward():
+                break
+    for item in paths:
+        if "draw" in item[0]:
+            del item[0]["draw"]
+    return len(paths)
+
+
+def place_model(model, path, step, part):
+    """AI-assisted: receives a model, its walking path, the step it is on and how far along that step (0-1); sets where it is drawn this frame; returns nothing."""
+    last = len(path) - 1
+    first = path[min(step, last)]
+    second = path[min(step + 1, last)]
+    point = lerp(tile_middle(first), tile_middle(second), part)
+    model["draw"] = point
+
+
+def fast_forward():
+    """AI-assisted: receives nothing; returns True while the player holds Space to speed up the enemies' turns."""
+    if UI["screen"] is None or UI["typing"]:
+        return False
+    return pygame.key.get_pressed()[pygame.K_SPACE]
+
+
+def wait_effects(game):
+    """AI-assisted: receives the game; keeps drawing until every enemy attack on screen has landed; returns nothing."""
+    if UI["screen"] is None:
+        return
+    consume_fx(game)
+    while game["running"] and art.ART["tick"] < UI["busy_until"]:
+        frame(game)
 
 
 def draw_path(game, hero, tile):
@@ -1019,6 +1200,82 @@ def draw_drag(game):
 
 
 # ================================================================ the frame
+
+def exit_open(game):
+    """AI-assisted: receives the game; returns True if the party's chamber is clear and has an unsealed EXIT door."""
+    if not game["plan"][game["chamber"]]["cleared"]:
+        return False
+    for door in game["doors"]:
+        tile = door["tile"]
+        if game["grid"][tile[1]][tile[0]] == "E":
+            return True
+    return False
+
+
+def heal_tip(game, hero):
+    """AI-assisted: receives the game and the acting hero; returns a tip if a hero is badly hurt and this hero holds a heal card ("" if not)."""
+    for friend in game["heroes"]:
+        if friend["exhausted"] or friend["hp"] * 3 > friend["max_hp"]:
+            continue
+        for card in hero["hand"]:
+            if card["action"]["kind"] == "heal":
+                return (friend["name"] + " is badly hurt - drag " + card["name"] + " onto them"
+                        + " (walk closer first if they do not glow).")
+    return ""
+
+
+def reach_tip(game, hero):
+    """AI-assisted: receives the game and the acting hero; returns a tip if enemies are in sight but out of reach of every attack card ("" if not)."""
+    seen = movement.enemy_targets(game, hero["pos"], 999)
+    if len(seen) == 0:
+        return ""
+    for card in hero["hand"]:
+        action = card["action"]
+        if action["kind"] == "attack" and len(movement.action_targets(game, hero, action)) > 0:
+            return ""
+    return "No enemy is in range of " + hero["name"] + "'s attack cards - walk closer first, then play one."
+
+
+def loot_tip(game, hero):
+    """AI-assisted: receives the game and the acting hero; returns a tip if a chest or shrine can be reached this turn ("" if not)."""
+    for tile in movement.move_targets(game, hero)[0]:
+        if game["known"][tile[1]][tile[0]] in "CP":
+            return "Loot in reach - walk onto the chest or shrine to grab it."
+    return ""
+
+
+def situation_tip(game):
+    """AI-assisted: receives the game; returns the most useful tip for what is happening right now ("" if there is nothing to say)."""
+    hero = selected_hero(game)
+    if hero is None:
+        return "Enemies are acting - hold SPACE to speed them up."
+    if exit_open(game):
+        return "This chamber is clear - walk a hero onto a glowing EXIT door. Side doors lead to extra loot."
+    tips = [heal_tip(game, hero), reach_tip(game, hero)]
+    if hero["moves_left"] > 0:
+        tips.append(loot_tip(game, hero))
+    if hero["acted"] and hero["moves_left"] == 0:
+        tips.append("Nothing left to do this turn - click End turn (E).")
+    if game["doom"] * 4 >= game["doom_max"] * 3:
+        tips.append("The Doom bar is nearly full - hurry to the red-skull door!")
+    for tip in tips:
+        if tip != "":
+            return tip
+    return ""
+
+
+def draw_tip(game):
+    """AI-assisted: receives the game; draws the tip strip along the bottom of the map; returns True if a tip was shown."""
+    words = situation_tip(game)
+    if words == "" or UI["phase"] == "menu":
+        return False
+    band = pygame.Rect(GRID_X, GRID_Y + GRID_H - 26, GRID_W, 26)
+    art.shade(band, art.BLACK, 175)
+    pygame.draw.line(UI["screen"], art.BRASS_DARK, band.topleft, band.topright, 1)
+    art.draw_icon("light", band.x + 16, band.centery, 7, art.GOLD)
+    art.text("TIP:  " + words, band.x + 30, band.y + 4, "small", art.GOLD, "left")
+    return True
+
 
 def hint_for(game, hero):
     """AI-assisted: receives the game and the acting hero; returns [words, rectangle to point at] for the next first-turn hint, or None when there is nothing left to teach."""
@@ -1088,6 +1345,7 @@ def draw_game(game):
     draw_message()
     for button in UI["buttons"]:
         art.draw_button(button)
+    draw_tip(game)
     draw_effects()
     draw_hint(game)
     draw_tooltip(game)
@@ -1110,10 +1368,12 @@ def common_event(game, event):
 
 
 def present(game):
-    """AI-assisted: receives the game (or None); shows the finished frame, waits for 60 FPS and returns the list of new events (minus the ones the camera used up)."""
+    """AI-assisted: receives the game (or None); shows the finished frame, waits for 60 FPS and returns the list of new events (minus the ones the camera used up); holding Space speeds the effects up."""
     pygame.display.flip()
     UI["clock"].tick(60)
     art.ART["tick"] += 1
+    if game is not None and UI["phase"] == "watch" and fast_forward():
+        art.ART["tick"] += 3
     events = []
     for event in pygame.event.get():
         common_event(game, event)
@@ -1131,12 +1391,14 @@ def frame(game):
 
 
 def pause(game, milliseconds):
-    """AI-assisted: receives the game and a time in milliseconds; keeps drawing for that long so the player can watch (does nothing if no window is open, as in the tests); returns nothing."""
+    """AI-assisted: receives the game and a time in milliseconds; keeps drawing for that long so the player can watch (much shorter while Space is held; nothing if no window is open, as in the tests); returns nothing."""
     if UI["screen"] is None:
         return
     end = pygame.time.get_ticks() + milliseconds
     while game["running"] and pygame.time.get_ticks() < end:
         frame(game)
+        if fast_forward():
+            end -= 50
 
 
 def move_cursor(game, key):
@@ -1497,8 +1759,8 @@ def get_hero_action(game, hero):
 
 # ================================================================ full screens: title and party
 
-def draw_title(buttons):
-    """AI-assisted: receives the title buttons; draws the title screen with Frodo facing the Warlord; returns nothing."""
+def draw_title(buttons, note):
+    """AI-assisted: receives the title buttons and a note (like a load error); draws the title screen with Frodo facing the Warlord; returns nothing."""
     art.draw_backdrop()
     art.torch_glow(360, 430, 260)
     art.torch_glow(920, 420, 260)
@@ -1512,26 +1774,80 @@ def draw_title(buttons):
     art.ribbon(920, 610, 260, "Spears's Warlord", art.BLOOD)
     for button in buttons:
         art.draw_button(button)
+    art.text(note, W // 2, 660, "body", art.CRIMSON, "center")
     art.text("F11 = full screen", W // 2, 690, "small", art.PARCHMENT_DARK, "center")
 
 
-def title_screen():
-    """AI-assisted: receives nothing; shows the title screen and waits; returns "start", "rules" or "quit"."""
-    names = ["start", "rules", "quit"]
-    labels = ["1  Start", "2  Rules", "3  Quit"]
+def title_screen(note):
+    """AI-assisted: receives a note to show (like a load error); shows the title screen and waits; returns "start", "continue", "rules" or "quit"."""
+    names = ["start", "continue", "rules", "quit"]
+    labels = ["1  New Game", "2  Continue", "3  Rules", "4  Quit"]
     buttons = []
-    for index in range(3):
-        buttons.append(make_button(names[index], labels[index], pygame.Rect(W // 2 - 90, 330 + index * 58, 180, 44)))
+    for index in range(4):
+        buttons.append(make_button(names[index], labels[index], pygame.Rect(W // 2 - 90, 300 + index * 56, 180, 44)))
     while not UI["closed"]:
-        draw_title(buttons)
+        draw_title(buttons, note)
         for event in present(None):
             if event.type == pygame.MOUSEBUTTONDOWN and button_at(buttons, event.pos) != "":
                 return button_at(buttons, event.pos)
-            elif event.type == pygame.KEYDOWN and pygame.K_1 <= event.key <= pygame.K_3:
+            elif event.type == pygame.KEYDOWN and pygame.K_1 <= event.key <= pygame.K_4:
                 return names[event.key - pygame.K_1]
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                 return "start"
     return "quit"
+
+
+def save_rect(index):
+    """AI-assisted: receives a row number on the Continue screen; returns that save's rectangle."""
+    return pygame.Rect(W // 2 - 360, 150 + index * 58, 720, 50)
+
+
+def draw_load_screen(saves, summaries):
+    """AI-assisted: receives the save names and their summaries; draws the Continue screen; returns nothing."""
+    art.draw_backdrop()
+    art.text_outline("Continue a Saved Game", W // 2, 70, "title", art.GOLD, "center")
+    art.divider(W // 2, 104, 420)
+    if len(saves) == 0:
+        art.text("No saved games yet. The game saves itself every time a door opens, and F3 saves by name.",
+                 W // 2, 200, "body", art.PARCHMENT, "center")
+    for index in range(len(saves)):
+        rect = save_rect(index)
+        state = hover_border(rect)
+        art.panel(rect, "parchment", state)
+        title = saves[index]
+        if title == "autosave":
+            title = "Autosave (last door opened)"
+        art.text(str(index + 1) + ".  " + title, rect.x + 16, rect.y + 6, "bold", art.INK, "left")
+        art.text(summaries[index], rect.x + 40, rect.y + 27, "small", art.BLOOD, "left")
+    art.text("Click a save (or press its number) to load it.   Esc = back", W // 2, 650, "body", art.PARCHMENT_DARK,
+             "center")
+
+
+def hover_border(rect):
+    """AI-assisted: receives a rectangle; returns the border color for it (gold under the mouse, brass otherwise)."""
+    if rect.collidepoint(pygame.mouse.get_pos()):
+        return art.GOLD
+    return art.BRASS_DARK
+
+
+def load_screen():
+    """AI-assisted: receives nothing; lists the saved games and waits for the player to pick one; returns its name, or "" to go back."""
+    saves = savegame.list_saves()[:8]
+    summaries = []
+    for name in saves:
+        summaries.append(savegame.save_summary(name))
+    while not UI["closed"]:
+        draw_load_screen(saves, summaries)
+        for event in present(None):
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                return ""
+            elif event.type == pygame.KEYDOWN and pygame.K_1 <= event.key < pygame.K_1 + len(saves):
+                return saves[event.key - pygame.K_1]
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                for index in range(len(saves)):
+                    if save_rect(index).collidepoint(event.pos):
+                        return saves[index]
+    return ""
 
 
 def recruit_rect(index):
@@ -1568,8 +1884,12 @@ def draw_party_screen(data, recruits, chosen, buttons, note):
     art.draw_backdrop()
     art.text_outline("Choose Your Party", W // 2, 62, "title", art.GOLD, "center")
     art.divider(W // 2, 96, 420)
-    art.text("Frodo always leads. Click up to 3 companions (or press 1-" + str(len(recruits)) + "). Enter = begin.",
-             W // 2, 126, "body", art.PARCHMENT, "center")
+    art.text("Frodo always leads. Add at least 2 companions (up to 3) by clicking them, or press 1-"
+             + str(len(recruits)) + ".", W // 2, 126, "body", art.PARCHMENT, "center")
+    count = "Companions chosen: " + str(len(chosen)) + " of 3"
+    if len(chosen) < 2:
+        count += "  -  choose " + str(2 - len(chosen)) + " more to begin"
+    art.text(count, W // 2, 152, "bold", art.GOLD, "center")
     draw_recruit(data, "Frodo", pygame.Rect(98, 170, 216, 380), True)
     for index in range(len(recruits)):
         draw_recruit(data, recruits[index], recruit_rect(index), recruits[index] in chosen)
@@ -1577,7 +1897,10 @@ def draw_party_screen(data, recruits, chosen, buttons, note):
         art.text(str(index + 1), recruit_rect(index).x + 18, recruit_rect(index).y + 18, "bold", art.INK, "center")
     art.text(note, W // 2, 582, "body", art.GOLD, "center")
     for button in buttons:
-        art.draw_button(button)
+        if button["id"] == "go" and len(chosen) < 2:
+            art.draw_plate(button["rect"], button["label"], "off")
+        else:
+            art.draw_button(button)
 
 
 def toggle_recruit(chosen, name):
@@ -1609,12 +1932,12 @@ def party_event(event, recruits, buttons):
 
 
 def party_screen(data):
-    """AI-assisted: receives the loaded data; lets the player choose up to 3 companions; returns the party name list (Frodo first), or [] to go back."""
+    """AI-assisted: receives the loaded data; starts with only Frodo and lets the player add 2 or 3 companions; returns the party name list (Frodo first), or [] to go back."""
     recruits = []
     for name in data["heroes"]:
         if name != "Frodo":
             recruits.append(name)
-    chosen = recruits[:3]
+    chosen = []
     note = ""
     buttons = [make_button("go", "Begin (Enter)", pygame.Rect(W // 2 - 190, 622, 180, 44)),
                make_button("back", "Back (Esc)", pygame.Rect(W // 2 + 10, 622, 180, 44))]
@@ -1622,8 +1945,10 @@ def party_screen(data):
         draw_party_screen(data, recruits, chosen, buttons, note)
         for event in present(None):
             choice = party_event(event, recruits, buttons)
-            if choice == "go":
+            if choice == "go" and len(chosen) >= 2:
                 return ["Frodo"] + chosen
+            elif choice == "go":
+                note = "Choose at least 2 companions to join Frodo first."
             elif choice == "back":
                 return []
             elif choice != "":
@@ -1631,24 +1956,30 @@ def party_screen(data):
     return []
 
 
-def title_flow(data):
-    """AI-assisted: receives the loaded data; runs the title, rules and party screens; returns the chosen party ([] if the player quits)."""
+def title_flow(data, note):
+    """AI-assisted: receives the loaded data and a note for the title screen; runs the title, Continue, rules and party screens; returns {"party": names} for a new game, {"file": name} to load a save, or {} to quit."""
     while not UI["closed"]:
-        choice = title_screen()
+        choice = title_screen(note)
+        note = ""
         if choice == "rules":
             show_rules()
+        elif choice == "continue":
+            name = load_screen()
+            if name != "":
+                return {"file": name}
         elif choice == "start":
             party = party_screen(data)
             if len(party) > 0:
-                return party
+                return {"party": party}
         else:
             break
-    return []
+    return {}
 
 
 # ================================================================ full screens: rules, status, end
 
 RULES = [
+    ["Quick Start", []],
     ["The Quest", [
         "You are Frodo, a small white dog in a knight's helmet, and you lead the party.",
         "Spears, the Dungeon Lord, has dug a dungeon of about 12 chambers. It is different every game.",
@@ -1677,14 +2008,16 @@ RULES = [
         "You only see what is IN a chamber near your heroes: about 5 steps on foot. Walls block the view.",
         "Darkened places show what you remember. Chests and shrines you have seen stay on the map.",
         "Enemies in the dark are hidden. They still move and may shoot from the dark.",
-        "Spears works in the dark too: he may arm new traps or march in reinforcements where you cannot see.",
-        "When that happens you only get a warning: 'Something stirs in the dark...'",
+        "Spears never changes the chamber you are in. But after a round he may secretly prepare a chamber you",
+        "    have not opened yet: an extra trap, a trapped chest or an extra guard. You only see a warning.",
         "Hover the mouse over a hero, an enemy or an object on the map to read its details.",
         "CAMERA: mouse wheel zooms in and out. Hold the RIGHT mouse button and drag (or use W A S D) to pan.",
         "    Home shows the whole dungeon you know. The camera follows whoever is acting."]],
     ["Keyboard Controls", [
         "Everything can also be done without the mouse.",
         "MENU (always at the bottom right on a hero's turn): F1 Rules, F2 Status, F3 Save, F9 Quit.",
+        "SAVING: F3 saves the whole game under a name you type. The game also saves itself every time a door",
+        "    opens. Choose Continue on the title screen to load a save.   Hold SPACE to speed up enemy turns.",
         "WALK: arrows move the white cursor, Enter walks to the cursor tile.",
         "    Or press M, type how many tiles, then press an arrow key for the direction.",
         "CARDS: 1, 2 or 3 chooses a card, arrows move the cursor to a target, Enter plays it. Esc puts it back.",
@@ -1712,7 +2045,8 @@ RULES = [
         "Spears goes for weak heroes, flanks them, and his Iron Guard hold the door until you come close.",
         "HE ADAPTS: lots of melee brings armored guards and slingers. Lots of ranged brings fast Wolf Riders and cover.",
         "    Looting brings trapped chests and Shade Stalkers. Huddling together brings Bomb Flingers and hidden pits.",
-        "After a round he may also send one unit of reinforcements, arm a new trap, or drop rubble into the room."]],
+        "After a round he may secretly prepare a chamber ahead: an extra trap, trapped chest or guard.",
+        "Enemies walk, strike and shoot on screen, and a caption says what each unit is doing. Hold SPACE to speed up."]],
 ]
 
 LEGEND = [["C", "Chest - move onto it for loot"], ["P", "Shrine - a small gift"],
@@ -1730,12 +2064,86 @@ def draw_legend(top):
         art.text(LEGEND[index][1], rect.right + 8, rect.y + 15, "small", art.INK, "left")
 
 
+def quick_panel(rect, title, lines):
+    """AI-assisted: receives a rectangle, a heading and its lines; draws one step of the quick-start card; returns the rectangle."""
+    art.panel(rect, "parchment", art.BRASS)
+    art.ribbon(rect.centerx, rect.y + 20, rect.width - 30, title, art.BLOOD)
+    y = rect.y + 196
+    for sentence in lines:
+        for line in art.wrap_text(sentence, "small", rect.width - 24):
+            art.text(line, rect.centerx, y, "small", art.INK, "center")
+            y += 18
+    return rect
+
+
+def quick_pictures(boxes):
+    """AI-assisted: receives the four quick-start panels; draws the little picture in each (the Warlord, a glowing tile, a card and an EXIT door); returns nothing."""
+    art.draw_model("warlord", boxes[0].centerx, boxes[0].y + 110, 36)
+    tile = pygame.Rect(boxes[1].centerx - 20, boxes[1].y + 80, 70, 70)
+    art.draw_floor(tile, 1)
+    art.glow_rect(tile, art.GLOW_COLORS["move"], 90)
+    art.text_outline("2", tile.right - 10, tile.bottom - 12, "bold", art.WHITE, "center")
+    art.draw_hero("archer", tile.x - 30, tile.y + 26, 15)
+    card = {"name": "Quick Shot", "action": {"kind": "attack", "amount": 2, "range": 4}, "element": "none"}
+    art.draw_card(card, pygame.Rect(boxes[2].x + 12, boxes[2].y + 50, 110, 132), art.GOLD, "archer")
+    art.draw_model("orc", boxes[2].right - 38, boxes[2].y + 110, 17)
+    pygame.draw.line(UI["screen"], art.GOLD, (boxes[2].x + 126, boxes[2].y + 116), (boxes[2].right - 62, boxes[2].y + 116), 3)
+    door = pygame.Rect(boxes[3].centerx - 35, boxes[3].y + 80, 70, 70)
+    art.draw_door(door, True)
+
+
+def draw_quickstart(sheet):
+    """AI-assisted: receives the rectangle to draw in; draws the one-page quick-start card (goal, walk, cards, doors, colours); returns nothing."""
+    art.panel(sheet, "leather", art.GOLD)
+    art.text_outline("Quick Start", sheet.centerx, sheet.y + 34, "title", art.GOLD, "center")
+    width = (sheet.width - 50) // 4
+    boxes = []
+    steps = [["Your Goal", ["Reach the boss behind the RED-SKULL door and defeat him.",
+                            "Don't let the Doom bar (top right) fill up."]],
+             ["1. Walk", ["On a hero's turn, click a BLUE tile to walk there.", "The number is how many steps."]],
+             ["2. Play a Card", ["Drag ONE card from the bottom onto a glowing target.",
+                                 "Red = enemy, green = friend. A new card is drawn."]],
+             ["3. Open Doors", ["Beat every enemy in a room, then walk onto the glowing EXIT door.",
+                                "Click End turn when you are done."]]]
+    for index in range(4):
+        box = pygame.Rect(sheet.x + 10 + index * (width + 10), sheet.y + 66, width, 292)
+        boxes.append(quick_panel(box, steps[index][0], steps[index][1]))
+    quick_pictures(boxes)
+    legend = [["move", "Blue: walk"], ["attack", "Red: attack"], ["heal", "Green: heal"], ["gold", "Gold: your hero"]]
+    for index in range(4):
+        spot = pygame.Rect(sheet.x + 60 + index * 210, sheet.y + 372, 26, 26)
+        art.glow_rect(spot, art.GLOW_COLORS[legend[index][0]], 120)
+        art.text(legend[index][1], spot.right + 10, spot.y + 4, "body", art.PARCHMENT, "left")
+    art.text("Hover over anything on the map to learn about it.   F1 = rules (this card is page 1).",
+             sheet.centerx, sheet.bottom - 30, "small", art.PARCHMENT_DARK, "center")
+
+
+def show_quickstart(game):
+    """AI-assisted: receives the game; shows the quick-start card over the map until the player clicks or presses a key; returns nothing."""
+    if UI["screen"] is None:
+        return
+    waiting = True
+    while game["running"] and waiting:
+        draw_game(game)
+        dim_screen()
+        draw_quickstart(pygame.Rect(120, 90, W - 240, 470))
+        art.text_outline("Click or press any key to begin", W // 2, 600, "head", art.GOLD, "center")
+        for event in present(game):
+            if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                waiting = False
+
+
 def draw_rules_page(number):
     """AI-assisted: receives a rules page number; draws that page on a parchment sheet; returns nothing."""
     art.draw_backdrop()
     sheet = pygame.Rect(60, 36, W - 120, H - 72)
     art.panel(sheet, "parchment", art.BRASS)
     page = RULES[number]
+    if len(page[1]) == 0:
+        draw_quickstart(sheet.inflate(-40, -110).move(0, -10))
+        art.text("Page " + str(number + 1) + " of " + str(len(RULES)) + "     Right arrow or click = next     Esc = close",
+                 W // 2, sheet.bottom - 28, "small", art.BLOOD, "center")
+        return
     art.text(page[0], W // 2, 76, "title", art.BLOOD, "center")
     art.divider(W // 2, 106, 520)
     y = 128
@@ -1744,7 +2152,7 @@ def draw_rules_page(number):
             art.text(line, 112, y, "body", art.INK, "left")
             y += 23
         y += 9
-    if number == 0:
+    if number == 1:
         draw_legend(y + 14)
     art.text("Page " + str(number + 1) + " of " + str(len(RULES))
              + "     Right arrow or click = next     Left arrow = back     Esc or Enter = close",

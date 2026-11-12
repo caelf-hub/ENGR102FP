@@ -3,6 +3,7 @@
 Run with:  python test_frodo.py
 These tests do not open a window. They write a few lines to frodo_log.txt.
 """
+import os
 import random
 
 import cards
@@ -13,6 +14,7 @@ import ui
 import game_data
 import logbook
 import movement
+import savegame
 import spears_ai
 
 
@@ -214,9 +216,82 @@ def test_logbook():
     return True
 
 
+def hand_names(hero):
+    """receives a hero; returns the names of the cards in their hand, deck and discard pile, for comparing."""
+    names = []
+    for pile in ["hand", "deck", "discard"]:
+        for card in hero[pile]:
+            names.append(pile + ":" + card["name"])
+    return names
+
+
+def test_saves():
+    """receives nothing; checks that a game saved to a file loads back the same, and that a broken file gives None; returns True."""
+    random.seed(4)
+    game = make_test_game()
+    game["round"] = 7
+    game["doom"] = 9
+    game["heroes"][1]["hp"] = 5
+    game["units"][0]["models"][0]["hp"] = 1
+    game["plan"][3]["prepared"] = ["trap", "guard"]
+    assert savegame.save_game(game, "test_save")
+    loaded = savegame.load_game(game["data"], "test_save")
+    assert loaded is not None
+    assert loaded["round"] == 7 and loaded["doom"] == 9 and loaded["seed"] == game["seed"]
+    assert loaded["grid"] == game["grid"] and loaded["known"] == game["known"]
+    assert len(loaded["plan"]) == len(game["plan"]) and loaded["plan"][3]["prepared"] == ["trap", "guard"]
+    assert loaded["doors"] == game["doors"] and loaded["boss_door"] == game["boss_door"]
+    for index in range(len(game["heroes"])):
+        old = game["heroes"][index]
+        new = loaded["heroes"][index]
+        assert new["name"] == old["name"] and new["hp"] == old["hp"] and new["pos"] == old["pos"]
+        assert hand_names(new) == hand_names(old)
+    assert len(loaded["units"]) == len(game["units"])
+    assert loaded["units"][0]["models"][0] == game["units"][0]["models"][0]
+    assert loaded["hero_deck"] == game["hero_deck"] and loaded["memory"] == game["memory"]
+    assert "test_save" in savegame.list_saves()
+    assert "round 7" in savegame.save_summary("test_save")
+    broken = open("test_save.sav", "w")
+    broken.write("GAME | game | round=oops" + chr(10))
+    broken.close()
+    assert savegame.load_game(game["data"], "test_save") is None
+    assert savegame.load_game(game["data"], "no_such_save") is None
+    os.remove("test_save.sav")
+    return True
+
+
+def test_spears_ahead():
+    """receives nothing; checks that Spears never changes the chamber the party is in, only chambers ahead, and that his preparations appear when one is opened; returns True."""
+    random.seed(6)
+    game = make_test_game()
+    before = []
+    for row in game["grid"]:
+        before.append(list(row))
+    units = len(game["units"])
+    for number in range(40):
+        spears_ai.reinforce(game)
+    assert game["grid"] == before and len(game["units"]) == units
+    prepared = 0
+    for chamber in game["plan"]:
+        if chamber["carved"] or chamber["kind"] == "boss":
+            assert chamber["prepared"] == []
+        prepared += len(chamber["prepared"])
+    assert prepared > 0
+    target = None
+    for door in game["doors"]:
+        if door["from"] == 0:
+            target = game["plan"][door["to"]]
+    target["prepared"] = ["guard", "guard", "trap"]
+    game["units"] = []
+    spears_ai.check_room_clear(game, 0)
+    frodo_game.enter_room(game, target["id"])
+    assert len(game["units"]) >= 2
+    return True
+
+
 def run_tests():
     """receives nothing; runs every test and prints the results; returns how many passed."""
-    tests = [test_load_dungeon, test_combat, test_cards, test_spears,
+    tests = [test_load_dungeon, test_combat, test_cards, test_spears, test_spears_ahead, test_saves,
              test_movement, test_logbook]
     passed = 0
     for test in tests:

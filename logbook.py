@@ -132,15 +132,3 @@ def hero_line(hero):
         line += " - items: " + ", ".join(hero["items"])
     return line
 
-
-def save_status(game, name):
-    """receives the game and a file name typed by the player; writes a status report to name.txt and returns True if it worked."""
-    try:
-        save_file = open(name + ".txt", "w")
-        save_file.write("Frodo and the Dungeon Lord - saved status report\n")
-        for line in status_lines(game):
-            save_file.write(line + "\n")
-        save_file.close()
-        return True
-    except OSError:
-        return False

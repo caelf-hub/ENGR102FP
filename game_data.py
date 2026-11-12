@@ -134,7 +134,6 @@ def new_game(data, party):
     for name in party:
         game["heroes"].append(make_hero(data, name))
     game.update({"grid": [], "seen": [], "known": [], "spawns": [], "door": None, "room_name": ""})
-    game.update({"event_tile": [0, 0]})
     game.update({"depth": 0, "plan": [], "doors": [], "chamber": 0, "boss_door": None, "rarity": 1})
     game.update({"doom": 0, "doom_max": settings["doom_max"], "warlord_dead": False})
     game.update({"memory": new_memory(), "stats": new_stats(), "counter": "none"})
@@ -143,7 +142,7 @@ def new_game(data, party):
     game.update({"enemy_deck": combat.build_modifier_deck(), "enemy_discard": []})
     game.update({"log": [], "round_log": [], "fx": [], "order": [], "turn_name": ""})
     game.update({"round": 0, "unit_count": 0, "room_units": 0})
-    game.update({"seed": 0, "boss_phase": 0})
+    game.update({"seed": 0, "boss_phase": 0, "moves": [], "owners": []})
     return game
 
 

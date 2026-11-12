@@ -64,8 +64,12 @@ Heroes and enemies take turns in the order shown at the top left. On a hero's tu
    straight away.
 3. **End turn** - click *End turn* (or press `E`).
 
-Everything you can do glows; a bad drop snaps back and says why. During the first round, small
-gold bubbles point at what to try next.
+Everything you can do glows; a bad drop snaps back and says why. A quick-start card opens with
+every new game, gold bubbles point at what to try during the first round, and a TIP strip under
+the map gives advice for what is happening.
+
+**Starting a game:** choose *New Game*, then add at least 2 companions to Frodo's party (up to 3).
+*Continue* loads a saved game.
 
 ### The dungeon
 
@@ -77,6 +81,9 @@ gold bubbles point at what to try next.
   with extra loot, which costs rounds (and every round raises Doom).
 - The door to the boss arena, the Throne of Spears, wears a red skull. At half health the Warlord
   summons his guard; near death he becomes enraged.
+- Spears never changes the chamber you are in, but between rounds he may secretly prepare a
+  chamber ahead with an extra trap, trapped chest or guard.
+- Enemies walk, strike and shoot on screen, with a caption saying what each one does.
 - Stand on a chest or shrine to loot it. Every time a door opens, the party heals a little.
 
 ### Controls
@@ -87,6 +94,7 @@ gold bubbles point at what to try next.
 | Play a card | drag it onto a glowing target, or click it then the target | `1`-`3`, then arrows + `Enter`; `Esc` puts it back |
 | End turn | *End turn* button | `E` |
 | Menu | buttons at the bottom right | `F1` Rules, `F2` Status, `F3` Save, `F9` Quit |
+| Speed up enemy turns | | hold `Space` |
 | Pop-up question | click Yes / No | `Y` / `N` |
 | Zoom the map | mouse wheel over the map | `+` / `-` |
 | Pan the map | hold the right button and drag | `W` `A` `S` `D` |
@@ -109,6 +117,7 @@ Hover the mouse over any hero, enemy or object on the map to see its details.
 | `chambers.py` | Plans the dungeon and carves the random chamber shapes, doors and corridors. |
 | `movement.py` | Tiles, walking, pathing, fog of war. |
 | `logbook.py` | Combat log, `frodo_log.txt`, end summary, win/lose check. |
+| `savegame.py` | Saves the whole game to a `.sav` file and loads it back. |
 | `ui.py` | The window: layout, camera, drag and drop, keyboard, hints, screens. |
 | `art.py` | Colours, figures, icons, cards, panels. |
 | `scenery.py` | Paints the dungeon: floor, walls, shadows, light. |
@@ -119,8 +128,10 @@ Hover the mouse over any hero, enemy or object on the map to see its details.
 Files the game creates while you play:
 
 - `frodo_log.txt` - every round's actions, plus a summary at the end. It is overwritten each new game.
-- `<name>.txt` - a status report, written when you choose *Save* and type a name. (It is a report
-  only; games cannot be loaded.)
+- `autosave.sav` - the game saves itself here every time a chamber door opens.
+- `<name>.sav` - a saved game, written when you choose *Save* (`F3`) and type a name.
+
+To load a save, choose **Continue** on the title screen and click it.
 
 ## Changing the game
 
