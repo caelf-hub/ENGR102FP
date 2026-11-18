@@ -19,16 +19,16 @@ import spears_ai
 
 
 def make_test_game():
-    """receives nothing; returns a small game with Frodo and Brother Biscuit standing in the first chamber of a freshly dug dungeon, for testing."""
+    """AI-assisted: [Owner: Team] receives nothing; returns a small game with Frodo and Brother Biscuit standing in the first chamber of a freshly dug dungeon, for testing."""
     data = game_data.load_dungeon("dungeon_data.txt")
-    game = game_data.new_game(data, ["Frodo", "Brother Biscuit"])
+    game = game_data.new_game(data, ["Frodo", "Brother Biscuit"], "Normal")
     frodo_game.start_dungeon(game)
     game["fx"] = []
     return game
 
 
 def test_load_dungeon():
-    """receives nothing; checks that dungeon_data.txt loads fully and a missing file returns None; returns True."""
+    """AI-assisted: [Owner: Team] receives nothing; checks that dungeon_data.txt loads fully and a missing file returns None; returns True."""
     data = game_data.load_dungeon("dungeon_data.txt")
     assert data is not None
     assert "Orc Brutes" in data["units"]
@@ -49,7 +49,7 @@ def test_load_dungeon():
 
 
 def test_combat():
-    """receives nothing; checks draw_modifier, calc_damage, apply_damage and sort_turn_order; returns True."""
+    """AI-assisted: [Owner: Team] receives nothing; checks draw_modifier, calc_damage, apply_damage and sort_turn_order; returns True."""
     assert combat.calc_damage(3, "x2", 1) == 5
     assert combat.calc_damage(3, "null", 0) == 0
     assert combat.calc_damage(2, "+1", 0) == 3
@@ -74,7 +74,7 @@ def test_combat():
 
 
 def test_cards():
-    """receives nothing; checks the 3-card hand, choose_card, finish_card, drawing and reshuffling, play_card, walking, is_exhausted, wane_elements and search_poi; returns True."""
+    """AI-assisted: [Owner: Team] receives nothing; checks the 3-card hand, choose_card, finish_card, drawing and reshuffling, play_card, walking, is_exhausted, wane_elements and search_poi; returns True."""
     game = make_test_game()
     frodo = game["heroes"][0]
     assert len(frodo["hand"]) == cards.HAND_SIZE and len(frodo["deck"]) == 8 - cards.HAND_SIZE
@@ -108,7 +108,7 @@ def test_cards():
 
 
 def check_dungeon(game):
-    """receives a game that has just started; checks the plan, the first chamber's doors and that opening a door carves a reachable chamber; returns True."""
+    """AI-assisted: [Owner: Team] receives a game that has just started; checks the plan, the first chamber's doors and that opening a door carves a reachable chamber; returns True."""
     plan = game["plan"]
     kinds = []
     for chamber in plan:
@@ -139,7 +139,7 @@ def check_dungeon(game):
 
 
 def test_spears():
-    """receives nothing; checks spears_counter, morale_test, advance_doom, generate_room and coherency; returns True."""
+    """AI-assisted: [Owner: Team] receives nothing; checks spears_counter, morale_test, advance_doom, generate_room and coherency; returns True."""
     memory = game_data.new_memory()
     assert spears_ai.spears_counter(memory) == "none"
     memory["melee_hits"] = 10
@@ -171,7 +171,7 @@ def test_spears():
 
 
 def test_movement():
-    """receives nothing; checks reachable tiles, walls and pathing; returns True."""
+    """AI-assisted: [Owner: Team] receives nothing; checks reachable tiles, walls and pathing; returns True."""
     grid = [list("#####"), list("#..##"), list("#.#.#"), list("#...#"), list("#####")]
     tiles = movement.reachable_tiles(grid, [1, 1], 2, [], [], False)
     assert [2, 1] in tiles and [1, 3] in tiles and [3, 3] not in tiles
@@ -199,7 +199,7 @@ def test_movement():
 
 
 def test_logbook():
-    """receives nothing; checks check_game_over, write_log and write_summary; returns True."""
+    """AI-assisted: [Owner: Team] receives nothing; checks check_game_over, write_log and write_summary; returns True."""
     up = [{"exhausted": False}, {"exhausted": True}]
     down = [{"exhausted": True}, {"exhausted": True}]
     assert logbook.check_game_over(up, 3, 20, False) == ""
@@ -217,7 +217,7 @@ def test_logbook():
 
 
 def hand_names(hero):
-    """receives a hero; returns the names of the cards in their hand, deck and discard pile, for comparing."""
+    """AI-assisted: [Owner: Team] receives a hero; returns the names of the cards in their hand, deck and discard pile, for comparing."""
     names = []
     for pile in ["hand", "deck", "discard"]:
         for card in hero[pile]:
@@ -226,7 +226,7 @@ def hand_names(hero):
 
 
 def test_saves():
-    """receives nothing; checks that a game saved to a file loads back the same, and that a broken file gives None; returns True."""
+    """AI-assisted: [Owner: Team] receives nothing; checks that a game saved to a file loads back the same, and that a broken file gives None; returns True."""
     random.seed(4)
     game = make_test_game()
     game["round"] = 7
@@ -261,7 +261,7 @@ def test_saves():
 
 
 def test_spears_ahead():
-    """receives nothing; checks that Spears never changes the chamber the party is in, only chambers ahead, and that his preparations appear when one is opened; returns True."""
+    """AI-assisted: [Owner: Team] receives nothing; checks that Spears never changes the chamber the party is in, only chambers ahead, and that his preparations appear when one is opened; returns True."""
     random.seed(6)
     game = make_test_game()
     before = []
@@ -290,7 +290,7 @@ def test_spears_ahead():
 
 
 def run_tests():
-    """receives nothing; runs every test and prints the results; returns how many passed."""
+    """AI-assisted: [Owner: Team] receives nothing; runs every test and prints the results; returns how many passed."""
     tests = [test_load_dungeon, test_combat, test_cards, test_spears, test_spears_ahead, test_saves,
              test_movement, test_logbook]
     passed = 0

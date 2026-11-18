@@ -29,7 +29,7 @@ BANNERS = {
 # ---------------------------------------------------------------- adaptation
 
 def spears_counter(memory):
-    """receives Spears's memory dictionary; returns the party habit he will punish next: "melee", "ranged", "loot", "clump", "rest" or "none"."""
+    """AI-assisted: [Owner: Member 2] receives Spears's memory dictionary; returns the party habit he will punish next: "melee", "ranged", "loot", "clump", "rest" or "none"."""
     scores = {"melee": memory["melee_hits"], "ranged": memory["ranged_hits"],
               "loot": memory["chests_opened"] * 3, "clump": memory["clumped"] * 2}
     best = "none"
@@ -42,14 +42,14 @@ def spears_counter(memory):
 
 
 def fade_memory(memory):
-    """receives Spears's memory; halves every count so newer habits matter more; returns the memory."""
+    """AI-assisted: [Owner: Member 2] receives Spears's memory; halves every count so newer habits matter more; returns the memory."""
     for key in memory:
         memory[key] = memory[key] // 2
     return memory
 
 
 def unit_plan(counter, step, kind):
-    """receives the habit to counter, how far along the main path this chamber is and its kind; returns the list of unit type names Spears deploys."""
+    """AI-assisted: [Owner: Member 2] receives the habit to counter, how far along the main path this chamber is and its kind; returns the list of unit type names Spears deploys."""
     if counter == "melee":
         plan = ["Iron Guard", "Goblin Slingers"]
     elif counter == "ranged":
@@ -70,7 +70,7 @@ def unit_plan(counter, step, kind):
 # ---------------------------------------------------------------- room generation
 
 def pick_style(styles, counter):
-    """receives the room styles and the habit to counter; returns a random style that matches (or any normal style)."""
+    """AI-assisted: [Owner: Member 2] receives the room styles and the habit to counter; returns a random style that matches (or any normal style)."""
     matches = []
     spares = []
     for style in styles:
@@ -84,7 +84,7 @@ def pick_style(styles, counter):
 
 
 def build_dungeon(game):
-    """receives the game; plans the whole dungeon, starts the map as solid rock and carves the boss arena (its outline is known from the start); returns how many chambers were planned."""
+    """AI-assisted: [Owner: Member 2] receives the game; plans the whole dungeon, starts the map as solid rock and carves the boss arena (its outline is known from the start); returns how many chambers were planned."""
     data = game["data"]
     dungeon = data["dungeon"]
     cols = dungeon["cell_cols"] * dungeon["cell_width"]
@@ -106,7 +106,7 @@ def build_dungeon(game):
 
 
 def boss_chamber(game):
-    """receives the game; returns the boss arena's chamber dictionary."""
+    """AI-assisted: [Owner: Member 2] receives the game; returns the boss arena's chamber dictionary."""
     for chamber in game["plan"]:
         if chamber["kind"] == "boss":
             return chamber
@@ -114,7 +114,7 @@ def boss_chamber(game):
 
 
 def chamber_at(game, tile):
-    """receives the game and a tile; returns the chamber whose zone holds that tile, or None."""
+    """AI-assisted: [Owner: Member 2] receives the game and a tile; returns the chamber whose zone holds that tile, or None."""
     number = game["owners"][tile[1]][tile[0]]
     if number < 0:
         return None
@@ -122,7 +122,7 @@ def chamber_at(game, tile):
 
 
 def door_at(game, tile):
-    """receives the game and a tile; returns the door record {"tile", "from", "to"} on that tile, or None."""
+    """AI-assisted: [Owner: Member 2] receives the game and a tile; returns the door record {"tile", "from", "to"} on that tile, or None."""
     for door in game["doors"]:
         if door["tile"] == tile:
             return door
@@ -130,7 +130,7 @@ def door_at(game, tile):
 
 
 def place_letters(grid, free, letter, count):
-    """receives the map grid, the list of free floor tiles, a tile letter and a count; puts that letter on random free tiles (removing them from the list); returns how many were placed."""
+    """AI-assisted: [Owner: Member 2] receives the map grid, the list of free floor tiles, a tile letter and a count; puts that letter on random free tiles (removing them from the list); returns how many were placed."""
     placed = 0
     while placed < count and len(free) > 0:
         tile = free.pop(random.randrange(len(free)))
@@ -140,7 +140,7 @@ def place_letters(grid, free, letter, count):
 
 
 def furnish(game, room, style, counter):
-    """receives the game, the new room, its style and the habit to counter; fills the chamber with chests, traps, cover and shrines, twisted to punish that habit (side chambers get an extra chest); returns how many floor tiles are still empty."""
+    """AI-assisted: [Owner: Member 2] receives the game, the new room, its style and the habit to counter; fills the chamber with chests, traps, cover and shrines, twisted to punish that habit (side chambers get an extra chest); returns how many floor tiles are still empty."""
     free = []
     for tile in room["tiles"]:
         if tile not in room["starts"] and movement.tile_distance(tile, room["origin"]) > 1:
@@ -166,7 +166,7 @@ def furnish(game, room, style, counter):
 
 
 def deploy_room(game, room, counter):
-    """receives the game, the new room and the habit to counter; Spears deploys his units in the far half of the chamber; returns how many units were placed."""
+    """AI-assisted: [Owner: Member 2] receives the game, the new room and the habit to counter; Spears deploys his units in the far half of the chamber; returns how many units were placed."""
     plan = unit_plan(counter, room["step"], room["kind"])
     if len(room["tiles"]) < 26:
         plan = plan[:2]
@@ -181,7 +181,7 @@ def deploy_room(game, room, counter):
 
 
 def add_unit(game, room, type_name, spawn, taken):
-    """receives the game, a room, a unit type, a spawn tile and the tiles already taken; makes the unit, stands it around the spawn and adds it to the room; returns the unit (None if no model fitted)."""
+    """AI-assisted: [Owner: Member 2] receives the game, a room, a unit type, a spawn tile and the tiles already taken; makes the unit, stands it around the spawn and adds it to the room; returns the unit (None if no model fitted)."""
     game["unit_count"] += 1
     unit = make_unit(game["data"], type_name, game["unit_count"])
     unit["chamber"] = room["id"]
@@ -193,7 +193,7 @@ def add_unit(game, room, type_name, spawn, taken):
 
 
 def deploy_boss(game, room):
-    """receives the game and the boss arena room; stands the Warlord at his mark and his guards at theirs; returns how many units were placed."""
+    """AI-assisted: [Owner: Member 2] receives the game and the boss arena room; stands the Warlord at his mark and his guards at theirs; returns how many units were placed."""
     markers = room["markers"]
     taken = movement.hero_tiles(game["heroes"]) + movement.model_tiles(game["units"])
     add_unit(game, room, "Warlord", markers["W"][0], taken)
@@ -205,7 +205,7 @@ def deploy_boss(game, room):
 
 
 def place_exits(game, chamber):
-    """receives the game and a freshly carved chamber; puts a sealed door in its wall towards every chamber that branches off it; returns the door to the main path (or None)."""
+    """AI-assisted: [Owner: Member 2] receives the game and a freshly carved chamber; puts a sealed door in its wall towards every chamber that branches off it; returns the door to the main path (or None)."""
     main_door = None
     for child in chambers.children(game["plan"], chamber["id"]):
         aim = chambers.box_center(chambers.zone_box(game["grid"], child["zone"]))
@@ -224,7 +224,7 @@ def place_exits(game, chamber):
 
 
 def nearest_tile(tiles, point):
-    """receives a list of tiles and a point; returns the tile closest to the point."""
+    """AI-assisted: [Owner: Member 2] receives a list of tiles and a point; returns the tile closest to the point."""
     best = tiles[0]
     for tile in tiles:
         if movement.tile_distance(tile, point) < movement.tile_distance(best, point):
@@ -233,7 +233,7 @@ def nearest_tile(tiles, point):
 
 
 def connect_chamber(game, chamber):
-    """receives the game and the chamber being entered; digs a corridor from the door that leads to it and swings that door open for good; returns the door tile, or None for the first chamber."""
+    """AI-assisted: [Owner: Member 2] receives the game and the chamber being entered; digs a corridor from the door that leads to it and swings that door open for good; returns the door tile, or None for the first chamber."""
     for door in game["doors"]:
         if door["to"] == chamber["id"]:
             allowed = [-1, door["from"], door["to"]]
@@ -244,7 +244,7 @@ def connect_chamber(game, chamber):
 
 
 def make_unit(data, type_name, number):
-    """receives the data, a unit type name and a unit number; returns a new unit dictionary with no models placed yet."""
+    """AI-assisted: [Owner: Member 2] receives the data, a unit type name and a unit number; returns a new unit dictionary with no models placed yet."""
     unit = dict(data["units"][type_name])
     unit["type"] = type_name
     unit["name"] = type_name + " " + LETTERS[number % 26]
@@ -256,7 +256,7 @@ def make_unit(data, type_name, number):
 
 
 def place_models(grid, unit, spawn, taken):
-    """receives the grid, a unit, a spawn tile and the tiles already taken; stands the unit's models on and around the spawn; returns how many were placed."""
+    """AI-assisted: [Owner: Member 2] receives the grid, a unit, a spawn tile and the tiles already taken; stands the unit's models on and around the spawn; returns how many were placed."""
     tiles = [spawn] + movement.reachable_tiles(grid, spawn, COHERENCY, [], [], False)
     for tile in tiles:
         if len(unit["models"]) == unit["start_models"]:
@@ -268,7 +268,7 @@ def place_models(grid, unit, spawn, taken):
 
 
 def generate_room(game, number, counter):
-    """receives the game, the number of the chamber being opened and the party habit Spears wants to counter; carves the chamber (the arena is already carved), furnishes it and deploys his units; returns the room dictionary."""
+    """AI-assisted: [Owner: Member 2] receives the game, the number of the chamber being opened and the party habit Spears wants to counter; carves the chamber (the arena is already carved), furnishes it and deploys his units; returns the room dictionary."""
     chamber = game["plan"][number]
     kind = chamber["kind"]
     if kind == "boss":
@@ -306,7 +306,7 @@ def generate_room(game, number, counter):
 # ---------------------------------------------------------------- unit helpers
 
 def find_unit(units, name):
-    """receives the unit list and a unit name; returns that unit, or None if it has been destroyed."""
+    """AI-assisted: [Owner: Member 2] receives the unit list and a unit name; returns that unit, or None if it has been destroyed."""
     for unit in units:
         if unit["name"] == name:
             return unit
@@ -314,7 +314,7 @@ def find_unit(units, name):
 
 
 def unit_visible(game, unit):
-    """receives the game and a unit; returns True if the party can see at least one of its models right now."""
+    """AI-assisted: [Owner: Member 2] receives the game and a unit; returns True if the party can see at least one of its models right now."""
     for model in unit["models"]:
         if game["seen"][model["pos"][1]][model["pos"][0]]:
             return True
@@ -322,7 +322,7 @@ def unit_visible(game, unit):
 
 
 def pick_initiative(unit):
-    """receives a unit; returns a random activation initiative that suits its role (fast units go early, heavy ones late)."""
+    """AI-assisted: [Owner: Member 2] receives a unit; returns a random activation initiative that suits its role (fast units go early, heavy ones late)."""
     if unit["role"] == "fast":
         return random.randint(10, 35)
     elif unit["role"] == "ranged":
@@ -334,7 +334,7 @@ def pick_initiative(unit):
 
 
 def pick_target(game, unit):
-    """receives the game and a unit; returns the hero Spears wants dead most (weak and close), or None if no hero stands."""
+    """AI-assisted: [Owner: Member 2] receives the game and a unit; returns the hero Spears wants dead most (weak and close), or None if no hero stands."""
     best = None
     best_score = 9999
     if len(unit["models"]) == 0:
@@ -350,7 +350,7 @@ def pick_target(game, unit):
 
 
 def coherency_ok(unit, model, tile):
-    """receives a unit, one of its models and a tile; returns True if the model would be within 2 tiles of another model of the unit there."""
+    """AI-assisted: [Owner: Member 2] receives a unit, one of its models and a tile; returns True if the model would be within 2 tiles of another model of the unit there."""
     if len(unit["models"]) < 2:
         return True
     for other in unit["models"]:
@@ -362,7 +362,7 @@ def coherency_ok(unit, model, tile):
 
 
 def goal_tile(game, unit, target):
-    """receives the game, a unit and its target hero; returns the tile the unit heads for (heavy units hold the door until heroes come close)."""
+    """AI-assisted: [Owner: Member 2] receives the game, a unit and its target hero; returns the tile the unit heads for (heavy units hold the door until heroes come close)."""
     leader = unit["models"][0]["pos"]
     far = movement.tile_distance(leader, target["pos"]) > 6
     if unit["role"] == "heavy" and far and game["door"] is not None:
@@ -371,14 +371,14 @@ def goal_tile(game, unit, target):
 
 
 def is_flank(game, unit, tile):
-    """receives the game, a unit and a tile next to its goal; returns True if another enemy model stands on the opposite side (a flank)."""
+    """AI-assisted: [Owner: Member 2] receives the game, a unit and a tile next to its goal; returns True if another enemy model stands on the opposite side (a flank)."""
     goal = unit["goal"]
     opposite = [goal[0] * 2 - tile[0], goal[1] * 2 - tile[1]]
     return movement.model_at(game["units"], opposite) is not None
 
 
 def ranged_score(steps, reach):
-    """receives the distance to the target and the shooting range; returns a score (low is good) for keeping a safe shooting distance."""
+    """AI-assisted: [Owner: Member 2] receives the distance to the target and the shooting range; returns a score (low is good) for keeping a safe shooting distance."""
     if steps < 3:
         return 20 + (3 - steps) * 5
     elif steps <= reach:
@@ -388,7 +388,7 @@ def ranged_score(steps, reach):
 
 
 def tile_score(game, unit, tile, steps_map):
-    """receives the game, a unit, a tile and the step map from the goal; returns how good that tile is (low is good)."""
+    """AI-assisted: [Owner: Member 2] receives the game, a unit, a tile and the step map from the goal; returns how good that tile is (low is good)."""
     steps = steps_map[tile[1]][tile[0]]
     if steps < 0:
         steps = 99
@@ -401,7 +401,7 @@ def tile_score(game, unit, tile, steps_map):
 
 
 def best_tile(game, unit, model, steps_map, steps):
-    """receives the game, a unit, one model, the step map from the goal and a move limit; returns the best tile that keeps coherency."""
+    """AI-assisted: [Owner: Member 2] receives the game, a unit, one model, the step map from the goal and a move limit; returns the best tile that keeps coherency."""
     blocked = movement.hero_tiles(game["heroes"])
     occupied = movement.model_tiles(game["units"])
     options = movement.reachable_tiles(game["grid"], model["pos"], steps, blocked, occupied, False)
@@ -422,7 +422,7 @@ def best_tile(game, unit, model, steps_map, steps):
 # ---------------------------------------------------------------- unit phases
 
 def move_unit(game, unit, target, steps):
-    """receives the game, a unit, its target hero and a move limit; moves every model toward the goal (remembering where each came from, for the animation); returns how many models moved."""
+    """AI-assisted: [Owner: Member 2] receives the game, a unit, its target hero and a move limit; moves every model toward the goal (remembering where each came from, for the animation); returns how many models moved."""
     unit["goal"] = goal_tile(game, unit, target)
     steps_map = movement.step_map(game["grid"], unit["goal"], [], True)
     moved = 0
@@ -436,7 +436,7 @@ def move_unit(game, unit, target, steps):
 
 
 def choose_victim(game, model, reach, target):
-    """receives the game, a model, its reach and the unit's target; returns the hero this model attacks (the target if in reach, else the weakest in reach, else None)."""
+    """AI-assisted: [Owner: Member 2] receives the game, a model, its reach and the unit's target; returns the hero this model attacks (the target if in reach, else the weakest in reach, else None)."""
     if not target["exhausted"] and movement.tile_distance(model["pos"], target["pos"]) <= reach:
         return target
     victim = None
@@ -449,7 +449,7 @@ def choose_victim(game, model, reach, target):
 
 
 def cover_bonus(game, unit, hero):
-    """receives the game, the attacking unit and the hero; returns 1 if the hero is behind cover from a shot, else 0."""
+    """AI-assisted: [Owner: Member 2] receives the game, the attacking unit and the hero; returns 1 if the hero is behind cover from a shot, else 0."""
     spot = game["grid"][hero["pos"][1]][hero["pos"][0]]
     if unit["role"] == "ranged" and spot == "~":
         return 1
@@ -457,7 +457,7 @@ def cover_bonus(game, unit, hero):
 
 
 def hero_falls(game, hero):
-    """receives the game and a hero with no hp; marks the hero exhausted and returns a message."""
+    """AI-assisted: [Owner: Member 2] receives the game and a hero with no hp; marks the hero exhausted and returns a message."""
     hero["exhausted"] = True
     if hero["kind"] == "leader":
         return logbook.say(game, "Frodo is exhausted! The party fights on without him.")
@@ -465,13 +465,14 @@ def hero_falls(game, hero):
 
 
 def splash(game, unit, hero):
-    """receives the game, an area-attack unit and the hero it hit; deals 1 damage to heroes next to that hero; returns how many were splashed."""
+    """AI-assisted: [Owner: Member 2] receives the game, an area-attack unit and the hero it hit; deals 1 damage to heroes next to that hero; returns how many were splashed."""
     count = 0
     for other in game["heroes"]:
         near = movement.tile_distance(other["pos"], hero["pos"]) == 1
         if other["exhausted"] or not near:
             continue
         combat.apply_damage(other, unit["aoe"])
+        feel_hit(game, other, unit["aoe"], "")
         game["stats"]["damage_taken"] += unit["aoe"]
         logbook.add_float(game, other["pos"], "-" + str(unit["aoe"]), "crimson")
         count += 1
@@ -480,8 +481,17 @@ def splash(game, unit, hero):
     return count
 
 
+def feel_hit(game, hero, damage, modifier):
+    """AI-assisted: [Owner: Member 2] receives the game, a hero who was just hit, the damage and the modifier card; asks the screen to flash the hero's portrait, and to shake on a big hit; returns the damage."""
+    if damage > 0:
+        game["fx"].append({"kind": "hurt", "name": hero["name"]})
+    if damage >= 4 or modifier == "x2":
+        game["fx"].append({"kind": "shake", "power": min(10, 3 + damage)})
+    return damage
+
+
 def unit_attack(game, unit, model, hero):
-    """receives the game, a unit, one of its models and a hero; resolves one enemy attack and returns the damage dealt."""
+    """AI-assisted: [Owner: Member 2] receives the game, a unit, one of its models and a hero; resolves one enemy attack and returns the damage dealt."""
     shield = hero["shield"] + hero["armor"] + cover_bonus(game, unit, hero)
     style = "melee"
     if unit["aoe"] > 0:
@@ -489,9 +499,10 @@ def unit_attack(game, unit, model, hero):
     elif unit["range"] > 1:
         style = "ranged"
     game["fx"].append({"kind": "strike", "from": list(model["pos"]), "to": list(hero["pos"]), "style": style})
-    result = combat.roll_attack(game, "enemy", unit["attack"], shield)
+    result = combat.roll_attack(game, "enemy", max(0, unit["attack"] + game["enemy_bonus"]), shield)
     damage = result[0]
     combat.apply_damage(hero, damage)
+    feel_hit(game, hero, damage, result[1])
     game["stats"]["damage_taken"] += damage
     game["seen"][model["pos"][1]][model["pos"][0]] = True
     logbook.say(game, unit["name"] + " hits " + hero["name"] + " (" + result[1] + ") for "
@@ -505,7 +516,7 @@ def unit_attack(game, unit, model, hero):
 
 
 def unit_shoot(game, unit, target):
-    """receives the game, a ranged unit and its target; every model in range shoots; returns the total damage."""
+    """AI-assisted: [Owner: Member 2] receives the game, a ranged unit and its target; every model in range shoots; returns the total damage."""
     total = 0
     for model in unit["models"]:
         victim = choose_victim(game, model, unit["range"], target)
@@ -515,7 +526,7 @@ def unit_shoot(game, unit, target):
 
 
 def touching_hero(game, unit):
-    """receives the game and a unit; returns True if any of its models stands next to a hero."""
+    """AI-assisted: [Owner: Member 2] receives the game and a unit; returns True if any of its models stands next to a hero."""
     for model in unit["models"]:
         for tile in movement.hero_tiles(game["heroes"]):
             if movement.tile_distance(model["pos"], tile) == 1:
@@ -524,7 +535,7 @@ def touching_hero(game, unit):
 
 
 def nearest_gap(unit, target):
-    """receives a unit and its target hero; returns how many tiles the closest model must cross to stand next to the hero."""
+    """AI-assisted: [Owner: Member 2] receives a unit and its target hero; returns how many tiles the closest model must cross to stand next to the hero."""
     gap = 99
     for model in unit["models"]:
         distance = movement.tile_distance(model["pos"], target["pos"]) - 1
@@ -534,7 +545,7 @@ def nearest_gap(unit, target):
 
 
 def unit_charge(game, unit, target):
-    """receives the game, a melee unit and its target; rolls a charge distance and moves in if it is enough; returns True on a successful charge."""
+    """AI-assisted: [Owner: Member 2] receives the game, a melee unit and its target; rolls a charge distance and moves in if it is enough; returns True on a successful charge."""
     if touching_hero(game, unit) or target["exhausted"]:
         return False
     roll = random.randint(1, 6)
@@ -551,7 +562,7 @@ def unit_charge(game, unit, target):
 
 
 def unit_fight(game, unit, target):
-    """receives the game, a unit and its target; every model next to a hero attacks; returns the total damage."""
+    """AI-assisted: [Owner: Member 2] receives the game, a unit and its target; every model next to a hero attacks; returns the total damage."""
     total = 0
     for model in unit["models"]:
         victim = choose_victim(game, model, 1, target)
@@ -563,12 +574,12 @@ def unit_fight(game, unit, target):
 # ---------------------------------------------------------------- morale and losses
 
 def morale_test(leadership, roll):
-    """receives a unit's leadership and a 2d6 roll; returns True if the unit holds (roll is leadership or less)."""
+    """AI-assisted: [Owner: Member 2] receives a unit's leadership and a 2d6 roll; returns True if the unit holds (roll is leadership or less)."""
     return roll <= leadership
 
 
 def check_room_clear(game, number):
-    """receives the game and a chamber number; if none of that chamber's units are left, unseals all its doors and returns True."""
+    """AI-assisted: [Owner: Member 2] receives the game and a chamber number; if none of that chamber's units are left, unseals all its doors and returns True."""
     chamber = game["plan"][number]
     if chamber["cleared"]:
         return True
@@ -589,7 +600,7 @@ def check_room_clear(game, number):
 
 
 def destroy_unit(game, unit, tile):
-    """receives the game, a unit with no models left and the tile where it fell; removes the unit, maybe drops loot, and returns True if loot dropped."""
+    """AI-assisted: [Owner: Member 2] receives the game, a unit with no models left and the tile where it fell; removes the unit, maybe drops loot, and returns True if loot dropped."""
     game["units"].remove(unit)
     logbook.say(game, unit["name"] + " is destroyed!")
     if unit["type"] == "Warlord":
@@ -603,8 +614,9 @@ def destroy_unit(game, unit, tile):
 
 
 def remove_model(game, unit, model):
-    """receives the game, a unit and a dead or fleeing model; removes the model and returns how many models the unit has left."""
+    """AI-assisted: [Owner: Member 2] receives the game, a unit and a dead or fleeing model; removes the model and returns how many models the unit has left."""
     tile = model["pos"]
+    game["fx"].append({"kind": "puff", "tile": list(tile)})
     unit["models"].remove(model)
     game["stats"]["enemies_slain"] += 1
     if len(unit["models"]) == 0:
@@ -613,7 +625,7 @@ def remove_model(game, unit, model):
 
 
 def safest_tile(game, model, steps):
-    """receives the game, a model and a move limit; returns the reachable tile farthest from every hero."""
+    """AI-assisted: [Owner: Member 2] receives the game, a model and a move limit; returns the reachable tile farthest from every hero."""
     heroes = movement.hero_tiles(game["heroes"])
     options = movement.reachable_tiles(game["grid"], model["pos"], steps, heroes,
                                        movement.model_tiles(game["units"]), False)
@@ -630,7 +642,7 @@ def safest_tile(game, model, steps):
 
 
 def fall_back(game, unit):
-    """receives the game and a broken unit; every model runs away from the heroes (remembering where each came from, for the animation); returns how many models moved."""
+    """AI-assisted: [Owner: Member 2] receives the game and a broken unit; every model runs away from the heroes (remembering where each came from, for the animation); returns how many models moved."""
     moved = 0
     for model in unit["models"]:
         tile = safest_tile(game, model, unit["move"])
@@ -642,7 +654,7 @@ def fall_back(game, unit):
 
 
 def break_unit(game, unit):
-    """receives the game and a unit that failed morale; it randomly loses a model or falls back; returns what happened."""
+    """AI-assisted: [Owner: Member 2] receives the game and a unit that failed morale; it randomly loses a model or falls back; returns what happened."""
     tile = unit["models"][0]["pos"]
     visible = unit_visible(game, unit)
     if visible:
@@ -658,7 +670,7 @@ def break_unit(game, unit):
 
 
 def unit_morale(game, unit):
-    """receives the game and a unit; if it is below half strength it rolls 2d6 against leadership; returns True if the unit holds."""
+    """AI-assisted: [Owner: Member 2] receives the game and a unit; if it is below half strength it rolls 2d6 against leadership; returns True if the unit holds."""
     alive = len(unit["models"])
     if alive == 0 or unit["start_models"] < 2 or alive * 2 >= unit["start_models"]:
         return True
@@ -676,7 +688,7 @@ def unit_morale(game, unit):
 # ---------------------------------------------------------------- doom and reinforcements
 
 def advance_doom(doom, amount, doom_max):
-    """receives the Doom Track value, how much to add and the track's end; returns the new value (never past the end)."""
+    """AI-assisted: [Owner: Member 2] receives the Doom Track value, how much to add and the track's end; returns the new value (never past the end)."""
     doom = doom + amount
     if doom > doom_max:
         doom = doom_max
@@ -684,7 +696,7 @@ def advance_doom(doom, amount, doom_max):
 
 
 def prepare_ahead(game, chamber):
-    """receives the game and a chamber the party has not opened yet; Spears secretly adds a trap, a guard or a trapped chest to it; returns what he added."""
+    """AI-assisted: [Owner: Member 2] receives the game and a chamber the party has not opened yet; Spears secretly adds a trap, a guard or a trapped chest to it; returns what he added."""
     choice = random.choice(["trap", "guard", "trapped chest"])
     chamber["prepared"].append(choice)
     logbook.note(game, "Spears prepares a " + choice + " in a chamber ahead (unseen by the party).")
@@ -692,7 +704,7 @@ def prepare_ahead(game, chamber):
 
 
 def reinforce(game):
-    """receives the game; after a round Spears may secretly strengthen one chamber the party has not opened yet (never the one they are in); returns what he added ("" if he waits)."""
+    """AI-assisted: [Owner: Member 2] receives the game; after a round Spears may secretly strengthen one chamber the party has not opened yet (never the one they are in); returns what he added ("" if he waits)."""
     if random.randint(1, 3) != 1:
         return ""
     ahead = []
@@ -708,7 +720,7 @@ def reinforce(game):
 
 
 def apply_preparations(game, room, chamber):
-    """receives the game, a freshly carved room and its chamber; puts in the traps, guards and trapped chests Spears prepared; returns how many were added."""
+    """AI-assisted: [Owner: Member 2] receives the game, a freshly carved room and its chamber; puts in the traps, guards and trapped chests Spears prepared; returns how many were added."""
     free = []
     for tile in room["tiles"]:
         spot = game["grid"][tile[1]][tile[0]]
@@ -730,7 +742,7 @@ def apply_preparations(game, room, chamber):
 # ---------------------------------------------------------------- the boss
 
 def warlord(game):
-    """receives the game; returns the Warlord's unit if he is on the map, else None."""
+    """AI-assisted: [Owner: Member 2] receives the game; returns the Warlord's unit if he is on the map, else None."""
     for unit in game["units"]:
         if unit["type"] == "Warlord":
             return unit
@@ -738,7 +750,7 @@ def warlord(game):
 
 
 def summon_guards(game, unit):
-    """receives the game and the Warlord; his guards rush in at the free guard marks of the arena; returns a message."""
+    """AI-assisted: [Owner: Member 2] receives the game and the Warlord; his guards rush in at the free guard marks of the arena; returns a message."""
     room = {"id": unit["chamber"], "units": []}
     taken = movement.hero_tiles(game["heroes"]) + movement.model_tiles(game["units"])
     spots = list(boss_chamber(game)["markers"]["G"]) + [unit["models"][0]["pos"]]
@@ -752,14 +764,14 @@ def summon_guards(game, unit):
 
 
 def enrage(unit):
-    """receives the Warlord; he grows stronger and faster; returns a message."""
+    """AI-assisted: [Owner: Member 2] receives the Warlord; he grows stronger and faster; returns a message."""
     unit["attack"] += 2
     unit["move"] += 1
     return "The Warlord is wounded and ENRAGED! +2 attack, +1 move."
 
 
 def boss_check(game, unit):
-    """receives the game and a unit that was just hit; if it is the Warlord, moves him into his next phase at half and at a quarter of his wounds; returns the phase he is in (0, 1 or 2)."""
+    """AI-assisted: [Owner: Member 2] receives the game and a unit that was just hit; if it is the Warlord, moves him into his next phase at half and at a quarter of his wounds; returns the phase he is in (0, 1 or 2)."""
     if unit["type"] != "Warlord" or len(unit["models"]) == 0:
         return game["boss_phase"]
     left = unit["models"][0]["hp"]
@@ -773,4 +785,5 @@ def boss_check(game, unit):
     if message != "":
         logbook.say(game, message)
         logbook.add_banner(game, message)
+        game["fx"].append({"kind": "shake", "power": 9})
     return game["boss_phase"]

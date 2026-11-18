@@ -50,7 +50,7 @@ CYAN = (112, 214, 230)
 ORANGE = (240, 142, 50)
 PINK = (236, 120, 140)
 
-COLOR_NAMES = {"crimson": CRIMSON, "white": WHITE, "gold": GOLD, "green": GREEN}
+COLOR_NAMES = {"crimson": CRIMSON, "white": WHITE, "gold": GOLD, "green": GREEN, "blue": (120, 170, 250)}
 ELEMENT_COLORS = {"fire": ORANGE, "frost": CYAN, "light": GOLD}
 ACTION_COLORS = {"attack": (240, 104, 92), "move": (134, 184, 244), "heal": (124, 214, 136),
                  "shield": (206, 212, 222)}

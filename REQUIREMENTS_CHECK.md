@@ -6,26 +6,26 @@ Line numbers were generated from the code. They shift if a file is edited.
 
 | # | Requirement | Where it is satisfied |
 |---|---|---|
-| 1 | One `while` loop runs the game round by round until win, lose or quit | `frodo_game.py` > `main()` line 484; the loop itself is at `frodo_game.py` line 494 |
-| 2 | Menu each round with rules, status and quit | `frodo_game.py` > `use_menu()` line 248 (Rules, Status, Save and Quit are buttons and F-keys on every hero's turn, every round; handled from `frodo_game.py` > `do_request()` line 219); the buttons are set up in `ui.py` > `turn_buttons()` line 1552; `ui.py` > `show_rules()` line 2162; `ui.py` > `show_status()` line 2206 |
-| 3 | `random` drives decks, rooms, Spears choices, charge and morale rolls, lost cards | modifier deck: `combat.py` line 25; room style: `spears_ai.py` line 82; dungeon plan: `chambers.py` line 99, `chambers.py` > `random_walk()` line 123; chamber size and shape: `chambers.py` > `shrink_box()` line 40; boss phases: `spears_ai.py` > `boss_check()` line 761; unit choice: `spears_ai.py` line 66; unit initiative: `spears_ai.py` > `pick_initiative()` line 324; charge roll: `spears_ai.py` line 540; morale 2d6: `spears_ai.py` line 665; reinforcements: `spears_ai.py` line 704; shuffling each hero's deck: `cards.py` line 35 and `game_data.py` line 110; hero turn order: `frodo_game.py` line 359 |
-| 4 | A list changed with append/insert AND remove/pop | hand: `.remove()` at `cards.py` line 19, `.append()` at `cards.py` line 39, `.pop()` at `cards.py` line 38; models in a unit: `.append()` at `spears_ai.py` line 265, `.remove()` at `spears_ai.py` line 608; enemy units: `spears_ai.py` line 593; path: `.insert()` at `movement.py` line 101; inventory: `frodo_game.py` line 106 |
-| 5 | A dictionary changed during play | `spears_memory` is `game["memory"]`: `frodo_game.py` line 160, halved in `spears_ai.py` > `fade_memory()` line 44; elements: `cards.py` > `use_element()` line 65 and `cards.py` > `wane_elements()` line 76; hero and model dictionaries: `combat.py` > `apply_damage()` line 47; stats: `frodo_game.py` line 438 |
-| 6 | At least three `if` statements with `elif`/`else` | `combat.py` > `calc_damage()` line 30; `frodo_game.py` > `step_on_tile()` line 115; `frodo_game.py` > `play_card()` line 196; `spears_ai.py` > `unit_plan()` line 51; `frodo_game.py` > `do_request()` line 219; `art.py` > `draw_feature()` line 958; `cards.py` > `apply_item()` line 112 |
-| 7 | At least three loops, including a `for` and a loop with `else` | `for` with `else`: `logbook.py` > `check_game_over()` line 98, `spears_ai.py` > `coherency_ok()` line 352; plain `for`: `combat.py` > `sort_turn_order()` line 66; `while`: `movement.py` > `step_map()` line 54, `frodo_game.py` > `hero_turn()` line 234 |
-| 8 | Every function has a tagged docstring; at least 3 take parameters and return a value | See the table below (498 functions, all tagged). Examples: `combat.py` > `calc_damage()` line 30, `spears_ai.py` > `morale_test()` line 565, `spears_ai.py` > `advance_doom()` line 678, `movement.py` > `reachable_tiles()` line 69 |
-| 9 | try/except around things that can fail | opening the data file: `game_data.py` line 92; numbers in the data file: `game_data.py` line 12; typed number box: `ui.py` line 1438; modifier maths: `combat.py` line 39; log file: `logbook.py` line 58; average with 0 rounds: `logbook.py` line 69; missing pygame: `frodo_game.py` line 10 |
-| 10 | Write `frodo_log.txt`: each round plus a calculated summary | `logbook.py` > `write_log()` line 48, called at the end of every round from `frodo_game.py` > `end_round()` line 430; `logbook.py` > `write_summary()` line 63 calculates the averages, called from `frodo_game.py` > `finish_game()` line 448 |
-| 11 | Read a team-made data file with `split()` (not json/csv) | `game_data.py` > `load_dungeon()` line 86 opens `dungeon_data.txt`; `game_data.py` > `read_line()` line 69 uses `split("\|")`; `game_data.py` > `parse_fields()` line 16 uses `split()` and `split("=")`; `game_data.py` > `parse_action()` line 26 uses `split(":")` |
-| 12 | Visual: the pygame window | `ui.py` > `init()` line 62 opens the 1280x720 window with `pygame.SCALED`; `ui.py` > `draw_game()` line 1336 draws every frame; `ui.py` > `show_map()` line 559 draws the dungeon |
+| 1 | One `while` loop runs the game round by round until win, lose or quit | `frodo_game.py` > `main()` line 508; the loop itself is at `frodo_game.py` line 518 |
+| 2 | Menu each round with rules, status and quit | `frodo_game.py` > `use_menu()` line 271 (Rules, Status, Save and Quit are buttons and F-keys on every hero's turn, every round; handled from `frodo_game.py` > `do_request()` line 240); the buttons are set up in `ui.py` > `turn_buttons()` line 1808; `ui.py` > `show_rules()` line 2455; `ui.py` > `show_status()` line 2499 |
+| 3 | `random` drives decks, rooms, Spears choices, charge and morale rolls, lost cards | modifier deck: `combat.py` line 25; room style: `spears_ai.py` line 82; dungeon plan: `chambers.py` line 99, `chambers.py` > `random_walk()` line 123; chamber size and shape: `chambers.py` > `shrink_box()` line 40; boss phases: `spears_ai.py` > `boss_check()` line 773; unit choice: `spears_ai.py` line 66; unit initiative: `spears_ai.py` > `pick_initiative()` line 324; charge roll: `spears_ai.py` line 551; morale 2d6: `spears_ai.py` line 677; reinforcements: `spears_ai.py` line 716; shuffling each hero's deck: `cards.py` line 35 and `game_data.py` line 112; hero turn order: `frodo_game.py` line 382 |
+| 4 | A list changed with append/insert AND remove/pop | hand: `.remove()` at `cards.py` line 19, `.append()` at `cards.py` line 39, `.pop()` at `cards.py` line 38; models in a unit: `.append()` at `spears_ai.py` line 265, `.remove()` at `spears_ai.py` line 620; enemy units: `spears_ai.py` line 604; path: `.insert()` at `movement.py` line 101; inventory: `frodo_game.py` line 107 |
+| 5 | A dictionary changed during play | `spears_memory` is `game["memory"]`: `frodo_game.py` line 163, halved in `spears_ai.py` > `fade_memory()` line 44; elements: `cards.py` > `use_element()` line 65 and `cards.py` > `wane_elements()` line 76; hero and model dictionaries: `combat.py` > `apply_damage()` line 47; stats: `frodo_game.py` line 461 |
+| 6 | At least three `if` statements with `elif`/`else` | `combat.py` > `calc_damage()` line 30; `frodo_game.py` > `step_on_tile()` line 117; `frodo_game.py` > `play_card()` line 213; `spears_ai.py` > `unit_plan()` line 51; `frodo_game.py` > `do_request()` line 240; `art.py` > `draw_feature()` line 958; `cards.py` > `apply_item()` line 112 |
+| 7 | At least three loops, including a `for` and a loop with `else` | `for` with `else`: `logbook.py` > `check_game_over()` line 98, `spears_ai.py` > `coherency_ok()` line 352; plain `for`: `combat.py` > `sort_turn_order()` line 66; `while`: `movement.py` > `step_map()` line 54, `frodo_game.py` > `hero_turn()` line 257 |
+| 8 | Every function has a tagged docstring; at least 3 take parameters and return a value | See the table below (521 functions, all tagged). Examples: `combat.py` > `calc_damage()` line 30, `spears_ai.py` > `morale_test()` line 576, `spears_ai.py` > `advance_doom()` line 690, `movement.py` > `reachable_tiles()` line 69 |
+| 9 | try/except around things that can fail | opening the data file: `game_data.py` line 94; numbers in the data file: `game_data.py` line 12; typed number box: `ui.py` line 1694; modifier maths: `combat.py` line 39; log file: `logbook.py` line 58; average with 0 rounds: `logbook.py` line 69; missing pygame: `frodo_game.py` line 10 |
+| 10 | Write `frodo_log.txt`: each round plus a calculated summary | `logbook.py` > `write_log()` line 48, called at the end of every round from `frodo_game.py` > `end_round()` line 453; `logbook.py` > `write_summary()` line 63 calculates the averages, called from `frodo_game.py` > `finish_game()` line 471 |
+| 11 | Read a team-made data file with `split()` (not json/csv) | `game_data.py` > `load_dungeon()` line 88 opens `dungeon_data.txt`; `game_data.py` > `read_line()` line 71 uses `split("\|")`; `game_data.py` > `parse_fields()` line 16 uses `split()` and `split("=")`; `game_data.py` > `parse_action()` line 26 uses `split(":")` |
+| 12 | Visual: the pygame window | `ui.py` > `init()` line 68 opens the 1280x720 window with `pygame.SCALED`; `ui.py` > `draw_game()` line 1586 draws every frame; `ui.py` > `show_map()` line 567 draws the dungeon |
 
 ## Other rules
 
 - No classes, lambdas, decorators or comprehensions in any file (checked with a script).
 - Files are opened by name only: `dungeon_data.txt`, `frodo_log.txt`, and `<name>.txt` for a typed save name.
-- `input()` is never used. The two typed fields are drawn in the window by `ui.py` > `ask_text()` line 1472: "How many tiles to move?" (`ui.py` > `typed_move()` line 1638) and "Name your save file" (`frodo_game.py` > `save_game()` line 344). Bad input is caught by `ui.py` > `check_number()` line 1432 and `ui.py` > `check_name()` line 1445, which show a message and ask again.
+- `input()` is never used. The two typed fields are drawn in the window by `ui.py` > `ask_text()` line 1728: "How many tiles to move?" (`ui.py` > `typed_move()` line 1894) and "Name your save file" (`frodo_game.py` > `save_game()` line 367). Bad input is caught by `ui.py` > `check_number()` line 1688 and `ui.py` > `check_name()` line 1701, which show a message and ask again.
 - Missing pygame prints `Run: pip install pygame` (`frodo_game.py` line 11).
-- Functions longer than 30 lines: `generate_room` in `spears_ai.py` (34), `test_cards` in `test_frodo.py` (32), `test_saves` in `test_frodo.py` (33).
+- Functions longer than 30 lines: `generate_room` in `spears_ai.py` (34), `draw_strike` in `ui.py` (39), `test_cards` in `test_frodo.py` (32), `test_saves` in `test_frodo.py` (33).
 
 ## Tags - read this before handing in
 
@@ -35,314 +35,337 @@ The AI assistant wrote every function. The brief says every docstring must start
 
 | File | Function | Line | Tag | Parameters | Returns a value |
 |---|---|---|---|---|---|
-| `frodo_game.py` | `install_room` | 31 | (no tag) | 2 | yes |
-| `frodo_game.py` | `catch_breath` | 50 | (no tag) | 1 | yes |
-| `frodo_game.py` | `enter_room` | 61 | (no tag) | 2 | yes |
-| `frodo_game.py` | `start_dungeon` | 78 | (no tag) | 1 | yes |
-| `frodo_game.py` | `spring_trap` | 89 | (no tag) | 2 | yes |
-| `frodo_game.py` | `open_chest` | 101 | (no tag) | 3 | yes |
-| `frodo_game.py` | `step_on_tile` | 115 | (no tag) | 2 | yes |
-| `frodo_game.py` | `hero_move` | 135 | (no tag) | 3 | yes |
-| `frodo_game.py` | `record_hit` | 152 | (no tag) | 3 | yes |
-| `frodo_game.py` | `hero_attack` | 164 | (no tag) | 5 | yes |
-| `frodo_game.py` | `hero_heal` | 185 | (no tag) | 4 | yes |
-| `frodo_game.py` | `play_card` | 196 | (no tag) | 4 | yes |
-| `frodo_game.py` | `do_request` | 219 | (no tag) | 3 | yes |
-| `frodo_game.py` | `hero_turn` | 234 | (no tag) | 2 | yes |
-| `frodo_game.py` | `use_menu` | 248 | (no tag) | 2 | yes |
-| `frodo_game.py` | `damage_words` | 263 | (no tag) | 2 | yes |
-| `frodo_game.py` | `health_now` | 275 | (no tag) | 1 | yes |
-| `frodo_game.py` | `spears_phase` | 283 | (no tag) | 2 | yes |
-| `frodo_game.py` | `take_turn` | 315 | (no tag) | 2 | yes |
-| `frodo_game.py` | `start_round` | 335 | (no tag) | 1 | yes |
-| `frodo_game.py` | `save_game` | 344 | (no tag) | 1 | yes |
-| `frodo_game.py` | `set_initiative` | 357 | (no tag) | 2 | yes |
-| `frodo_game.py` | `prepare_heroes` | 363 | (no tag) | 1 | yes |
-| `frodo_game.py` | `play_round` | 375 | (no tag) | 1 | yes |
-| `frodo_game.py` | `cleanup_cards` | 393 | (no tag) | 1 | yes |
-| `frodo_game.py` | `mark_exhausted` | 403 | (no tag) | 1 | yes |
-| `frodo_game.py` | `count_clumping` | 416 | (no tag) | 1 | yes |
-| `frodo_game.py` | `end_round` | 430 | (no tag) | 1 | yes |
-| `frodo_game.py` | `finish_game` | 448 | (no tag) | 2 | yes |
-| `frodo_game.py` | `open_game` | 457 | (no tag) | 2 | yes |
-| `frodo_game.py` | `choose_game` | 471 | (no tag) | 1 | yes |
-| `frodo_game.py` | `main` | 484 | (no tag) | 0 | no |
-| `game_data.py` | `clean_value` | 8 | (no tag) | 1 | yes |
-| `game_data.py` | `parse_fields` | 16 | (no tag) | 1 | yes |
-| `game_data.py` | `parse_action` | 26 | (no tag) | 1 | yes |
-| `game_data.py` | `make_card` | 38 | (no tag) | 2 | yes |
-| `game_data.py` | `store_record` | 46 | (no tag) | 4 | yes |
-| `game_data.py` | `read_line` | 69 | (no tag) | 2 | yes |
-| `game_data.py` | `load_dungeon` | 86 | (no tag) | 1 | yes |
-| `game_data.py` | `make_hero` | 100 | (no tag) | 2 | yes |
-| `game_data.py` | `new_memory` | 118 | (no tag) | 0 | yes |
-| `game_data.py` | `new_stats` | 124 | (no tag) | 0 | yes |
-| `game_data.py` | `new_game` | 130 | (no tag) | 2 | yes |
-| `game_data.py` | `find_hero` | 149 | (no tag) | 2 | yes |
-| `game_data.py` | `place_party` | 157 | (no tag) | 2 | yes |
-| `combat.py` | `build_modifier_deck` | 5 | (no tag) | 0 | yes |
-| `combat.py` | `draw_modifier` | 16 | (no tag) | 2 | yes |
-| `combat.py` | `calc_damage` | 30 | (no tag) | 3 | yes |
-| `combat.py` | `apply_damage` | 47 | (no tag) | 2 | yes |
-| `combat.py` | `roll_attack` | 55 | (no tag) | 4 | yes |
-| `combat.py` | `sort_turn_order` | 66 | (no tag) | 2 | yes |
-| `cards.py` | `find_card` | 7 | (no tag) | 2 | yes |
-| `cards.py` | `choose_card` | 15 | (no tag) | 2 | yes |
-| `cards.py` | `finish_card` | 23 | (no tag) | 2 | yes |
-| `cards.py` | `draw_card` | 29 | (no tag) | 1 | yes |
-| `cards.py` | `refill_hand` | 43 | (no tag) | 1 | yes |
-| `cards.py` | `is_exhausted` | 51 | (no tag) | 1 | yes |
-| `cards.py` | `heal_hero` | 56 | (no tag) | 2 | yes |
-| `cards.py` | `use_element` | 65 | (no tag) | 2 | yes |
-| `cards.py` | `wane_elements` | 76 | (no tag) | 1 | yes |
-| `cards.py` | `search_poi` | 87 | (no tag) | 3 | yes |
-| `cards.py` | `cheese_feast` | 100 | (no tag) | 2 | yes |
-| `cards.py` | `apply_item` | 112 | (no tag) | 3 | yes |
-| `spears_ai.py` | `spears_counter` | 31 | (no tag) | 1 | yes |
-| `spears_ai.py` | `fade_memory` | 44 | (no tag) | 1 | yes |
-| `spears_ai.py` | `unit_plan` | 51 | (no tag) | 3 | yes |
-| `spears_ai.py` | `pick_style` | 72 | (no tag) | 2 | yes |
-| `spears_ai.py` | `build_dungeon` | 86 | (no tag) | 1 | yes |
-| `spears_ai.py` | `boss_chamber` | 108 | (no tag) | 1 | yes |
-| `spears_ai.py` | `chamber_at` | 116 | (no tag) | 2 | yes |
-| `spears_ai.py` | `door_at` | 124 | (no tag) | 2 | yes |
-| `spears_ai.py` | `place_letters` | 132 | (no tag) | 4 | yes |
-| `spears_ai.py` | `furnish` | 142 | (no tag) | 4 | yes |
-| `spears_ai.py` | `deploy_room` | 168 | (no tag) | 3 | yes |
-| `spears_ai.py` | `add_unit` | 183 | (no tag) | 5 | yes |
-| `spears_ai.py` | `deploy_boss` | 195 | (no tag) | 2 | yes |
-| `spears_ai.py` | `place_exits` | 207 | (no tag) | 2 | yes |
-| `spears_ai.py` | `nearest_tile` | 226 | (no tag) | 2 | yes |
-| `spears_ai.py` | `connect_chamber` | 235 | (no tag) | 2 | yes |
-| `spears_ai.py` | `make_unit` | 246 | (no tag) | 3 | yes |
-| `spears_ai.py` | `place_models` | 258 | (no tag) | 4 | yes |
-| `spears_ai.py` | `generate_room` | 270 | (no tag) | 3 | yes |
-| `spears_ai.py` | `find_unit` | 308 | (no tag) | 2 | yes |
-| `spears_ai.py` | `unit_visible` | 316 | (no tag) | 2 | yes |
-| `spears_ai.py` | `pick_initiative` | 324 | (no tag) | 1 | yes |
-| `spears_ai.py` | `pick_target` | 336 | (no tag) | 2 | yes |
-| `spears_ai.py` | `coherency_ok` | 352 | (no tag) | 3 | yes |
-| `spears_ai.py` | `goal_tile` | 364 | (no tag) | 3 | yes |
-| `spears_ai.py` | `is_flank` | 373 | (no tag) | 3 | yes |
-| `spears_ai.py` | `ranged_score` | 380 | (no tag) | 2 | yes |
-| `spears_ai.py` | `tile_score` | 390 | (no tag) | 4 | yes |
-| `spears_ai.py` | `best_tile` | 403 | (no tag) | 5 | yes |
-| `spears_ai.py` | `move_unit` | 424 | (no tag) | 4 | yes |
-| `spears_ai.py` | `choose_victim` | 438 | (no tag) | 4 | yes |
-| `spears_ai.py` | `cover_bonus` | 451 | (no tag) | 3 | yes |
-| `spears_ai.py` | `hero_falls` | 459 | (no tag) | 2 | yes |
-| `spears_ai.py` | `splash` | 467 | (no tag) | 3 | yes |
-| `spears_ai.py` | `unit_attack` | 483 | (no tag) | 4 | yes |
-| `spears_ai.py` | `unit_shoot` | 507 | (no tag) | 3 | yes |
-| `spears_ai.py` | `touching_hero` | 517 | (no tag) | 2 | yes |
-| `spears_ai.py` | `nearest_gap` | 526 | (no tag) | 2 | yes |
-| `spears_ai.py` | `unit_charge` | 536 | (no tag) | 3 | yes |
-| `spears_ai.py` | `unit_fight` | 553 | (no tag) | 3 | yes |
-| `spears_ai.py` | `morale_test` | 565 | (no tag) | 2 | yes |
-| `spears_ai.py` | `check_room_clear` | 570 | (no tag) | 2 | yes |
-| `spears_ai.py` | `destroy_unit` | 591 | (no tag) | 3 | yes |
-| `spears_ai.py` | `remove_model` | 605 | (no tag) | 3 | yes |
-| `spears_ai.py` | `safest_tile` | 615 | (no tag) | 3 | yes |
-| `spears_ai.py` | `fall_back` | 632 | (no tag) | 2 | yes |
-| `spears_ai.py` | `break_unit` | 644 | (no tag) | 2 | yes |
-| `spears_ai.py` | `unit_morale` | 660 | (no tag) | 2 | yes |
-| `spears_ai.py` | `advance_doom` | 678 | (no tag) | 3 | yes |
-| `spears_ai.py` | `prepare_ahead` | 686 | (no tag) | 2 | yes |
-| `spears_ai.py` | `reinforce` | 694 | (no tag) | 1 | yes |
-| `spears_ai.py` | `apply_preparations` | 710 | (no tag) | 3 | yes |
-| `spears_ai.py` | `warlord` | 732 | (no tag) | 1 | yes |
-| `spears_ai.py` | `summon_guards` | 740 | (no tag) | 2 | yes |
-| `spears_ai.py` | `enrage` | 754 | (no tag) | 1 | yes |
-| `spears_ai.py` | `boss_check` | 761 | (no tag) | 2 | yes |
-| `movement.py` | `tile_distance` | 11 | (no tag) | 2 | yes |
-| `movement.py` | `in_bounds` | 16 | (no tag) | 3 | yes |
-| `movement.py` | `is_floor` | 21 | (no tag) | 4 | yes |
-| `movement.py` | `blank_grid` | 34 | (no tag) | 2 | yes |
-| `movement.py` | `can_enter` | 45 | (no tag) | 5 | yes |
-| `movement.py` | `step_map` | 54 | (no tag) | 4 | yes |
-| `movement.py` | `reachable_tiles` | 69 | (no tag) | 6 | yes |
-| `movement.py` | `lower_neighbor` | 81 | (no tag) | 2 | yes |
-| `movement.py` | `find_path` | 92 | (no tag) | 5 | yes |
-| `movement.py` | `hero_tiles` | 105 | (no tag) | 1 | yes |
-| `movement.py` | `model_tiles` | 114 | (no tag) | 1 | yes |
-| `movement.py` | `hero_at` | 123 | (no tag) | 2 | yes |
-| `movement.py` | `model_at` | 131 | (no tag) | 2 | yes |
-| `movement.py` | `learn_outline` | 140 | (no tag) | 1 | yes |
-| `movement.py` | `shown_letter` | 159 | (no tag) | 1 | yes |
-| `movement.py` | `lit_floor` | 168 | (no tag) | 1 | yes |
-| `movement.py` | `wall_in_view` | 180 | (no tag) | 4 | yes |
-| `movement.py` | `refresh_vision` | 189 | (no tag) | 1 | yes |
-| `movement.py` | `enemy_targets` | 205 | (no tag) | 3 | yes |
-| `movement.py` | `friend_targets` | 214 | (no tag) | 3 | yes |
-| `movement.py` | `move_targets` | 223 | (no tag) | 2 | yes |
-| `movement.py` | `action_targets` | 235 | (no tag) | 3 | yes |
-| `movement.py` | `is_valid_drop` | 245 | (no tag) | 2 | yes |
-| `movement.py` | `drop_message` | 250 | (no tag) | 4 | yes |
-| `logbook.py` | `say` | 4 | (no tag) | 2 | yes |
-| `logbook.py` | `note` | 11 | (no tag) | 2 | yes |
-| `logbook.py` | `tell` | 17 | (no tag) | 3 | yes |
-| `logbook.py` | `add_float` | 24 | (no tag) | 4 | yes |
-| `logbook.py` | `add_banner` | 30 | (no tag) | 2 | yes |
-| `logbook.py` | `start_log` | 36 | (no tag) | 1 | yes |
-| `logbook.py` | `write_log` | 48 | (no tag) | 2 | yes |
-| `logbook.py` | `write_summary` | 63 | (no tag) | 1 | yes |
-| `logbook.py` | `summary_lines` | 83 | (no tag) | 1 | yes |
-| `logbook.py` | `check_game_over` | 98 | (no tag) | 4 | yes |
-| `logbook.py` | `status_lines` | 112 | (no tag) | 1 | yes |
-| `logbook.py` | `hero_line` | 124 | (no tag) | 1 | yes |
-| `ui.py` | `init` | 62 | AI-assisted | 0 | yes |
-| `ui.py` | `set_message` | 75 | AI-assisted | 1 | yes |
-| `ui.py` | `tile_rect` | 81 | AI-assisted | 1 | yes |
-| `ui.py` | `tile_center` | 94 | AI-assisted | 1 | yes |
-| `ui.py` | `tile_at` | 100 | AI-assisted | 1 | yes |
-| `ui.py` | `hero_block_rect` | 112 | AI-assisted | 1 | yes |
-| `ui.py` | `card_rect` | 117 | AI-assisted | 1 | yes |
-| `ui.py` | `hero_at_pixel` | 122 | AI-assisted | 2 | yes |
-| `ui.py` | `moved_far` | 133 | AI-assisted | 2 | yes |
-| `ui.py` | `selected_hero` | 138 | AI-assisted | 1 | yes |
-| `ui.py` | `find_by_name` | 145 | AI-assisted | 2 | yes |
-| `ui.py` | `make_button` | 155 | AI-assisted | 3 | yes |
-| `ui.py` | `set_buttons` | 160 | AI-assisted | 1 | yes |
-| `ui.py` | `button_at` | 172 | AI-assisted | 2 | yes |
-| `ui.py` | `tile_letter` | 182 | AI-assisted | 3 | yes |
-| `ui.py` | `min_zoom` | 191 | AI-assisted | 0 | yes |
-| `ui.py` | `clamp_camera` | 198 | AI-assisted | 0 | yes |
-| `ui.py` | `view_rect` | 211 | AI-assisted | 0 | yes |
-| `ui.py` | `visible_box` | 218 | AI-assisted | 0 | yes |
-| `ui.py` | `tile_middle` | 228 | AI-assisted | 1 | yes |
-| `ui.py` | `follow` | 233 | AI-assisted | 1 | yes |
-| `ui.py` | `frame_tiles` | 244 | AI-assisted | 2 | yes |
-| `ui.py` | `show_chamber` | 264 | AI-assisted | 2 | yes |
-| `ui.py` | `fit_view` | 270 | AI-assisted | 1 | yes |
-| `ui.py` | `zoom_by` | 280 | AI-assisted | 2 | yes |
-| `ui.py` | `glide_camera` | 293 | AI-assisted | 0 | no |
-| `ui.py` | `camera_event` | 316 | AI-assisted | 2 | yes |
-| `ui.py` | `camera_key` | 338 | AI-assisted | 2 | yes |
-| `ui.py` | `seen_letters` | 352 | AI-assisted | 1 | yes |
-| `ui.py` | `room_art` | 363 | AI-assisted | 2 | yes |
-| `ui.py` | `draw_features` | 378 | AI-assisted | 2 | yes |
-| `ui.py` | `draw_ripples` | 398 | AI-assisted | 2 | yes |
-| `ui.py` | `draw_highlights` | 411 | AI-assisted | 0 | yes |
-| `ui.py` | `light_sources` | 425 | AI-assisted | 1 | yes |
-| `ui.py` | `draw_flames` | 438 | AI-assisted | 3 | yes |
-| `ui.py` | `draw_lighting` | 455 | AI-assisted | 2 | yes |
-| `ui.py` | `visible_models` | 466 | AI-assisted | 2 | yes |
-| `ui.py` | `draw_coherency` | 475 | AI-assisted | 1 | no |
-| `ui.py` | `draw_model_token` | 486 | AI-assisted | 2 | no |
-| `ui.py` | `draw_figures` | 497 | AI-assisted | 1 | yes |
-| `ui.py` | `draw_hero_token` | 516 | AI-assisted | 2 | no |
-| `ui.py` | `draw_cursor` | 529 | AI-assisted | 0 | no |
-| `ui.py` | `paint_world` | 537 | AI-assisted | 3 | yes |
-| `ui.py` | `show_map` | 559 | AI-assisted | 1 | yes |
-| `ui.py` | `draw_zoom_hint` | 589 | AI-assisted | 0 | no |
-| `ui.py` | `draw_boss_bar` | 598 | AI-assisted | 1 | yes |
-| `ui.py` | `tooltip_lines` | 615 | AI-assisted | 2 | yes |
-| `ui.py` | `draw_tooltip` | 634 | AI-assisted | 1 | yes |
-| `ui.py` | `draw_doom` | 655 | AI-assisted | 1 | yes |
-| `ui.py` | `draw_elements` | 669 | AI-assisted | 1 | no |
-| `ui.py` | `draw_tracker_entry` | 688 | AI-assisted | 3 | no |
-| `ui.py` | `draw_top_bar` | 714 | AI-assisted | 1 | no |
-| `ui.py` | `hero_status` | 732 | AI-assisted | 2 | yes |
-| `ui.py` | `draw_portrait` | 744 | AI-assisted | 2 | no |
-| `ui.py` | `draw_hero_block` | 751 | AI-assisted | 2 | no |
-| `ui.py` | `draw_party_panel` | 771 | AI-assisted | 1 | no |
-| `ui.py` | `log_color` | 778 | AI-assisted | 1 | yes |
-| `ui.py` | `draw_log` | 786 | AI-assisted | 1 | yes |
-| `ui.py` | `draw_message` | 807 | AI-assisted | 0 | no |
-| `ui.py` | `dragging_card` | 818 | AI-assisted | 1 | yes |
-| `ui.py` | `draw_pile` | 824 | AI-assisted | 1 | no |
-| `ui.py` | `draw_hand` | 837 | AI-assisted | 1 | yes |
-| `ui.py` | `phase_hint` | 860 | AI-assisted | 0 | yes |
-| `ui.py` | `draw_bottom` | 866 | AI-assisted | 1 | yes |
-| `ui.py` | `effect_start` | 881 | AI-assisted | 0 | yes |
-| `ui.py` | `add_floater` | 886 | AI-assisted | 3 | yes |
-| `ui.py` | `add_strike` | 893 | AI-assisted | 1 | yes |
-| `ui.py` | `consume_fx` | 907 | AI-assisted | 1 | yes |
-| `ui.py` | `fade_list` | 929 | AI-assisted | 1 | yes |
-| `ui.py` | `draw_mod_card` | 939 | AI-assisted | 0 | no |
-| `ui.py` | `draw_banner` | 951 | AI-assisted | 0 | no |
-| `ui.py` | `draw_effects` | 970 | AI-assisted | 0 | no |
-| `ui.py` | `lerp` | 991 | AI-assisted | 3 | yes |
-| `ui.py` | `draw_slash` | 996 | AI-assisted | 2 | no |
-| `ui.py` | `draw_strike` | 1006 | AI-assisted | 2 | no |
-| `ui.py` | `draw_strikes` | 1034 | AI-assisted | 0 | yes |
-| `ui.py` | `caption` | 1045 | AI-assisted | 3 | no |
-| `ui.py` | `draw_caption` | 1057 | AI-assisted | 0 | yes |
-| `ui.py` | `model_paths` | 1076 | AI-assisted | 1 | yes |
-| `ui.py` | `play_moves` | 1093 | AI-assisted | 1 | yes |
-| `ui.py` | `place_model` | 1115 | AI-assisted | 4 | no |
-| `ui.py` | `fast_forward` | 1124 | AI-assisted | 0 | yes |
-| `ui.py` | `wait_effects` | 1131 | AI-assisted | 1 | no |
-| `ui.py` | `draw_path` | 1140 | AI-assisted | 3 | yes |
-| `ui.py` | `preview_words` | 1150 | AI-assisted | 4 | yes |
-| `ui.py` | `draw_preview` | 1166 | AI-assisted | 3 | yes |
-| `ui.py` | `draw_drag` | 1183 | AI-assisted | 1 | yes |
-| `ui.py` | `exit_open` | 1204 | AI-assisted | 1 | yes |
-| `ui.py` | `heal_tip` | 1215 | AI-assisted | 2 | yes |
-| `ui.py` | `reach_tip` | 1227 | AI-assisted | 2 | yes |
-| `ui.py` | `loot_tip` | 1239 | AI-assisted | 2 | yes |
-| `ui.py` | `situation_tip` | 1247 | AI-assisted | 1 | yes |
-| `ui.py` | `draw_tip` | 1267 | AI-assisted | 1 | yes |
-| `ui.py` | `hint_for` | 1280 | AI-assisted | 2 | yes |
-| `ui.py` | `draw_hint` | 1301 | AI-assisted | 1 | yes |
-| `ui.py` | `learn_hint` | 1328 | AI-assisted | 1 | yes |
-| `ui.py` | `draw_game` | 1336 | AI-assisted | 1 | no |
-| `ui.py` | `common_event` | 1355 | AI-assisted | 2 | no |
-| `ui.py` | `present` | 1370 | AI-assisted | 1 | yes |
-| `ui.py` | `frame` | 1387 | AI-assisted | 1 | yes |
-| `ui.py` | `pause` | 1393 | AI-assisted | 2 | no |
-| `ui.py` | `move_cursor` | 1404 | AI-assisted | 2 | yes |
-| `ui.py` | `clear_input` | 1416 | AI-assisted | 0 | no |
-| `ui.py` | `dim_screen` | 1425 | AI-assisted | 0 | no |
-| `ui.py` | `check_number` | 1432 | AI-assisted | 3 | yes |
-| `ui.py` | `check_name` | 1445 | AI-assisted | 1 | yes |
-| `ui.py` | `draw_text_box` | 1455 | AI-assisted | 3 | no |
-| `ui.py` | `ask_text` | 1472 | AI-assisted | 5 | yes |
-| `ui.py` | `type_loop` | 1482 | AI-assisted | 5 | yes |
-| `ui.py` | `ask_yes_no` | 1510 | AI-assisted | 2 | yes |
-| `ui.py` | `ask_direction` | 1533 | AI-assisted | 1 | yes |
-| `ui.py` | `confirm_quit` | 1547 | AI-assisted | 1 | yes |
-| `ui.py` | `turn_buttons` | 1552 | AI-assisted | 0 | yes |
-| `ui.py` | `show_moves` | 1558 | AI-assisted | 2 | yes |
-| `ui.py` | `show_targets` | 1567 | AI-assisted | 2 | yes |
-| `ui.py` | `refresh_glow` | 1575 | AI-assisted | 2 | yes |
-| `ui.py` | `hand_card_at` | 1583 | AI-assisted | 2 | yes |
-| `ui.py` | `pick_card` | 1592 | AI-assisted | 2 | yes |
-| `ui.py` | `card_request` | 1606 | AI-assisted | 3 | yes |
-| `ui.py` | `move_request` | 1616 | AI-assisted | 3 | yes |
-| `ui.py` | `tile_request` | 1624 | AI-assisted | 3 | yes |
-| `ui.py` | `typed_move` | 1638 | AI-assisted | 2 | yes |
-| `ui.py` | `turn_button` | 1654 | AI-assisted | 3 | yes |
-| `ui.py` | `turn_mouse_down` | 1667 | AI-assisted | 3 | yes |
-| `ui.py` | `turn_mouse_up` | 1685 | AI-assisted | 3 | yes |
-| `ui.py` | `turn_key` | 1701 | AI-assisted | 3 | yes |
-| `ui.py` | `turn_intro` | 1721 | AI-assisted | 1 | yes |
-| `ui.py` | `get_hero_action` | 1731 | AI-assisted | 2 | yes |
-| `ui.py` | `draw_title` | 1762 | AI-assisted | 2 | no |
-| `ui.py` | `title_screen` | 1781 | AI-assisted | 1 | yes |
-| `ui.py` | `save_rect` | 1800 | AI-assisted | 1 | yes |
-| `ui.py` | `draw_load_screen` | 1805 | AI-assisted | 2 | no |
-| `ui.py` | `hover_border` | 1826 | AI-assisted | 1 | yes |
-| `ui.py` | `load_screen` | 1833 | AI-assisted | 0 | yes |
-| `ui.py` | `recruit_rect` | 1853 | AI-assisted | 1 | yes |
-| `ui.py` | `draw_recruit` | 1858 | AI-assisted | 4 | no |
-| `ui.py` | `draw_party_screen` | 1882 | AI-assisted | 5 | no |
-| `ui.py` | `toggle_recruit` | 1906 | AI-assisted | 2 | yes |
-| `ui.py` | `party_event` | 1917 | AI-assisted | 3 | yes |
-| `ui.py` | `party_screen` | 1934 | AI-assisted | 1 | yes |
-| `ui.py` | `title_flow` | 1959 | AI-assisted | 2 | yes |
-| `ui.py` | `draw_legend` | 2057 | AI-assisted | 1 | no |
-| `ui.py` | `quick_panel` | 2067 | AI-assisted | 3 | yes |
-| `ui.py` | `quick_pictures` | 2079 | AI-assisted | 1 | no |
-| `ui.py` | `draw_quickstart` | 2095 | AI-assisted | 1 | no |
-| `ui.py` | `show_quickstart` | 2121 | AI-assisted | 1 | no |
-| `ui.py` | `draw_rules_page` | 2136 | AI-assisted | 1 | no |
-| `ui.py` | `show_rules` | 2162 | AI-assisted | 0 | yes |
-| `ui.py` | `memory_line` | 2183 | AI-assisted | 1 | yes |
-| `ui.py` | `draw_status_box` | 2191 | AI-assisted | 1 | no |
-| `ui.py` | `show_status` | 2206 | AI-assisted | 1 | yes |
-| `ui.py` | `draw_end` | 2219 | AI-assisted | 2 | no |
-| `ui.py` | `end_screen` | 2240 | AI-assisted | 2 | yes |
+| `frodo_game.py` | `install_room` | 31 | AI-assisted | 2 | yes |
+| `frodo_game.py` | `catch_breath` | 50 | AI-assisted | 1 | yes |
+| `frodo_game.py` | `enter_room` | 61 | AI-assisted | 2 | yes |
+| `frodo_game.py` | `start_dungeon` | 78 | AI-assisted | 1 | yes |
+| `frodo_game.py` | `spring_trap` | 89 | AI-assisted | 2 | yes |
+| `frodo_game.py` | `open_chest` | 102 | AI-assisted | 3 | yes |
+| `frodo_game.py` | `step_on_tile` | 117 | AI-assisted | 2 | yes |
+| `frodo_game.py` | `hero_move` | 138 | AI-assisted | 3 | yes |
+| `frodo_game.py` | `record_hit` | 155 | AI-assisted | 3 | yes |
+| `frodo_game.py` | `hero_attack` | 167 | AI-assisted | 5 | yes |
+| `frodo_game.py` | `hero_heal` | 190 | AI-assisted | 4 | yes |
+| `frodo_game.py` | `strike_style` | 202 | AI-assisted | 2 | yes |
+| `frodo_game.py` | `play_card` | 213 | AI-assisted | 4 | yes |
+| `frodo_game.py` | `do_request` | 240 | AI-assisted | 3 | yes |
+| `frodo_game.py` | `hero_turn` | 257 | AI-assisted | 2 | yes |
+| `frodo_game.py` | `use_menu` | 271 | AI-assisted | 2 | yes |
+| `frodo_game.py` | `damage_words` | 286 | AI-assisted | 2 | yes |
+| `frodo_game.py` | `health_now` | 298 | AI-assisted | 1 | yes |
+| `frodo_game.py` | `spears_phase` | 306 | AI-assisted | 2 | yes |
+| `frodo_game.py` | `take_turn` | 338 | AI-assisted | 2 | yes |
+| `frodo_game.py` | `start_round` | 358 | AI-assisted | 1 | yes |
+| `frodo_game.py` | `save_game` | 367 | AI-assisted | 1 | yes |
+| `frodo_game.py` | `set_initiative` | 380 | AI-assisted | 2 | yes |
+| `frodo_game.py` | `prepare_heroes` | 386 | AI-assisted | 1 | yes |
+| `frodo_game.py` | `play_round` | 398 | AI-assisted | 1 | yes |
+| `frodo_game.py` | `cleanup_cards` | 416 | AI-assisted | 1 | yes |
+| `frodo_game.py` | `mark_exhausted` | 426 | AI-assisted | 1 | yes |
+| `frodo_game.py` | `count_clumping` | 439 | AI-assisted | 1 | yes |
+| `frodo_game.py` | `end_round` | 453 | AI-assisted | 1 | yes |
+| `frodo_game.py` | `finish_game` | 471 | AI-assisted | 2 | yes |
+| `frodo_game.py` | `open_game` | 480 | AI-assisted | 2 | yes |
+| `frodo_game.py` | `choose_game` | 494 | AI-assisted | 1 | yes |
+| `frodo_game.py` | `main` | 508 | AI-assisted | 0 | no |
+| `game_data.py` | `clean_value` | 8 | AI-assisted | 1 | yes |
+| `game_data.py` | `parse_fields` | 16 | AI-assisted | 1 | yes |
+| `game_data.py` | `parse_action` | 26 | AI-assisted | 1 | yes |
+| `game_data.py` | `make_card` | 38 | AI-assisted | 2 | yes |
+| `game_data.py` | `store_record` | 46 | AI-assisted | 4 | yes |
+| `game_data.py` | `read_line` | 71 | AI-assisted | 2 | yes |
+| `game_data.py` | `load_dungeon` | 88 | AI-assisted | 1 | yes |
+| `game_data.py` | `make_hero` | 102 | AI-assisted | 2 | yes |
+| `game_data.py` | `new_memory` | 120 | AI-assisted | 0 | yes |
+| `game_data.py` | `new_stats` | 126 | AI-assisted | 0 | yes |
+| `game_data.py` | `find_level` | 132 | AI-assisted | 2 | yes |
+| `game_data.py` | `apply_level` | 140 | AI-assisted | 2 | yes |
+| `game_data.py` | `new_game` | 151 | AI-assisted | 3 | yes |
+| `game_data.py` | `find_hero` | 171 | AI-assisted | 2 | yes |
+| `game_data.py` | `place_party` | 179 | AI-assisted | 2 | yes |
+| `combat.py` | `build_modifier_deck` | 5 | AI-assisted | 0 | yes |
+| `combat.py` | `draw_modifier` | 16 | AI-assisted | 2 | yes |
+| `combat.py` | `calc_damage` | 30 | AI-assisted | 3 | yes |
+| `combat.py` | `apply_damage` | 47 | AI-assisted | 2 | yes |
+| `combat.py` | `roll_attack` | 55 | AI-assisted | 4 | yes |
+| `combat.py` | `sort_turn_order` | 66 | AI-assisted | 2 | yes |
+| `cards.py` | `find_card` | 7 | AI-assisted | 2 | yes |
+| `cards.py` | `choose_card` | 15 | AI-assisted | 2 | yes |
+| `cards.py` | `finish_card` | 23 | AI-assisted | 2 | yes |
+| `cards.py` | `draw_card` | 29 | AI-assisted | 1 | yes |
+| `cards.py` | `refill_hand` | 43 | AI-assisted | 1 | yes |
+| `cards.py` | `is_exhausted` | 51 | AI-assisted | 1 | yes |
+| `cards.py` | `heal_hero` | 56 | AI-assisted | 2 | yes |
+| `cards.py` | `use_element` | 65 | AI-assisted | 2 | yes |
+| `cards.py` | `wane_elements` | 76 | AI-assisted | 1 | yes |
+| `cards.py` | `search_poi` | 87 | AI-assisted | 3 | yes |
+| `cards.py` | `cheese_feast` | 100 | AI-assisted | 2 | yes |
+| `cards.py` | `apply_item` | 112 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `spears_counter` | 31 | AI-assisted | 1 | yes |
+| `spears_ai.py` | `fade_memory` | 44 | AI-assisted | 1 | yes |
+| `spears_ai.py` | `unit_plan` | 51 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `pick_style` | 72 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `build_dungeon` | 86 | AI-assisted | 1 | yes |
+| `spears_ai.py` | `boss_chamber` | 108 | AI-assisted | 1 | yes |
+| `spears_ai.py` | `chamber_at` | 116 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `door_at` | 124 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `place_letters` | 132 | AI-assisted | 4 | yes |
+| `spears_ai.py` | `furnish` | 142 | AI-assisted | 4 | yes |
+| `spears_ai.py` | `deploy_room` | 168 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `add_unit` | 183 | AI-assisted | 5 | yes |
+| `spears_ai.py` | `deploy_boss` | 195 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `place_exits` | 207 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `nearest_tile` | 226 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `connect_chamber` | 235 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `make_unit` | 246 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `place_models` | 258 | AI-assisted | 4 | yes |
+| `spears_ai.py` | `generate_room` | 270 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `find_unit` | 308 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `unit_visible` | 316 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `pick_initiative` | 324 | AI-assisted | 1 | yes |
+| `spears_ai.py` | `pick_target` | 336 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `coherency_ok` | 352 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `goal_tile` | 364 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `is_flank` | 373 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `ranged_score` | 380 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `tile_score` | 390 | AI-assisted | 4 | yes |
+| `spears_ai.py` | `best_tile` | 403 | AI-assisted | 5 | yes |
+| `spears_ai.py` | `move_unit` | 424 | AI-assisted | 4 | yes |
+| `spears_ai.py` | `choose_victim` | 438 | AI-assisted | 4 | yes |
+| `spears_ai.py` | `cover_bonus` | 451 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `hero_falls` | 459 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `splash` | 467 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `feel_hit` | 484 | AI-assisted | 4 | yes |
+| `spears_ai.py` | `unit_attack` | 493 | AI-assisted | 4 | yes |
+| `spears_ai.py` | `unit_shoot` | 518 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `touching_hero` | 528 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `nearest_gap` | 537 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `unit_charge` | 547 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `unit_fight` | 564 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `morale_test` | 576 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `check_room_clear` | 581 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `destroy_unit` | 602 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `remove_model` | 616 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `safest_tile` | 627 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `fall_back` | 644 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `break_unit` | 656 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `unit_morale` | 672 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `advance_doom` | 690 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `prepare_ahead` | 698 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `reinforce` | 706 | AI-assisted | 1 | yes |
+| `spears_ai.py` | `apply_preparations` | 722 | AI-assisted | 3 | yes |
+| `spears_ai.py` | `warlord` | 744 | AI-assisted | 1 | yes |
+| `spears_ai.py` | `summon_guards` | 752 | AI-assisted | 2 | yes |
+| `spears_ai.py` | `enrage` | 766 | AI-assisted | 1 | yes |
+| `spears_ai.py` | `boss_check` | 773 | AI-assisted | 2 | yes |
+| `movement.py` | `tile_distance` | 11 | AI-assisted | 2 | yes |
+| `movement.py` | `in_bounds` | 16 | AI-assisted | 3 | yes |
+| `movement.py` | `is_floor` | 21 | AI-assisted | 4 | yes |
+| `movement.py` | `blank_grid` | 34 | AI-assisted | 2 | yes |
+| `movement.py` | `can_enter` | 45 | AI-assisted | 5 | yes |
+| `movement.py` | `step_map` | 54 | AI-assisted | 4 | yes |
+| `movement.py` | `reachable_tiles` | 69 | AI-assisted | 6 | yes |
+| `movement.py` | `lower_neighbor` | 81 | AI-assisted | 2 | yes |
+| `movement.py` | `find_path` | 92 | AI-assisted | 5 | yes |
+| `movement.py` | `hero_tiles` | 105 | AI-assisted | 1 | yes |
+| `movement.py` | `model_tiles` | 114 | AI-assisted | 1 | yes |
+| `movement.py` | `hero_at` | 123 | AI-assisted | 2 | yes |
+| `movement.py` | `model_at` | 131 | AI-assisted | 2 | yes |
+| `movement.py` | `learn_outline` | 140 | AI-assisted | 1 | yes |
+| `movement.py` | `shown_letter` | 159 | AI-assisted | 1 | yes |
+| `movement.py` | `lit_floor` | 168 | AI-assisted | 1 | yes |
+| `movement.py` | `wall_in_view` | 180 | AI-assisted | 4 | yes |
+| `movement.py` | `refresh_vision` | 189 | AI-assisted | 1 | yes |
+| `movement.py` | `enemy_targets` | 205 | AI-assisted | 3 | yes |
+| `movement.py` | `friend_targets` | 214 | AI-assisted | 3 | yes |
+| `movement.py` | `move_targets` | 223 | AI-assisted | 2 | yes |
+| `movement.py` | `action_targets` | 235 | AI-assisted | 3 | yes |
+| `movement.py` | `is_valid_drop` | 245 | AI-assisted | 2 | yes |
+| `movement.py` | `drop_message` | 250 | AI-assisted | 4 | yes |
+| `logbook.py` | `say` | 4 | AI-assisted | 2 | yes |
+| `logbook.py` | `note` | 11 | AI-assisted | 2 | yes |
+| `logbook.py` | `tell` | 17 | AI-assisted | 3 | yes |
+| `logbook.py` | `add_float` | 24 | AI-assisted | 4 | yes |
+| `logbook.py` | `add_banner` | 30 | AI-assisted | 2 | yes |
+| `logbook.py` | `start_log` | 36 | AI-assisted | 1 | yes |
+| `logbook.py` | `write_log` | 48 | AI-assisted | 2 | yes |
+| `logbook.py` | `write_summary` | 63 | AI-assisted | 1 | yes |
+| `logbook.py` | `summary_lines` | 83 | AI-assisted | 1 | yes |
+| `logbook.py` | `check_game_over` | 98 | AI-assisted | 4 | yes |
+| `logbook.py` | `status_lines` | 112 | AI-assisted | 1 | yes |
+| `logbook.py` | `hero_line` | 124 | AI-assisted | 1 | yes |
+| `ui.py` | `init` | 68 | AI-assisted | 0 | yes |
+| `ui.py` | `set_message` | 81 | AI-assisted | 1 | yes |
+| `ui.py` | `tile_rect` | 87 | AI-assisted | 1 | yes |
+| `ui.py` | `tile_center` | 100 | AI-assisted | 1 | yes |
+| `ui.py` | `tile_at` | 106 | AI-assisted | 1 | yes |
+| `ui.py` | `hero_block_rect` | 118 | AI-assisted | 1 | yes |
+| `ui.py` | `card_rect` | 123 | AI-assisted | 1 | yes |
+| `ui.py` | `hero_at_pixel` | 128 | AI-assisted | 2 | yes |
+| `ui.py` | `moved_far` | 139 | AI-assisted | 2 | yes |
+| `ui.py` | `selected_hero` | 144 | AI-assisted | 1 | yes |
+| `ui.py` | `find_by_name` | 151 | AI-assisted | 2 | yes |
+| `ui.py` | `make_button` | 161 | AI-assisted | 3 | yes |
+| `ui.py` | `set_buttons` | 166 | AI-assisted | 1 | yes |
+| `ui.py` | `button_at` | 178 | AI-assisted | 2 | yes |
+| `ui.py` | `tile_letter` | 188 | AI-assisted | 3 | yes |
+| `ui.py` | `min_zoom` | 197 | AI-assisted | 0 | yes |
+| `ui.py` | `clamp_camera` | 204 | AI-assisted | 0 | yes |
+| `ui.py` | `view_rect` | 217 | AI-assisted | 0 | yes |
+| `ui.py` | `visible_box` | 224 | AI-assisted | 0 | yes |
+| `ui.py` | `tile_middle` | 234 | AI-assisted | 1 | yes |
+| `ui.py` | `follow` | 239 | AI-assisted | 1 | yes |
+| `ui.py` | `frame_tiles` | 250 | AI-assisted | 2 | yes |
+| `ui.py` | `show_chamber` | 270 | AI-assisted | 2 | yes |
+| `ui.py` | `fit_view` | 276 | AI-assisted | 1 | yes |
+| `ui.py` | `zoom_by` | 286 | AI-assisted | 2 | yes |
+| `ui.py` | `glide_camera` | 299 | AI-assisted | 0 | no |
+| `ui.py` | `camera_event` | 322 | AI-assisted | 2 | yes |
+| `ui.py` | `camera_key` | 344 | AI-assisted | 2 | yes |
+| `ui.py` | `seen_letters` | 358 | AI-assisted | 1 | yes |
+| `ui.py` | `room_art` | 369 | AI-assisted | 2 | yes |
+| `ui.py` | `draw_features` | 384 | AI-assisted | 2 | yes |
+| `ui.py` | `draw_ripples` | 404 | AI-assisted | 2 | yes |
+| `ui.py` | `draw_highlights` | 417 | AI-assisted | 0 | yes |
+| `ui.py` | `light_sources` | 431 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_flames` | 444 | AI-assisted | 3 | yes |
+| `ui.py` | `draw_lighting` | 461 | AI-assisted | 2 | yes |
+| `ui.py` | `visible_models` | 472 | AI-assisted | 2 | yes |
+| `ui.py` | `draw_coherency` | 481 | AI-assisted | 1 | no |
+| `ui.py` | `draw_model_token` | 492 | AI-assisted | 2 | no |
+| `ui.py` | `draw_figures` | 503 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_hero_token` | 522 | AI-assisted | 2 | no |
+| `ui.py` | `draw_cursor` | 537 | AI-assisted | 0 | no |
+| `ui.py` | `paint_world` | 545 | AI-assisted | 3 | yes |
+| `ui.py` | `show_map` | 567 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_zoom_hint` | 597 | AI-assisted | 0 | no |
+| `ui.py` | `draw_boss_bar` | 606 | AI-assisted | 1 | yes |
+| `ui.py` | `tooltip_lines` | 623 | AI-assisted | 2 | yes |
+| `ui.py` | `card_tip` | 643 | AI-assisted | 1 | yes |
+| `ui.py` | `tracker_tip` | 667 | AI-assisted | 2 | yes |
+| `ui.py` | `element_tip` | 679 | AI-assisted | 2 | yes |
+| `ui.py` | `hero_tip` | 689 | AI-assisted | 1 | yes |
+| `ui.py` | `panel_tip` | 698 | AI-assisted | 2 | yes |
+| `ui.py` | `draw_tooltip` | 723 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_doom` | 751 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_elements` | 765 | AI-assisted | 1 | no |
+| `ui.py` | `draw_tracker_entry` | 784 | AI-assisted | 3 | no |
+| `ui.py` | `draw_top_bar` | 810 | AI-assisted | 1 | no |
+| `ui.py` | `hero_status` | 828 | AI-assisted | 2 | yes |
+| `ui.py` | `draw_portrait` | 840 | AI-assisted | 2 | no |
+| `ui.py` | `hurt_amount` | 847 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_hero_block` | 857 | AI-assisted | 2 | no |
+| `ui.py` | `draw_party_panel` | 883 | AI-assisted | 1 | no |
+| `ui.py` | `log_color` | 890 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_log` | 898 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_message` | 919 | AI-assisted | 0 | no |
+| `ui.py` | `dragging_card` | 930 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_pile` | 936 | AI-assisted | 1 | no |
+| `ui.py` | `draw_hand` | 949 | AI-assisted | 1 | yes |
+| `ui.py` | `phase_hint` | 972 | AI-assisted | 0 | yes |
+| `ui.py` | `draw_bottom` | 978 | AI-assisted | 1 | yes |
+| `ui.py` | `effect_start` | 993 | AI-assisted | 0 | yes |
+| `ui.py` | `add_floater` | 998 | AI-assisted | 3 | yes |
+| `ui.py` | `add_strike` | 1005 | AI-assisted | 1 | yes |
+| `ui.py` | `consume_fx` | 1022 | AI-assisted | 1 | yes |
+| `ui.py` | `add_feel` | 1046 | AI-assisted | 1 | yes |
+| `ui.py` | `reset_screen` | 1060 | AI-assisted | 0 | no |
+| `ui.py` | `fade_list` | 1069 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_mod_card` | 1079 | AI-assisted | 0 | no |
+| `ui.py` | `draw_banner` | 1091 | AI-assisted | 0 | no |
+| `ui.py` | `draw_effects` | 1110 | AI-assisted | 0 | no |
+| `ui.py` | `lerp` | 1135 | AI-assisted | 3 | yes |
+| `ui.py` | `draw_slash` | 1140 | AI-assisted | 2 | no |
+| `ui.py` | `draw_strike` | 1150 | AI-assisted | 2 | no |
+| `ui.py` | `draw_puff` | 1191 | AI-assisted | 2 | no |
+| `ui.py` | `draw_sparkle` | 1203 | AI-assisted | 2 | no |
+| `ui.py` | `draw_feel` | 1216 | AI-assisted | 0 | yes |
+| `ui.py` | `shake_offset` | 1232 | AI-assisted | 0 | yes |
+| `ui.py` | `draw_strikes` | 1243 | AI-assisted | 0 | yes |
+| `ui.py` | `caption` | 1254 | AI-assisted | 3 | no |
+| `ui.py` | `draw_caption` | 1266 | AI-assisted | 0 | yes |
+| `ui.py` | `model_paths` | 1285 | AI-assisted | 1 | yes |
+| `ui.py` | `play_moves` | 1302 | AI-assisted | 1 | yes |
+| `ui.py` | `place_model` | 1324 | AI-assisted | 4 | no |
+| `ui.py` | `slide_hero` | 1333 | AI-assisted | 4 | no |
+| `ui.py` | `fly_card` | 1343 | AI-assisted | 4 | no |
+| `ui.py` | `draw_flying` | 1365 | AI-assisted | 0 | yes |
+| `ui.py` | `fast_forward` | 1374 | AI-assisted | 0 | yes |
+| `ui.py` | `wait_effects` | 1381 | AI-assisted | 1 | no |
+| `ui.py` | `draw_path` | 1390 | AI-assisted | 3 | yes |
+| `ui.py` | `preview_words` | 1400 | AI-assisted | 4 | yes |
+| `ui.py` | `draw_preview` | 1416 | AI-assisted | 3 | yes |
+| `ui.py` | `draw_drag` | 1433 | AI-assisted | 1 | yes |
+| `ui.py` | `exit_open` | 1454 | AI-assisted | 1 | yes |
+| `ui.py` | `heal_tip` | 1465 | AI-assisted | 2 | yes |
+| `ui.py` | `reach_tip` | 1477 | AI-assisted | 2 | yes |
+| `ui.py` | `loot_tip` | 1489 | AI-assisted | 2 | yes |
+| `ui.py` | `situation_tip` | 1497 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_tip` | 1517 | AI-assisted | 1 | yes |
+| `ui.py` | `hint_for` | 1530 | AI-assisted | 2 | yes |
+| `ui.py` | `draw_hint` | 1551 | AI-assisted | 1 | yes |
+| `ui.py` | `learn_hint` | 1578 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_game` | 1586 | AI-assisted | 1 | no |
+| `ui.py` | `common_event` | 1606 | AI-assisted | 2 | no |
+| `ui.py` | `present` | 1621 | AI-assisted | 1 | yes |
+| `ui.py` | `frame` | 1643 | AI-assisted | 1 | yes |
+| `ui.py` | `pause` | 1649 | AI-assisted | 2 | no |
+| `ui.py` | `move_cursor` | 1660 | AI-assisted | 2 | yes |
+| `ui.py` | `clear_input` | 1672 | AI-assisted | 0 | no |
+| `ui.py` | `dim_screen` | 1681 | AI-assisted | 0 | no |
+| `ui.py` | `check_number` | 1688 | AI-assisted | 3 | yes |
+| `ui.py` | `check_name` | 1701 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_text_box` | 1711 | AI-assisted | 3 | no |
+| `ui.py` | `ask_text` | 1728 | AI-assisted | 5 | yes |
+| `ui.py` | `type_loop` | 1738 | AI-assisted | 5 | yes |
+| `ui.py` | `ask_yes_no` | 1766 | AI-assisted | 2 | yes |
+| `ui.py` | `ask_direction` | 1789 | AI-assisted | 1 | yes |
+| `ui.py` | `confirm_quit` | 1803 | AI-assisted | 1 | yes |
+| `ui.py` | `turn_buttons` | 1808 | AI-assisted | 0 | yes |
+| `ui.py` | `show_moves` | 1814 | AI-assisted | 2 | yes |
+| `ui.py` | `show_targets` | 1823 | AI-assisted | 2 | yes |
+| `ui.py` | `refresh_glow` | 1831 | AI-assisted | 2 | yes |
+| `ui.py` | `hand_card_at` | 1839 | AI-assisted | 2 | yes |
+| `ui.py` | `pick_card` | 1848 | AI-assisted | 2 | yes |
+| `ui.py` | `card_request` | 1862 | AI-assisted | 3 | yes |
+| `ui.py` | `move_request` | 1872 | AI-assisted | 3 | yes |
+| `ui.py` | `tile_request` | 1880 | AI-assisted | 3 | yes |
+| `ui.py` | `typed_move` | 1894 | AI-assisted | 2 | yes |
+| `ui.py` | `turn_button` | 1910 | AI-assisted | 3 | yes |
+| `ui.py` | `turn_mouse_down` | 1923 | AI-assisted | 3 | yes |
+| `ui.py` | `turn_mouse_up` | 1941 | AI-assisted | 3 | yes |
+| `ui.py` | `turn_key` | 1957 | AI-assisted | 3 | yes |
+| `ui.py` | `turn_intro` | 1977 | AI-assisted | 1 | yes |
+| `ui.py` | `get_hero_action` | 1987 | AI-assisted | 2 | yes |
+| `ui.py` | `draw_title` | 2018 | AI-assisted | 2 | no |
+| `ui.py` | `title_screen` | 2037 | AI-assisted | 1 | yes |
+| `ui.py` | `save_rect` | 2056 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_load_screen` | 2061 | AI-assisted | 2 | no |
+| `ui.py` | `hover_border` | 2082 | AI-assisted | 1 | yes |
+| `ui.py` | `load_screen` | 2089 | AI-assisted | 0 | yes |
+| `ui.py` | `recruit_rect` | 2109 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_recruit` | 2114 | AI-assisted | 4 | no |
+| `ui.py` | `draw_party_screen` | 2138 | AI-assisted | 5 | no |
+| `ui.py` | `toggle_recruit` | 2162 | AI-assisted | 2 | yes |
+| `ui.py` | `level_rect` | 2173 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_levels` | 2178 | AI-assisted | 2 | no |
+| `ui.py` | `party_event` | 2189 | AI-assisted | 3 | yes |
+| `ui.py` | `change_level` | 2213 | AI-assisted | 3 | yes |
+| `ui.py` | `party_screen` | 2222 | AI-assisted | 1 | yes |
+| `ui.py` | `title_flow` | 2251 | AI-assisted | 2 | yes |
+| `ui.py` | `draw_legend` | 2350 | AI-assisted | 1 | no |
+| `ui.py` | `quick_panel` | 2360 | AI-assisted | 3 | yes |
+| `ui.py` | `quick_pictures` | 2372 | AI-assisted | 1 | no |
+| `ui.py` | `draw_quickstart` | 2388 | AI-assisted | 1 | no |
+| `ui.py` | `show_quickstart` | 2414 | AI-assisted | 1 | no |
+| `ui.py` | `draw_rules_page` | 2429 | AI-assisted | 1 | no |
+| `ui.py` | `show_rules` | 2455 | AI-assisted | 0 | yes |
+| `ui.py` | `memory_line` | 2476 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_status_box` | 2484 | AI-assisted | 1 | no |
+| `ui.py` | `show_status` | 2499 | AI-assisted | 1 | yes |
+| `ui.py` | `draw_end` | 2512 | AI-assisted | 2 | no |
+| `ui.py` | `end_buttons` | 2534 | AI-assisted | 0 | yes |
+| `ui.py` | `end_screen` | 2540 | AI-assisted | 2 | yes |
 | `art.py` | `pick_font` | 66 | AI-assisted | 3 | yes |
 | `art.py` | `make_fonts` | 74 | AI-assisted | 0 | yes |
 | `art.py` | `setup` | 89 | AI-assisted | 1 | yes |
@@ -418,32 +441,32 @@ The AI assistant wrote every function. The brief says every docstring must start
 | `art.py` | `action_words` | 994 | AI-assisted | 1 | yes |
 | `art.py` | `draw_card` | 1008 | AI-assisted | 4 | yes |
 | `art.py` | `draw_modifier` | 1031 | AI-assisted | 4 | no |
-| `scenery.py` | `is_wall` | 35 | (no tag) | 3 | yes |
-| `scenery.py` | `layer` | 42 | (no tag) | 2 | yes |
-| `scenery.py` | `soft_blob` | 47 | (no tag) | 7 | no |
-| `scenery.py` | `grain` | 54 | (no tag) | 0 | yes |
-| `scenery.py` | `add_grain` | 67 | (no tag) | 1 | no |
-| `scenery.py` | `slab_fits` | 77 | (no tag) | 4 | yes |
-| `scenery.py` | `pick_size` | 86 | (no tag) | 4 | yes |
-| `scenery.py` | `slab_plan` | 95 | (no tag) | 3 | yes |
-| `scenery.py` | `scratch` | 113 | (no tag) | 5 | no |
-| `scenery.py` | `paint_slab` | 123 | (no tag) | 3 | no |
-| `scenery.py` | `paint_puddle` | 144 | (no tag) | 3 | yes |
-| `scenery.py` | `paint_debris` | 159 | (no tag) | 3 | no |
+| `scenery.py` | `is_wall` | 35 | AI-assisted | 3 | yes |
+| `scenery.py` | `layer` | 42 | AI-assisted | 2 | yes |
+| `scenery.py` | `soft_blob` | 47 | AI-assisted | 7 | no |
+| `scenery.py` | `grain` | 54 | AI-assisted | 0 | yes |
+| `scenery.py` | `add_grain` | 67 | AI-assisted | 1 | no |
+| `scenery.py` | `slab_fits` | 77 | AI-assisted | 4 | yes |
+| `scenery.py` | `pick_size` | 86 | AI-assisted | 4 | yes |
+| `scenery.py` | `slab_plan` | 95 | AI-assisted | 3 | yes |
+| `scenery.py` | `scratch` | 113 | AI-assisted | 5 | no |
+| `scenery.py` | `paint_slab` | 123 | AI-assisted | 3 | no |
+| `scenery.py` | `paint_puddle` | 144 | AI-assisted | 3 | yes |
+| `scenery.py` | `paint_debris` | 159 | AI-assisted | 3 | no |
 | `scenery.py` | `random_spot` | 174 | AI-assisted | 3 | yes |
 | `scenery.py` | `paint_floor` | 179 | AI-assisted | 4 | yes |
 | `scenery.py` | `floor_base` | 200 | AI-assisted | 3 | yes |
-| `scenery.py` | `paint_grid_hints` | 210 | (no tag) | 2 | yes |
-| `scenery.py` | `gradient` | 231 | (no tag) | 4 | yes |
+| `scenery.py` | `paint_grid_hints` | 210 | AI-assisted | 2 | yes |
+| `scenery.py` | `gradient` | 231 | AI-assisted | 4 | yes |
 | `scenery.py` | `cached_gradient` | 251 | AI-assisted | 4 | yes |
-| `scenery.py` | `paint_wall_shadows` | 259 | (no tag) | 2 | no |
-| `scenery.py` | `paint_rock_top` | 283 | (no tag) | 5 | no |
-| `scenery.py` | `brick_tint` | 304 | (no tag) | 2 | yes |
-| `scenery.py` | `paint_course` | 309 | (no tag) | 5 | no |
-| `scenery.py` | `paint_damp` | 321 | (no tag) | 5 | no |
-| `scenery.py` | `paint_face` | 333 | (no tag) | 5 | yes |
-| `scenery.py` | `has_torch` | 355 | (no tag) | 2 | yes |
-| `scenery.py` | `paint_sconce` | 360 | (no tag) | 3 | no |
+| `scenery.py` | `paint_wall_shadows` | 259 | AI-assisted | 2 | no |
+| `scenery.py` | `paint_rock_top` | 283 | AI-assisted | 5 | no |
+| `scenery.py` | `brick_tint` | 304 | AI-assisted | 2 | yes |
+| `scenery.py` | `paint_course` | 309 | AI-assisted | 5 | no |
+| `scenery.py` | `paint_damp` | 321 | AI-assisted | 5 | no |
+| `scenery.py` | `paint_face` | 333 | AI-assisted | 5 | yes |
+| `scenery.py` | `has_torch` | 355 | AI-assisted | 2 | yes |
+| `scenery.py` | `paint_sconce` | 360 | AI-assisted | 3 | no |
 | `scenery.py` | `near_floor` | 367 | AI-assisted | 3 | yes |
 | `scenery.py` | `tile_dice` | 376 | AI-assisted | 3 | yes |
 | `scenery.py` | `paint_walls` | 381 | AI-assisted | 3 | yes |
@@ -451,7 +474,7 @@ The AI assistant wrote every function. The brief says every docstring must start
 | `scenery.py` | `light_color` | 415 | AI-assisted | 5 | yes |
 | `scenery.py` | `light_grid` | 427 | AI-assisted | 4 | yes |
 | `scenery.py` | `draw_flame` | 436 | AI-assisted | 4 | no |
-| `scenery.py` | `draw_ripple` | 449 | (no tag) | 3 | no |
+| `scenery.py` | `draw_ripple` | 449 | AI-assisted | 3 | no |
 | `chambers.py` | `blank_map` | 18 | AI-assisted | 2 | yes |
 | `chambers.py` | `zone_box` | 26 | AI-assisted | 2 | yes |
 | `chambers.py` | `box_center` | 35 | AI-assisted | 1 | yes |
@@ -499,37 +522,37 @@ The AI assistant wrote every function. The brief says every docstring must start
 | `savegame.py` | `read_names` | 98 | AI-assisted | 1 | yes |
 | `savegame.py` | `is_yes` | 106 | AI-assisted | 1 | yes |
 | `savegame.py` | `game_line` | 113 | AI-assisted | 1 | yes |
-| `savegame.py` | `hero_line` | 125 | AI-assisted | 1 | yes |
-| `savegame.py` | `chamber_line` | 135 | AI-assisted | 1 | yes |
-| `savegame.py` | `unit_line` | 153 | AI-assisted | 1 | yes |
-| `savegame.py` | `number_line` | 166 | AI-assisted | 2 | yes |
-| `savegame.py` | `raw_line` | 174 | AI-assisted | 3 | yes |
-| `savegame.py` | `map_lines` | 179 | AI-assisted | 2 | yes |
-| `savegame.py` | `save_lines` | 187 | AI-assisted | 1 | yes |
-| `savegame.py` | `save_game` | 210 | AI-assisted | 2 | yes |
-| `savegame.py` | `find_in_deck` | 224 | AI-assisted | 3 | yes |
-| `savegame.py` | `read_pile` | 232 | AI-assisted | 3 | yes |
-| `savegame.py` | `load_hero` | 240 | AI-assisted | 4 | yes |
-| `savegame.py` | `load_chamber` | 254 | AI-assisted | 4 | yes |
-| `savegame.py` | `load_unit` | 274 | AI-assisted | 4 | yes |
-| `savegame.py` | `load_game_line` | 289 | AI-assisted | 2 | yes |
-| `savegame.py` | `load_raw` | 303 | AI-assisted | 4 | yes |
-| `savegame.py` | `load_record` | 318 | AI-assisted | 5 | yes |
-| `savegame.py` | `read_save` | 339 | AI-assisted | 1 | yes |
-| `savegame.py` | `party_names` | 355 | AI-assisted | 1 | yes |
-| `savegame.py` | `build_game` | 364 | AI-assisted | 2 | yes |
-| `savegame.py` | `load_game` | 380 | AI-assisted | 2 | yes |
-| `savegame.py` | `list_saves` | 396 | AI-assisted | 0 | yes |
-| `savegame.py` | `save_summary` | 412 | AI-assisted | 1 | yes |
-| `test_frodo.py` | `make_test_game` | 21 | (no tag) | 0 | yes |
-| `test_frodo.py` | `test_load_dungeon` | 30 | (no tag) | 0 | yes |
-| `test_frodo.py` | `test_combat` | 51 | (no tag) | 0 | yes |
-| `test_frodo.py` | `test_cards` | 76 | (no tag) | 0 | yes |
-| `test_frodo.py` | `check_dungeon` | 110 | (no tag) | 1 | yes |
-| `test_frodo.py` | `test_spears` | 141 | (no tag) | 0 | yes |
-| `test_frodo.py` | `test_movement` | 173 | (no tag) | 0 | yes |
-| `test_frodo.py` | `test_logbook` | 201 | (no tag) | 0 | yes |
-| `test_frodo.py` | `hand_names` | 219 | (no tag) | 1 | yes |
-| `test_frodo.py` | `test_saves` | 228 | (no tag) | 0 | yes |
-| `test_frodo.py` | `test_spears_ahead` | 263 | (no tag) | 0 | yes |
-| `test_frodo.py` | `run_tests` | 292 | (no tag) | 0 | yes |
+| `savegame.py` | `hero_line` | 126 | AI-assisted | 1 | yes |
+| `savegame.py` | `chamber_line` | 136 | AI-assisted | 1 | yes |
+| `savegame.py` | `unit_line` | 154 | AI-assisted | 1 | yes |
+| `savegame.py` | `number_line` | 167 | AI-assisted | 2 | yes |
+| `savegame.py` | `raw_line` | 175 | AI-assisted | 3 | yes |
+| `savegame.py` | `map_lines` | 180 | AI-assisted | 2 | yes |
+| `savegame.py` | `save_lines` | 188 | AI-assisted | 1 | yes |
+| `savegame.py` | `save_game` | 211 | AI-assisted | 2 | yes |
+| `savegame.py` | `find_in_deck` | 225 | AI-assisted | 3 | yes |
+| `savegame.py` | `read_pile` | 233 | AI-assisted | 3 | yes |
+| `savegame.py` | `load_hero` | 241 | AI-assisted | 4 | yes |
+| `savegame.py` | `load_chamber` | 255 | AI-assisted | 4 | yes |
+| `savegame.py` | `load_unit` | 275 | AI-assisted | 4 | yes |
+| `savegame.py` | `load_game_line` | 290 | AI-assisted | 2 | yes |
+| `savegame.py` | `load_raw` | 306 | AI-assisted | 4 | yes |
+| `savegame.py` | `load_record` | 321 | AI-assisted | 5 | yes |
+| `savegame.py` | `read_save` | 342 | AI-assisted | 1 | yes |
+| `savegame.py` | `party_names` | 358 | AI-assisted | 1 | yes |
+| `savegame.py` | `build_game` | 367 | AI-assisted | 2 | yes |
+| `savegame.py` | `load_game` | 383 | AI-assisted | 2 | yes |
+| `savegame.py` | `list_saves` | 399 | AI-assisted | 0 | yes |
+| `savegame.py` | `save_summary` | 415 | AI-assisted | 1 | yes |
+| `test_frodo.py` | `make_test_game` | 21 | AI-assisted | 0 | yes |
+| `test_frodo.py` | `test_load_dungeon` | 30 | AI-assisted | 0 | yes |
+| `test_frodo.py` | `test_combat` | 51 | AI-assisted | 0 | yes |
+| `test_frodo.py` | `test_cards` | 76 | AI-assisted | 0 | yes |
+| `test_frodo.py` | `check_dungeon` | 110 | AI-assisted | 1 | yes |
+| `test_frodo.py` | `test_spears` | 141 | AI-assisted | 0 | yes |
+| `test_frodo.py` | `test_movement` | 173 | AI-assisted | 0 | yes |
+| `test_frodo.py` | `test_logbook` | 201 | AI-assisted | 0 | yes |
+| `test_frodo.py` | `hand_names` | 219 | AI-assisted | 1 | yes |
+| `test_frodo.py` | `test_saves` | 228 | AI-assisted | 0 | yes |
+| `test_frodo.py` | `test_spears_ahead` | 263 | AI-assisted | 0 | yes |
+| `test_frodo.py` | `run_tests` | 292 | AI-assisted | 0 | yes |

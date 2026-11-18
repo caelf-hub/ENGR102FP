@@ -10,6 +10,7 @@ The file is in this order:
   3. the camera and the map                     7. the hero's turn (walk, card, orders)   
   4. the panels (top bar, party, log, cards)   8. full screens: title, party, rules, end
 """
+import math
 import random
 
 import pygame
@@ -39,6 +40,10 @@ FEATURE_NOTES = {"C": "Chest: move a hero here for loot.", "P": "Shrine: move a 
                  "E": "Unsealed door: walk a hero onto it to open the chamber behind.",
                  "d": "Open doorway.", "Y": "The Warlord's iron throne.",
                  "B": "Brazier: its fire lights the arena."}
+ROLE_NOTES = {"melee": "Melee: walks up and charges to hit heroes next to it.",
+              "ranged": "Ranged: keeps its distance and shoots.",
+              "heavy": "Heavy: armoured; guards the door until heroes come close.",
+              "fast": "Fast: moves far and charges from a distance."}
 MIN_ZOOM_LIMIT = 0.25
 MAX_ZOOM = 1.6
 PAN_KEYS = {pygame.K_w: [0, -1], pygame.K_a: [-1, 0], pygame.K_s: [0, 1], pygame.K_d: [1, 0]}
@@ -50,6 +55,7 @@ UI = {"screen": None, "clock": None, "closed": False,
       "cursor": [1, 1], "cursor_on": False, "log_scroll": 0,
       "hints": {"walk": False, "card": False, "end": False},
       "strikes": [], "busy_until": 0, "caption": None,
+      "puffs": [], "sparkles": [], "shakes": [], "hurt": {}, "flying": None,
       "floaters": [], "flashes": [], "mod": None, "banner": None,
       "room": None, "room_key": "", "ripples": [],
       "cam": [384.0, 240.0], "zoom": 1.0, "cam_goal": None, "zoom_goal": None, "pan": None,
@@ -518,6 +524,8 @@ def draw_hero_token(game, hero):
     if hero["exhausted"]:
         return
     center = tile_center(hero["pos"])
+    if "draw" in hero:
+        center = [hero["draw"][0] - UI["view"].x, hero["draw"][1] - UI["view"].y]
     if hero["name"] == game["turn_name"] or hero is selected_hero(game):
         pygame.draw.circle(UI["screen"], art.GOLD, center, int(22 + 2 * art.pulse()), 2)
     art.draw_hero(hero["kind"], center[0], center[1] - 5, 15)
@@ -619,31 +627,119 @@ def tooltip_lines(game, tile):
     spot = tile_letter(game, tile[0], tile[1])
     if hero is not None:
         return [hero["name"] + " - " + hero["title"], "HP " + str(hero["hp"]) + "/" + str(hero["max_hp"])
-                + "   Shield " + str(hero["shield"] + hero["armor"])]
+                + "   Shield " + str(hero["shield"] + hero["armor"]) + "   Move " + str(hero["move"])]
     elif found is not None and game["seen"][tile[1]][tile[0]]:
         unit = found[0]
         return [unit["name"] + " (" + unit["role"] + ")",
                 "Wounds " + str(found[1]["hp"]) + "/" + str(unit["wounds"]) + "   Attack " + str(unit["attack"])
                 + "   Toughness " + str(unit["toughness"]),
-                "Move " + str(unit["move"]) + "   Range " + str(unit["range"]) + "   Leadership " + str(unit["leadership"])]
+                "Move " + str(unit["move"]) + "   Range " + str(unit["range"]) + "   Leadership " + str(unit["leadership"]),
+                ROLE_NOTES[unit["role"]]]
     elif spot in FEATURE_NOTES:
         return [FEATURE_NOTES[spot]]
     return []
 
 
+def card_tip(card):
+    """AI-assisted: receives a card; returns the lines that explain exactly what it does."""
+    action = card["action"]
+    amount = str(action["amount"])
+    lines = [card["name"]]
+    if action["kind"] == "attack":
+        reach = "an enemy next to the hero"
+        if action["range"] > 1:
+            reach = "an enemy up to " + str(action["range"]) + " tiles away"
+        lines.append("Deals " + amount + " damage to " + reach + ".")
+        lines.append("A modifier card (+1, -1, x2, miss...) changes the damage.")
+    elif action["kind"] == "heal":
+        lines.append("Heals a hero up to " + str(action["range"]) + " tiles away by " + amount + " HP.")
+    elif action["kind"] == "shield":
+        lines.append("Blocks " + amount + " damage from every hit until the end of the round.")
+    else:
+        lines.append("Gives " + amount + " extra tiles of walking this turn.")
+    if card["element"] in art.ELEMENT_COLORS:
+        lines.append(card["element"].capitalize() + ": lights the " + card["element"] + " orb; the next "
+                     + card["element"] + " card gets +1.")
+    lines.append("Drag it onto a glowing target, or click it then the target.")
+    return lines
+
+
+def tracker_tip(game, entry):
+    """AI-assisted: receives the game and one turn-order entry; returns the lines that explain it."""
+    if entry[2] == "hero":
+        hero = find_by_name(game["heroes"], entry[3])
+        return [hero["name"] + " acts at " + str(entry[0]),
+                "HP " + str(hero["hp"]) + "/" + str(hero["max_hp"]) + ". Lower numbers act first."]
+    unit = find_by_name(game["units"], entry[3])
+    if unit is None or len(visible_models(game, unit)) == 0:
+        return ["Something in the dark acts at " + str(entry[0]) + "."]
+    return [unit["name"] + " acts at " + str(entry[0]) + ".", "Lower numbers act first."]
+
+
+def element_tip(game, index):
+    """AI-assisted: receives the game and an element number (0 fire, 1 frost, 2 light); returns the lines that explain that orb."""
+    name = ["fire", "frost", "light"][index]
+    state = "dark"
+    if game["elements"][name] > 0:
+        state = "glowing for " + str(game["elements"][name]) + " more round(s)"
+    return [name.capitalize() + " orb: " + state + ".",
+            "Playing a " + name + " card lights it. While it glows, the next " + name + " card gets +1."]
+
+
+def hero_tip(hero):
+    """AI-assisted: receives a hero; returns the lines that explain their panel."""
+    items = "none"
+    if len(hero["items"]) > 0:
+        items = ", ".join(hero["items"])
+    return [hero["name"] + " - " + hero["title"], "Move " + str(hero["move"]) + ": tiles they can walk each turn.",
+            "Speed " + str(hero["speed"]) + ": lower acts earlier in the round.", "Items: " + items]
+
+
+def panel_tip(game, pos):
+    """AI-assisted: receives the game and the mouse position; returns the tooltip lines for whatever panel, card, orb or bar is under it ([] if none)."""
+    hero = selected_hero(game)
+    if hero is not None:
+        for index in range(len(hero["hand"])):
+            if card_rect(index).collidepoint(pos):
+                return card_tip(hero["hand"][index])
+        if pygame.Rect(796, 590, 92, 120).collidepoint(pos):
+            return ["Deck " + str(len(hero["deck"])) + " cards, discard " + str(len(hero["discard"])) + ".",
+                    "After you play a card a new one is drawn.", "An empty deck is reshuffled from the discard pile."]
+    for index in range(min(len(game["order"]), 10)):
+        if abs(pos[0] - (214 + index * 41)) <= 17 and pos[1] < 56:
+            return tracker_tip(game, game["order"][index])
+    for index in range(3):
+        if abs(pos[0] - (640 + index * 32)) <= 12 and pos[1] < 46:
+            return element_tip(game, index)
+    if pygame.Rect(736, 5, 538, 46).collidepoint(pos):
+        return ["Doom " + str(game["doom"]) + " of " + str(game["doom_max"]) + ": +1 every round, +1 for each trap.",
+                "If it fills up, Spears wins. Head for the red-skull door!"]
+    for index in range(len(game["heroes"])):
+        if hero_block_rect(index).collidepoint(pos):
+            return hero_tip(game["heroes"][index])
+    return []
+
+
 def draw_tooltip(game):
-    """AI-assisted: receives the game; shows a small note about the hero, enemy or feature under the mouse; returns how many lines were shown."""
+    """AI-assisted: receives the game; shows a small note about the hero, enemy, feature, card or panel under the mouse; returns how many lines were shown."""
     mouse = pygame.mouse.get_pos()
     tile = tile_at(mouse)
-    if tile is None or UI["drag"] is not None:
+    if UI["drag"] is not None:
         return 0
-    lines = tooltip_lines(game, tile)
+    lines = []
+    if tile is not None:
+        lines = tooltip_lines(game, tile)
+    else:
+        lines = panel_tip(game, mouse)
     if len(lines) == 0:
         return 0
     width = 20
     for line in lines:
         width = max(width, art.ART["fonts"]["small"].size(line)[0] + 20)
-    box = pygame.Rect(min(mouse[0] + 14, W - width - 4), max(60, mouse[1] - 20 - len(lines) * 18), width, 12 + len(lines) * 18)
+    top = max(60, mouse[1] - 20 - len(lines) * 18)
+    if mouse[1] > 560:
+        top = mouse[1] - 30 - len(lines) * 18
+    box = pygame.Rect(min(mouse[0] + 14, W - width - 4), top, width, 12 + len(lines) * 18)
     art.panel(box, "parchment", art.BRASS)
     for number in range(len(lines)):
         art.text(lines[number], box.x + 10, box.y + 6 + number * 18, "small", art.INK, "left")
@@ -748,6 +844,16 @@ def draw_portrait(hero, rect):
     art.draw_hero(hero["kind"], frame_rect.centerx, frame_rect.centery - 2, 20)
 
 
+def hurt_amount(hero):
+    """AI-assisted: receives a hero; returns how strongly their panel should flash red right now (1 just hit, fading to 0)."""
+    if hero["name"] not in UI["hurt"]:
+        return 0
+    age = art.ART["tick"] - UI["hurt"][hero["name"]]
+    if age < 0 or age > 36:
+        return 0
+    return 1 - age / 36
+
+
 def draw_hero_block(game, index):
     """AI-assisted: receives the game and a hero's place in the party; draws the hero's panel (portrait, hp bar, deck and discard, status); returns nothing."""
     hero = game["heroes"][index]
@@ -755,6 +861,10 @@ def draw_hero_block(game, index):
     border = art.BRASS_DARK
     if hero is selected_hero(game) or hero["name"] == game["turn_name"]:
         border = art.GOLD
+    hurt = hurt_amount(hero)
+    if hurt > 0:
+        border = art.CRIMSON
+        rect = rect.move(int(3 * hurt * math.sin(art.ART["tick"] * 2.5)), 0)
     art.panel(rect, "parchment", border)
     draw_portrait(hero, rect)
     art.text(hero["name"], rect.x + 72, rect.y + 4, "bold", art.INK, "left")
@@ -764,6 +874,8 @@ def draw_hero_block(game, index):
              art.INK, "left")
     art.text(hero_status(game, hero), rect.x + 72, rect.y + 62, "tiny", art.BLOOD, "left")
     art.text(hero["title"], rect.x + 8, rect.y + 86, "tiny", art.INK, "left")
+    if hurt > 0:
+        art.shade(rect, art.CRIMSON, int(110 * hurt))
     if hero["exhausted"]:
         art.shade(rect, art.BLACK, 150)
 
@@ -840,7 +952,7 @@ def draw_hand(hero):
     for index in range(len(hero["hand"])):
         card = hero["hand"][index]
         rect = card_rect(index)
-        if dragging_card(index):
+        if dragging_card(index) or (UI["flying"] is not None and UI["flying"]["index"] == index):
             pygame.draw.rect(UI["screen"], art.BRASS_DARK, rect, 2, 7)
         elif UI["card"] == index:
             art.draw_card(card, rect.move(0, -14), art.GOLD, hero["kind"])
@@ -895,11 +1007,14 @@ def add_strike(fx):
     length = 16
     if fx["style"] == "bomb":
         length = 26
-    elif fx["style"] == "ranged":
+    elif fx["style"] != "melee":
         length = 20
     start = effect_start()
+    color = art.ORANGE
+    if "element" in fx and fx["element"] in art.ELEMENT_COLORS:
+        color = art.ELEMENT_COLORS[fx["element"]]
     UI["strikes"].append({"from": fx["from"], "to": fx["to"], "style": fx["style"], "start": start,
-                          "life": length + 10, "length": length})
+                          "life": length + 10, "length": length, "color": color})
     UI["busy_until"] = start + length
     return UI["busy_until"]
 
@@ -916,6 +1031,8 @@ def consume_fx(game):
                                   "start": effect_start()})
         elif fx["kind"] == "strike":
             add_strike(fx)
+        elif fx["kind"] in ["puff", "sparkle", "shake", "hurt"]:
+            add_feel(fx)
         elif fx["kind"] == "mod":
             UI["mod"] = {"text": fx["text"], "side": fx["side"], "life": 64, "start": effect_start()}
         elif fx["kind"] == "banner":
@@ -924,6 +1041,29 @@ def consume_fx(game):
             add_floater(fx["tile"], "MORALE BROKEN!", art.GOLD)
             UI["flashes"].append({"tile": fx["tile"], "life": 40, "color": art.GOLD, "start": effect_start()})
     return handled
+
+
+def add_feel(fx):
+    """AI-assisted: receives a game-feel effect (puff, sparkle, shake or hurt); queues it to start when the attack before it lands; returns the effect kind."""
+    start = effect_start()
+    if fx["kind"] == "puff":
+        UI["puffs"].append({"tile": fx["tile"], "start": start, "life": 30})
+    elif fx["kind"] == "sparkle":
+        UI["sparkles"].append({"tile": fx["tile"], "color": art.COLOR_NAMES[fx["color"]], "start": start, "life": 34})
+    elif fx["kind"] == "shake":
+        UI["shakes"].append({"power": fx["power"], "start": start, "life": 14})
+    else:
+        UI["hurt"][fx["name"]] = start
+    return fx["kind"]
+
+
+def reset_screen():
+    """AI-assisted: receives nothing; clears every effect, caption and banner left from an earlier game; returns nothing."""
+    for name in ["floaters", "flashes", "strikes", "puffs", "sparkles", "shakes", "ripples"]:
+        UI[name] = []
+    UI.update({"hurt": {}, "caption": None, "banner": None, "mod": None, "busy_until": 0, "flying": None})
+    UI.update({"room_key": "", "phase": "watch", "turn_hero": None})
+    clear_input()
 
 
 def fade_list(items):
@@ -970,6 +1110,7 @@ def draw_banner():
 def draw_effects():
     """AI-assisted: receives nothing; draws enemy attacks, hit flashes, floating numbers, the modifier card and the banner (each when its turn comes); returns nothing."""
     UI["screen"].set_clip(pygame.Rect(GRID_X, GRID_Y, GRID_W, GRID_H))
+    draw_feel()
     draw_strikes()
     for flash in UI["flashes"]:
         if art.ART["tick"] >= flash["start"]:
@@ -983,6 +1124,9 @@ def draw_effects():
     fade_list(UI["flashes"])
     fade_list(UI["floaters"])
     fade_list(UI["strikes"])
+    fade_list(UI["puffs"])
+    fade_list(UI["sparkles"])
+    fade_list(UI["shakes"])
     draw_mod_card()
     draw_banner()
     draw_caption()
@@ -1014,6 +1158,19 @@ def draw_strike(strike, part):
         pygame.draw.line(screen, art.CRIMSON, start, reach, 2)
         if part > 0.5:
             draw_slash(end, (part - 0.5) * 2)
+    elif strike["style"] == "arrow":
+        spot = lerp(start, end, part)
+        tail = lerp(start, end, max(0.0, part - 0.12))
+        pygame.draw.line(screen, art.WOOD, tail, spot, 3)
+        pygame.draw.circle(screen, art.STEEL, spot, 3)
+    elif strike["style"] == "bolt":
+        spot = lerp(start, end, part)
+        for back in range(4):
+            trail = lerp(start, end, max(0.0, part - back * 0.05))
+            pygame.draw.circle(screen, strike["color"], trail, max(2, 8 - back * 2))
+        pygame.draw.circle(screen, art.WHITE, spot, 3)
+        if part > 0.9:
+            pygame.draw.circle(screen, strike["color"], end, int(10 + (part - 0.9) * 120), 3)
     elif strike["style"] == "ranged":
         spot = lerp(start, end, part)
         tail = lerp(start, end, max(0.0, part - 0.15))
@@ -1029,6 +1186,58 @@ def draw_strike(strike, part):
         burst = int((part - 0.8) * 5 * 40 * UI["zoom"]) + 6
         pygame.draw.circle(screen, art.ORANGE, end, burst, 5)
         pygame.draw.circle(screen, art.GOLD, end, max(2, burst // 2))
+
+
+def draw_puff(puff, age):
+    """AI-assisted: receives a puff of smoke (left by a fallen enemy) and how many frames old it is; draws grey smoke rings drifting up; returns nothing."""
+    middle = tile_center(puff["tile"])
+    grow = age * 0.9 * UI["zoom"] + 6
+    fade = max(0, 200 - age * 7)
+    for offset in [[-8, 0], [8, -2], [0, -10]]:
+        spot = (middle[0] + offset[0] * UI["zoom"], middle[1] + offset[1] * UI["zoom"] - age * 0.6)
+        layer = pygame.Surface((int(grow * 2) + 2, int(grow * 2) + 2), pygame.SRCALPHA)
+        pygame.draw.circle(layer, (130, 128, 136, fade), (int(grow) + 1, int(grow) + 1), int(grow))
+        UI["screen"].blit(layer, (spot[0] - grow, spot[1] - grow))
+
+
+def draw_sparkle(sparkle, age):
+    """AI-assisted: receives a sparkle (loot, heal, shield or dash) and how many frames old it is; draws little stars rising and a ring; returns nothing."""
+    middle = tile_center(sparkle["tile"])
+    color = sparkle["color"]
+    pygame.draw.circle(UI["screen"], color, middle, int(6 + age * 0.9 * UI["zoom"]), 2)
+    for star in range(6):
+        x = middle[0] + ((star * 37) % 41 - 20) * UI["zoom"]
+        y = middle[1] - age * 1.2 - (star * 11) % 17
+        size = max(1, 4 - age // 10)
+        pygame.draw.line(UI["screen"], color, (x - size, y), (x + size, y), 2)
+        pygame.draw.line(UI["screen"], color, (x, y - size), (x, y + size), 2)
+
+
+def draw_feel():
+    """AI-assisted: receives nothing; draws the smoke puffs and sparkles that are playing; returns how many were drawn."""
+    drawn = 0
+    for puff in UI["puffs"]:
+        age = art.ART["tick"] - puff["start"]
+        if age >= 0:
+            draw_puff(puff, age)
+            drawn += 1
+    for sparkle in UI["sparkles"]:
+        age = art.ART["tick"] - sparkle["start"]
+        if age >= 0:
+            draw_sparkle(sparkle, age)
+            drawn += 1
+    return drawn
+
+
+def shake_offset():
+    """AI-assisted: receives nothing; returns how far [x, y] to jolt the screen this frame for the strongest shake playing ([0, 0] if none)."""
+    power = 0
+    for shake in UI["shakes"]:
+        if art.ART["tick"] >= shake["start"]:
+            power = max(power, shake["power"] * shake["life"] / 14)
+    if power == 0:
+        return [0, 0]
+    return [int(power * math.sin(art.ART["tick"] * 1.9)), int(power * 0.6 * math.cos(art.ART["tick"] * 2.3))]
 
 
 def draw_strikes():
@@ -1119,6 +1328,47 @@ def place_model(model, path, step, part):
     second = path[min(step + 1, last)]
     point = lerp(tile_middle(first), tile_middle(second), part)
     model["draw"] = point
+
+
+def slide_hero(game, hero, start, end):
+    """AI-assisted: receives the game, a walking hero and the tile they step from and to; slides the hero smoothly across that one step; returns nothing."""
+    if UI["screen"] is None:
+        return
+    for part in range(1, 6):
+        hero["draw"] = lerp(tile_middle(start), tile_middle(end), part / 6)
+        frame(game)
+    del hero["draw"]
+
+
+def fly_card(game, hero, name, tile):
+    """AI-assisted: receives the game, the acting hero, the card being played and its target tile; shows the card flying from the hand to the target, shrinking as it goes; returns nothing."""
+    if UI["screen"] is None:
+        return
+    index = -1
+    for number in range(len(hero["hand"])):
+        if hero["hand"][number]["name"] == name:
+            index = number
+    if index < 0:
+        return
+    start = card_rect(index)
+    end = tile_rect(tile)
+    for part in range(1, 11):
+        size = 1 - part * 0.07
+        middle = lerp(start.center, end.center, part / 10)
+        rect = pygame.Rect(0, 0, int(start.width * size), int(start.height * size))
+        rect.center = (int(middle[0]), int(middle[1]))
+        UI["flying"] = {"index": index, "card": hero["hand"][index], "rect": rect, "kind": hero["kind"]}
+        frame(game)
+    UI["flying"] = None
+
+
+def draw_flying():
+    """AI-assisted: receives nothing; draws the card that is flying to its target, if any; returns True if one was drawn."""
+    flying = UI["flying"]
+    if flying is None:
+        return False
+    art.draw_card(flying["card"], flying["rect"], art.GOLD, flying["kind"])
+    return True
 
 
 def fast_forward():
@@ -1350,6 +1600,7 @@ def draw_game(game):
     draw_hint(game)
     draw_tooltip(game)
     draw_drag(game)
+    draw_flying()
 
 
 def common_event(game, event):
@@ -1368,7 +1619,12 @@ def common_event(game, event):
 
 
 def present(game):
-    """AI-assisted: receives the game (or None); shows the finished frame, waits for 60 FPS and returns the list of new events (minus the ones the camera used up); holding Space speeds the effects up."""
+    """AI-assisted: receives the game (or None); shows the finished frame (jolted if a shake is playing), waits for 60 FPS and returns the list of new events (minus the ones the camera used up); holding Space speeds the effects up."""
+    jolt = shake_offset()
+    if jolt != [0, 0] and game is not None:
+        picture = UI["screen"].copy()
+        UI["screen"].fill(art.BLACK)
+        UI["screen"].blit(picture, jolt)
     pygame.display.flip()
     UI["clock"].tick(60)
     art.ART["tick"] += 1
@@ -1895,7 +2151,7 @@ def draw_party_screen(data, recruits, chosen, buttons, note):
         draw_recruit(data, recruits[index], recruit_rect(index), recruits[index] in chosen)
         art.medallion(recruit_rect(index).x + 18, recruit_rect(index).y + 18, 13, art.PARCHMENT, art.BRASS)
         art.text(str(index + 1), recruit_rect(index).x + 18, recruit_rect(index).y + 18, "bold", art.INK, "center")
-    art.text(note, W // 2, 582, "body", art.GOLD, "center")
+    art.text(note, W // 2, 566, "body", art.GOLD, "center")
     for button in buttons:
         if button["id"] == "go" and len(chosen) < 2:
             art.draw_plate(button["rect"], button["label"], "off")
@@ -1914,6 +2170,22 @@ def toggle_recruit(chosen, name):
     return name + " joins the party!"
 
 
+def level_rect(index):
+    """AI-assisted: receives a difficulty number (0-2); returns its button rectangle on the party screen."""
+    return pygame.Rect(W // 2 - 240 + index * 164, 592, 152, 28)
+
+
+def draw_levels(data, chosen_level):
+    """AI-assisted: receives the data and the chosen difficulty number; draws the Easy / Normal / Hard buttons and what the chosen one means; returns nothing."""
+    art.text("Difficulty (Left / Right):", W // 2 - 250, 596, "bold", art.PARCHMENT, "right")
+    for index in range(len(data["levels"])):
+        state = "off"
+        if index == chosen_level:
+            state = "on"
+        art.draw_plate(level_rect(index), data["levels"][index]["name"], state)
+    art.text(data["levels"][chosen_level]["blurb"], W // 2, 692, "small", art.PARCHMENT_DARK, "center")
+
+
 def party_event(event, recruits, buttons):
     """AI-assisted: receives one event, the recruit names and the buttons; returns "go", "back", a recruit name to toggle, or ""."""
     if event.type == pygame.KEYDOWN:
@@ -1923,37 +2195,57 @@ def party_event(event, recruits, buttons):
             return "back"
         elif pygame.K_1 <= event.key < pygame.K_1 + len(recruits):
             return recruits[event.key - pygame.K_1]
+        elif event.key == pygame.K_LEFT:
+            return "level-1"
+        elif event.key == pygame.K_RIGHT:
+            return "level+1"
     elif event.type == pygame.MOUSEBUTTONDOWN:
         for index in range(len(recruits)):
             if recruit_rect(index).collidepoint(event.pos):
                 return recruits[index]
+        for index in range(3):
+            if level_rect(index).collidepoint(event.pos):
+                return "level" + str(index)
         return button_at(buttons, event.pos)
     return ""
 
 
+def change_level(choice, level, count):
+    """AI-assisted: receives a party-screen choice like "level+1" or "level2", the current difficulty number and how many there are; returns the new difficulty number."""
+    if choice == "level+1":
+        return min(count - 1, level + 1)
+    elif choice == "level-1":
+        return max(0, level - 1)
+    return int(choice[5:])
+
+
 def party_screen(data):
-    """AI-assisted: receives the loaded data; starts with only Frodo and lets the player add 2 or 3 companions; returns the party name list (Frodo first), or [] to go back."""
+    """AI-assisted: receives the loaded data; starts with only Frodo, lets the player add 2 or 3 companions and pick a difficulty; returns {"party": names, "difficulty": name}, or {} to go back."""
     recruits = []
     for name in data["heroes"]:
         if name != "Frodo":
             recruits.append(name)
     chosen = []
+    level = 1
     note = ""
-    buttons = [make_button("go", "Begin (Enter)", pygame.Rect(W // 2 - 190, 622, 180, 44)),
-               make_button("back", "Back (Esc)", pygame.Rect(W // 2 + 10, 622, 180, 44))]
+    buttons = [make_button("go", "Begin (Enter)", pygame.Rect(W // 2 - 190, 636, 180, 40)),
+               make_button("back", "Back (Esc)", pygame.Rect(W // 2 + 10, 636, 180, 40))]
     while not UI["closed"]:
         draw_party_screen(data, recruits, chosen, buttons, note)
+        draw_levels(data, level)
         for event in present(None):
             choice = party_event(event, recruits, buttons)
             if choice == "go" and len(chosen) >= 2:
-                return ["Frodo"] + chosen
+                return {"party": ["Frodo"] + chosen, "difficulty": data["levels"][level]["name"]}
             elif choice == "go":
                 note = "Choose at least 2 companions to join Frodo first."
             elif choice == "back":
-                return []
+                return {}
+            elif choice.startswith("level"):
+                level = change_level(choice, level, len(data["levels"]))
             elif choice != "":
                 note = toggle_recruit(chosen, choice)
-    return []
+    return {}
 
 
 def title_flow(data, note):
@@ -1968,9 +2260,9 @@ def title_flow(data, note):
             if name != "":
                 return {"file": name}
         elif choice == "start":
-            party = party_screen(data)
-            if len(party) > 0:
-                return {"party": party}
+            picked = party_screen(data)
+            if len(picked) > 0:
+                return picked
         else:
             break
     return {}
@@ -1990,6 +2282,7 @@ RULES = [
         "MAIN PATH or SIDE CHAMBER? Most chambers have one door onward. Some also have a side door to an optional",
         "    chamber with extra chests and rarer loot - but it costs rounds, and every round costs Doom.",
         "THE BOSS: the door to the Throne of Spears wears a red skull.",
+        "DIFFICULTY (party screen): Easy gives tougher heroes and more time - best for a first game. Hard hits harder.",
         "    At half health the Warlord summons his Iron Guard. Near death he becomes ENRAGED (+2 attack, +1 move)."]],
     ["A Hero's Turn", [
         "Heroes and enemy units take turns in order: the row of portraits at the top left (left goes first).",
@@ -2010,7 +2303,7 @@ RULES = [
         "Enemies in the dark are hidden. They still move and may shoot from the dark.",
         "Spears never changes the chamber you are in. But after a round he may secretly prepare a chamber you",
         "    have not opened yet: an extra trap, a trapped chest or an extra guard. You only see a warning.",
-        "Hover the mouse over a hero, an enemy or an object on the map to read its details.",
+        "Hover the mouse over anything - a hero, an enemy, a card, the Doom bar, the turn order - to read about it.",
         "CAMERA: mouse wheel zooms in and out. Hold the RIGHT mouse button and drag (or use W A S D) to pan.",
         "    Home shows the whole dungeon you know. The camera follows whoever is acting."]],
     ["Keyboard Controls", [
@@ -2233,17 +2526,27 @@ def draw_end(result, lines):
     art.ribbon(sheet.centerx, sheet.y + 26, 300, "Adventure Summary", art.BLOOD)
     for number in range(len(lines)):
         art.text(lines[number], sheet.x + 40, sheet.y + 60 + number * 34, "body", art.INK, "left")
-    art.text("The full story is saved in frodo_log.txt.     Press Enter or click to close.",
-             W // 2, 684, "body", art.PARCHMENT_DARK, "center")
+    art.text("The full story is saved in frodo_log.txt.", W // 2, 640, "body", art.PARCHMENT_DARK, "center")
+    for button in end_buttons():
+        art.draw_button(button)
+
+
+def end_buttons():
+    """AI-assisted: receives nothing; returns the Play again and Quit buttons of the end screen."""
+    return [make_button("again", "Play again (Enter)", pygame.Rect(W // 2 - 200, 662, 190, 40)),
+            make_button("quit", "Quit (Esc)", pygame.Rect(W // 2 + 10, 662, 190, 40))]
 
 
 def end_screen(result, lines):
-    """AI-assisted: receives "win" or "lose" and the summary sentences; shows the end screen until the player closes it; returns the result."""
+    """AI-assisted: receives "win" or "lose" and the summary sentences; shows the end screen until the player chooses; returns "again" or "quit"."""
+    reset_screen()
     while not UI["closed"]:
         draw_end(result, lines)
         for event in present(None):
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                return result
-            elif event.type == pygame.KEYDOWN and (event.key == pygame.K_RETURN or event.key == pygame.K_ESCAPE):
-                return result
-    return result
+            if event.type == pygame.MOUSEBUTTONDOWN and button_at(end_buttons(), event.pos) != "":
+                return button_at(end_buttons(), event.pos)
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                return "again"
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                return "quit"
+    return "quit"

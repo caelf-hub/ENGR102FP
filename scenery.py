@@ -33,26 +33,26 @@ SIZES = [[2, 2], [2, 2], [4, 2], [2, 4], [3, 2], [2, 3], [2, 1], [1, 2], [1, 1]]
 
 
 def is_wall(letters, col, row):
-    """receives the grid of letters the party sees and a col/row; returns True if that spot is wall (outside the room counts as wall)."""
+    """AI-assisted: receives the grid of letters the party sees and a col/row; returns True if that spot is wall (outside the room counts as wall)."""
     if row < 0 or row >= len(letters) or col < 0 or col >= len(letters[0]):
         return True
     return letters[row][col] == "#"
 
 
 def layer(width, height):
-    """receives a size; returns an empty see-through picture to paint soft things on."""
+    """AI-assisted: receives a size; returns an empty see-through picture to paint soft things on."""
     return pygame.Surface((max(1, int(width)), max(1, int(height))), pygame.SRCALPHA)
 
 
 def soft_blob(surface, x, y, width, height, color, alpha):
-    """receives a picture, a position, a size, a color and a see-through amount; paints a soft oval stain there; returns nothing."""
+    """AI-assisted: receives a picture, a position, a size, a color and a see-through amount; paints a soft oval stain there; returns nothing."""
     patch = layer(width, height)
     pygame.draw.ellipse(patch, (color[0], color[1], color[2], alpha), patch.get_rect())
     surface.blit(patch, (int(x), int(y)))
 
 
 def grain():
-    """receives nothing; returns a picture of fine random speckles that makes flat color look like rough stone (built once)."""
+    """AI-assisted: receives nothing; returns a picture of fine random speckles that makes flat color look like rough stone (built once)."""
     if "grain" not in art.ART["cache"]:
         dice = random.Random(99)
         picture = layer(128, 128)
@@ -65,7 +65,7 @@ def grain():
 
 
 def add_grain(surface):
-    """receives a picture; covers it with the stone speckle; returns nothing."""
+    """AI-assisted: receives a picture; covers it with the stone speckle; returns nothing."""
     speckle = grain()
     for x in range(0, surface.get_width(), 128):
         for y in range(0, surface.get_height(), 128):
@@ -75,7 +75,7 @@ def add_grain(surface):
 # ================================================================ the floor
 
 def slab_fits(used, ux, uy, size):
-    """receives the grid of used half-tiles, a spot and a slab size; returns True if a slab that size fits there."""
+    """AI-assisted: receives the grid of used half-tiles, a spot and a slab size; returns True if a slab that size fits there."""
     for row in range(uy, uy + size[1]):
         for col in range(ux, ux + size[0]):
             if row >= len(used) or col >= len(used[0]) or used[row][col]:
@@ -84,7 +84,7 @@ def slab_fits(used, ux, uy, size):
 
 
 def pick_size(used, ux, uy, dice):
-    """receives the used grid, a spot and a random source; returns a random slab size that fits (a small one if nothing else does)."""
+    """AI-assisted: receives the used grid, a spot and a random source; returns a random slab size that fits (a small one if nothing else does)."""
     for attempt in range(4):
         size = dice.choice(SIZES)
         if slab_fits(used, ux, uy, size):
@@ -93,7 +93,7 @@ def pick_size(used, ux, uy, dice):
 
 
 def slab_plan(cols, rows, dice):
-    """receives the room size in tiles and a random source; returns a list of [x, y, width, height] flagstones of mixed sizes that cover the floor."""
+    """AI-assisted: receives the room size in tiles and a random source; returns a list of [x, y, width, height] flagstones of mixed sizes that cover the floor."""
     used = []
     for row in range(rows * 2):
         used.append([False] * (cols * 2))
@@ -111,7 +111,7 @@ def slab_plan(cols, rows, dice):
 
 
 def scratch(surface, x, y, dice, color):
-    """receives a picture, a start point, a random source and a color; scratches one wandering crack; returns nothing."""
+    """AI-assisted: receives a picture, a start point, a random source and a color; scratches one wandering crack; returns nothing."""
     for step in range(dice.randint(2, 5)):
         next_x = x + dice.randint(-10, 10)
         next_y = y + dice.randint(-8, 8)
@@ -121,7 +121,7 @@ def scratch(surface, x, y, dice, color):
 
 
 def paint_slab(surface, slab, dice):
-    """receives a picture, one [x, y, width, height] flagstone and a random source; paints the worn stone with lit and shadowed edges; returns nothing."""
+    """AI-assisted: receives a picture, one [x, y, width, height] flagstone and a random source; paints the worn stone with lit and shadowed edges; returns nothing."""
     color = art.tint(FLOOR_STONE, dice.randint(-18, 8))
     if dice.randint(1, 5) == 1:
         color = (art.clamp(color[0] - 8), color[1], art.clamp(color[2] + 8))
@@ -142,7 +142,7 @@ def paint_slab(surface, slab, dice):
 
 
 def paint_puddle(surface, spot, dice):
-    """receives a picture, a middle point and a random source; paints a dark puddle with a pale reflection; returns [x, y, width, height]."""
+    """AI-assisted: receives a picture, a middle point and a random source; paints a dark puddle with a pale reflection; returns [x, y, width, height]."""
     width = dice.randint(44, 104)
     height = dice.randint(20, 42)
     patch = layer(width, height)
@@ -157,7 +157,7 @@ def paint_puddle(surface, spot, dice):
 
 
 def paint_debris(surface, spot, dice):
-    """receives a picture, a middle point and a random source; scatters a few broken stones (and sometimes a bone) there; returns nothing."""
+    """AI-assisted: receives a picture, a middle point and a random source; scatters a few broken stones (and sometimes a bone) there; returns nothing."""
     for number in range(dice.randint(2, 5)):
         x = spot[0] + dice.randint(-18, 18)
         y = spot[1] + dice.randint(-18, 18)
@@ -208,7 +208,7 @@ def floor_base(cols, rows, seed):
 
 
 def paint_grid_hints(surface, letters):
-    """receives a picture and the letters grid; rules a clear grid over every floor tile (a dark line and a pale line, like a groove) so the party can count tiles; returns how many tiles were ruled."""
+    """AI-assisted: receives a picture and the letters grid; rules a clear grid over every floor tile (a dark line and a pale line, like a groove) so the party can count tiles; returns how many tiles were ruled."""
     marks = layer(surface.get_width(), surface.get_height())
     count = 0
     for row in range(len(letters)):
@@ -229,7 +229,7 @@ def paint_grid_hints(surface, letters):
 # ================================================================ shadows at the foot of walls
 
 def gradient(width, height, side, strength):
-    """receives a size, which side is darkest ("top", "left", "right" or "bottom") and a strength; returns a shadow strip that fades away from that side."""
+    """AI-assisted: receives a size, which side is darkest ("top", "left", "right" or "bottom") and a strength; returns a shadow strip that fades away from that side."""
     strip = layer(width, height)
     if side == "top" or side == "bottom":
         depth = height
@@ -257,7 +257,7 @@ def cached_gradient(width, height, side, strength):
 
 
 def paint_wall_shadows(surface, letters):
-    """receives a picture and the letters grid; darkens the floor along the foot of every wall, deepest under the tall north faces; returns nothing."""
+    """AI-assisted: receives a picture and the letters grid; darkens the floor along the foot of every wall, deepest under the tall north faces; returns nothing."""
     top = gradient(TILE, 30, "top", 210)
     left = gradient(20, TILE, "left", 150)
     right = gradient(14, TILE, "right", 110)
@@ -281,7 +281,7 @@ def paint_wall_shadows(surface, letters):
 # ================================================================ walls
 
 def paint_rock_top(surface, letters, col, row, dice):
-    """receives a picture, the letters grid, a wall tile and a random source; paints the dark top of the wall with a pale rim where it meets the floor; returns nothing."""
+    """AI-assisted: receives a picture, the letters grid, a wall tile and a random source; paints the dark top of the wall with a pale rim where it meets the floor; returns nothing."""
     x = col * TILE
     y = row * TILE
     pygame.draw.rect(surface, ROCK, pygame.Rect(x, y, TILE, TILE))
@@ -302,12 +302,12 @@ def paint_rock_top(surface, letters, col, row, dice):
 
 
 def brick_tint(brick_x, brick_y):
-    """receives a brick's place along the wall and its height; returns how much lighter or darker that brick is (always the same for the same brick)."""
+    """AI-assisted: receives a brick's place along the wall and its height; returns how much lighter or darker that brick is (always the same for the same brick)."""
     return (brick_x * 37 + brick_y * 91) % 23 - 13
 
 
 def paint_course(surface, x, y, height, number):
-    """receives a picture, the left and top of one row of bricks in a tile, its height and the row number; paints the bricks so they line up with the next tile; returns nothing."""
+    """AI-assisted: receives a picture, the left and top of one row of bricks in a tile, its height and the row number; paints the bricks so they line up with the next tile; returns nothing."""
     pygame.draw.rect(surface, GROUT, pygame.Rect(x, y, TILE, height))
     start = x - 24 * (number % 2) - (x % 48)
     for left in range(start, x + TILE, 48):
@@ -319,7 +319,7 @@ def paint_course(surface, x, y, height, number):
 
 
 def paint_damp(surface, x, top, bottom, dice):
-    """receives a picture, the left, top and bottom of a wall face and a random source; adds wet streaks running down and moss at the foot; returns nothing."""
+    """AI-assisted: receives a picture, the left, top and bottom of a wall face and a random source; adds wet streaks running down and moss at the foot; returns nothing."""
     for number in range(dice.randint(1, 3)):
         streak_x = x + dice.randint(4, TILE - 5)
         length = dice.randint(14, bottom - top - 6)
@@ -331,7 +331,7 @@ def paint_damp(surface, x, top, bottom, dice):
 
 
 def paint_face(surface, letters, col, row, dice):
-    """receives a picture, the letters grid, a wall tile with floor to its south and a random source; paints the tall brick face rising from the floor; returns the y of the face's top."""
+    """AI-assisted: receives a picture, the letters grid, a wall tile with floor to its south and a random source; paints the tall brick face rising from the floor; returns the y of the face's top."""
     x = col * TILE
     bottom = row * TILE + TILE
     top = row * TILE
@@ -353,12 +353,12 @@ def paint_face(surface, letters, col, row, dice):
 
 
 def has_torch(col, row):
-    """receives a wall face tile; returns True if a wall torch hangs on this face (about every fourth face)."""
+    """AI-assisted: receives a wall face tile; returns True if a wall torch hangs on this face (about every fourth face)."""
     return (col * 3 + row) % 4 == 1
 
 
 def paint_sconce(surface, x, y):
-    """receives a picture and a point on a wall face; paints the iron bracket and unlit torch that hangs there; returns nothing."""
+    """AI-assisted: receives a picture and a point on a wall face; paints the iron bracket and unlit torch that hangs there; returns nothing."""
     pygame.draw.rect(surface, (30, 28, 32), pygame.Rect(x - 5, y + 8, 10, 4))
     pygame.draw.rect(surface, art.WOOD_DARK, pygame.Rect(x - 2, y - 4, 4, 14))
     pygame.draw.rect(surface, (30, 28, 32), pygame.Rect(x - 3, y - 6, 6, 4))
@@ -447,7 +447,7 @@ def draw_flame(x, y, tick, scale):
 
 
 def draw_ripple(x, y, life):
-    """receives a point on the screen and how many frames the ripple has left (30 = new); draws a drip ring spreading on a puddle; returns nothing."""
+    """AI-assisted: receives a point on the screen and how many frames the ripple has left (30 = new); draws a drip ring spreading on a puddle; returns nothing."""
     grow = 30 - life
     shade_value = 60 + life * 4
     ring = pygame.Rect(0, 0, 4 + grow * 1.1, 2 + grow * 0.55)

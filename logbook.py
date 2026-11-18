@@ -2,39 +2,39 @@
 
 
 def say(game, text):
-    """receives the game and a sentence; adds it to the on-screen log and this round's file log; returns the sentence."""
+    """AI-assisted: [Owner: Member 1] receives the game and a sentence; adds it to the on-screen log and this round's file log; returns the sentence."""
     game["log"].append(text)
     game["round_log"].append(text)
     return text
 
 
 def note(game, text):
-    """receives the game and a sentence the party cannot see happening; writes it only to the file log; returns the sentence."""
+    """AI-assisted: [Owner: Member 1] receives the game and a sentence the party cannot see happening; writes it only to the file log; returns the sentence."""
     game["round_log"].append(text)
     return text
 
 
 def tell(game, visible, text):
-    """receives the game, whether the party can see the event, and a sentence; shows it on screen only if visible, but always logs it to the file; returns the sentence."""
+    """AI-assisted: [Owner: Member 1] receives the game, whether the party can see the event, and a sentence; shows it on screen only if visible, but always logs it to the file; returns the sentence."""
     if visible:
         return say(game, text)
     return note(game, text + " (unseen)")
 
 
 def add_float(game, tile, text, color):
-    """receives the game, a tile, some text and a color name; asks the screen to float that text over the tile."""
+    """AI-assisted: [Owner: Member 1] receives the game, a tile, some text and a color name; asks the screen to float that text over the tile."""
     game["fx"].append({"kind": "float", "tile": [tile[0], tile[1]], "text": text, "color": color})
     return text
 
 
 def add_banner(game, text):
-    """receives the game and a sentence; asks the screen to show it as a Spears banner; returns the sentence."""
+    """AI-assisted: [Owner: Member 1] receives the game and a sentence; asks the screen to show it as a Spears banner; returns the sentence."""
     game["fx"].append({"kind": "banner", "text": text})
     return text
 
 
 def start_log(party):
-    """receives the list of hero names; starts a fresh frodo_log.txt and returns True if the file could be written."""
+    """AI-assisted: [Owner: Member 1] receives the list of hero names; starts a fresh frodo_log.txt and returns True if the file could be written."""
     try:
         log_file = open("frodo_log.txt", "w")
         log_file.write("FRODO AND THE DUNGEON LORD - adventure log\n")
@@ -46,7 +46,7 @@ def start_log(party):
 
 
 def write_log(lines, round_number):
-    """receives this round's sentences and the round number; appends them to frodo_log.txt and returns how many lines were written."""
+    """AI-assisted: [Owner: Member 1] receives this round's sentences and the round number; appends them to frodo_log.txt and returns how many lines were written."""
     written = 0
     try:
         log_file = open("frodo_log.txt", "a")
@@ -61,7 +61,7 @@ def write_log(lines, round_number):
 
 
 def write_summary(stats):
-    """receives the stats dictionary; works out the averages, appends the summary to frodo_log.txt and returns the summary dictionary."""
+    """AI-assisted: [Owner: Member 1] receives the stats dictionary; works out the averages, appends the summary to frodo_log.txt and returns the summary dictionary."""
     summary = dict(stats)
     try:
         summary["average_dealt"] = round(stats["damage_dealt"] / stats["rounds"], 1)
@@ -81,7 +81,7 @@ def write_summary(stats):
 
 
 def summary_lines(summary):
-    """receives the summary dictionary; returns the list of sentences shown at the end and written to the log."""
+    """AI-assisted: [Owner: Member 1] receives the summary dictionary; returns the list of sentences shown at the end and written to the log."""
     lines = []
     lines.append("Rounds played: " + str(summary["rounds"]))
     lines.append("Rooms cleared: " + str(summary["rooms_cleared"]))
@@ -96,7 +96,7 @@ def summary_lines(summary):
 
 
 def check_game_over(heroes, doom, doom_max, warlord_dead):
-    """receives the heroes, the Doom Track, its end and whether the Warlord is dead; returns "win", "lose" or "" (keep playing)."""
+    """AI-assisted: [Owner: Member 1] receives the heroes, the Doom Track, its end and whether the Warlord is dead; returns "win", "lose" or "" (keep playing)."""
     if warlord_dead:
         return "win"
     elif doom >= doom_max:
@@ -110,7 +110,7 @@ def check_game_over(heroes, doom, doom_max, warlord_dead):
 
 
 def status_lines(game):
-    """receives the game; returns a list of sentences describing the party, the room and the Doom Track."""
+    """AI-assisted: [Owner: Member 1] receives the game; returns a list of sentences describing the party, the room and the Doom Track."""
     lines = []
     lines.append("Round " + str(game["round"]) + " - in " + game["room_name"] + " ("
                  + str(game["depth"]) + " of " + str(len(game["plan"])) + " chambers explored)")
@@ -122,7 +122,7 @@ def status_lines(game):
 
 
 def hero_line(hero):
-    """receives a hero; returns one sentence with the hero's hp, cards and items."""
+    """AI-assisted: [Owner: Member 1] receives a hero; returns one sentence with the hero's hp, cards and items."""
     line = hero["name"] + ": HP " + str(hero["hp"]) + "/" + str(hero["max_hp"])
     line += ", move " + str(hero["move"]) + ", deck " + str(len(hero["deck"])) + ", discard "
     line += str(len(hero["discard"]))

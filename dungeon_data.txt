@@ -7,7 +7,13 @@
 # Only the boss arena is drawn by hand (the ARENA lines at the bottom).
 
 # ---- SETTINGS ----
-SETTING | game | doom_max=85
+SETTING | game | doom_max=70
+
+# ---- DIFFICULTY ---- (chosen on the party screen)
+# hero_hp = extra HP for every hero   doom = extra steps on the Doom Track   enemy_attack = added to every enemy hit
+DIFFICULTY | Easy   | hero_hp=6  doom=30  enemy_attack=-1 blurb=For_a_first_try:_tougher_heroes,_more_time.
+DIFFICULTY | Normal | hero_hp=0  doom=0   enemy_attack=0  blurb=The_game_as_designed.
+DIFFICULTY | Hard   | hero_hp=0  doom=-10 enemy_attack=1  blurb=Harder_hits_and_less_time.
 
 # ---- HEROES ---- (Frodo always leads; the player picks up to 3 more)
 # move  = how many tiles the hero may walk on each of their turns

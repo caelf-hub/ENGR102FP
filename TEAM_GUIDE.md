@@ -73,3 +73,10 @@ Run the game with `python frodo_game.py`. Run the tests with `python test_frodo.
 - Spears never edits the chamber the party is in. `spears_ai.reinforce()` adds "trap", "guard" or "trapped chest" to a chamber's `prepared` list, and `apply_preparations()` places them when that chamber is opened.
 - Enemy moves are recorded in `game["moves"]` and attacks as `strike` effects in `game["fx"]`; `ui.play_moves()` and `ui.wait_effects()` animate them, and `ui.caption()` shows what the unit is doing.
 - Tips: `ui.situation_tip()` picks the tip under the map; the quick-start card is `ui.draw_quickstart()`.
+
+## Difficulty, game feel and ownership
+
+- Difficulty levels are the `DIFFICULTY` lines in `dungeon_data.txt`; `game_data.apply_level()` applies one to a new game (`game["difficulty"]`, `game["enemy_bonus"]`).
+- Game-feel effects are requested by the game logic as `game["fx"]` entries: `strike` (an attack flying), `puff` (an enemy falls), `sparkle` (loot, heal, shield, dash, door), `shake` (a big hit), `hurt` (a hero's panel flashes red). `ui.consume_fx()` turns them into animation, each starting when the attack before it has landed.
+- Tooltips: `ui.tooltip_lines()` for the map, `ui.panel_tip()` for cards, the deck, the turn order, the orbs, the Doom bar and the hero panels.
+- Every function's owner is in its docstring (`AI-assisted: [Owner: Member 2] ...`); `OWNERS.md` lists them all. To re-make `OWNERS.md` after adding functions, copy the owner tag style and update the table by hand.

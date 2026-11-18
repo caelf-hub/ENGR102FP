@@ -5,7 +5,7 @@ HAND_SIZE = 3
 
 
 def find_card(pile, name):
-    """receives a list of cards and a card name; returns that card, or None if it is not there."""
+    """AI-assisted: [Owner: Member 1] receives a list of cards and a card name; returns that card, or None if it is not there."""
     for card in pile:
         if card["name"] == name:
             return card
@@ -13,7 +13,7 @@ def find_card(pile, name):
 
 
 def choose_card(hero, name):
-    """receives a hero and a card name; takes that card out of the hand and returns it (None if it is not in the hand)."""
+    """AI-assisted: [Owner: Member 1] receives a hero and a card name; takes that card out of the hand and returns it (None if it is not in the hand)."""
     card = find_card(hero["hand"], name)
     if card is not None:
         hero["hand"].remove(card)
@@ -21,13 +21,13 @@ def choose_card(hero, name):
 
 
 def finish_card(hero, card):
-    """receives a hero and the card they just played; puts it on the discard pile and draws a new card; returns how many cards are now in hand."""
+    """AI-assisted: [Owner: Member 1] receives a hero and the card they just played; puts it on the discard pile and draws a new card; returns how many cards are now in hand."""
     hero["discard"].append(card)
     return refill_hand(hero)
 
 
 def draw_card(hero):
-    """receives a hero; moves the top card of their deck into their hand (shuffling the discard pile back into the deck first if the deck is empty); returns the card drawn, or None."""
+    """AI-assisted: [Owner: Member 1] receives a hero; moves the top card of their deck into their hand (shuffling the discard pile back into the deck first if the deck is empty); returns the card drawn, or None."""
     if len(hero["deck"]) == 0:
         for card in hero["discard"]:
             hero["deck"].append(card)
@@ -41,7 +41,7 @@ def draw_card(hero):
 
 
 def refill_hand(hero):
-    """receives a hero; draws cards until they hold HAND_SIZE (or run out); returns how many cards are in hand."""
+    """AI-assisted: [Owner: Member 1] receives a hero; draws cards until they hold HAND_SIZE (or run out); returns how many cards are in hand."""
     while len(hero["hand"]) < HAND_SIZE:
         if draw_card(hero) is None:
             break
@@ -49,12 +49,12 @@ def refill_hand(hero):
 
 
 def is_exhausted(hero):
-    """receives a hero; returns True if the hero has no hp left."""
+    """AI-assisted: [Owner: Member 1] receives a hero; returns True if the hero has no hp left."""
     return hero["hp"] <= 0
 
 
 def heal_hero(hero, amount):
-    """receives a hero and a heal amount; raises hp (not past max) and returns how much was healed."""
+    """AI-assisted: [Owner: Member 1] receives a hero and a heal amount; raises hp (not past max) and returns how much was healed."""
     before = hero["hp"]
     hero["hp"] = hero["hp"] + amount
     if hero["hp"] > hero["max_hp"]:
@@ -63,7 +63,7 @@ def heal_hero(hero, amount):
 
 
 def use_element(elements, name):
-    """receives the elements dictionary and an element name; if it is glowing, uses it up and returns 1 (bonus), otherwise starts it glowing and returns 0."""
+    """AI-assisted: [Owner: Member 1] receives the elements dictionary and an element name; if it is glowing, uses it up and returns 1 (bonus), otherwise starts it glowing and returns 0."""
     if name not in elements:
         return 0
     if elements[name] > 0:
@@ -74,7 +74,7 @@ def use_element(elements, name):
 
 
 def wane_elements(elements):
-    """receives the elements dictionary; lowers every glowing element by 1 and returns how many are still glowing."""
+    """AI-assisted: [Owner: Member 1] receives the elements dictionary; lowers every glowing element by 1 and returns how many are still glowing."""
     glowing = 0
     for name in elements:
         if elements[name] > 0:
@@ -85,7 +85,7 @@ def wane_elements(elements):
 
 
 def search_poi(hero, items, max_rarity):
-    """receives the searching hero, the item list and the best rarity allowed; adds a random item to the hero and returns it (None if nothing fits)."""
+    """AI-assisted: [Owner: Member 1] receives the searching hero, the item list and the best rarity allowed; adds a random item to the hero and returns it (None if nothing fits)."""
     choices = []
     for item in items:
         if item["rarity"] <= max_rarity:
@@ -98,7 +98,7 @@ def search_poi(hero, items, max_rarity):
 
 
 def cheese_feast(game, amount):
-    """receives the game and a heal amount; Frodo heals that much, everyone else heals 1; returns a message."""
+    """AI-assisted: [Owner: Member 1] receives the game and a heal amount; Frodo heals that much, everyone else heals 1; returns a message."""
     for hero in game["heroes"]:
         if hero["exhausted"]:
             continue
@@ -110,7 +110,7 @@ def cheese_feast(game, amount):
 
 
 def apply_item(game, hero, item):
-    """receives the game, a hero and an item; applies the item's effect and returns a message about it."""
+    """AI-assisted: [Owner: Member 1] receives the game, a hero and an item; applies the item's effect and returns a message about it."""
     pieces = item["effect"].split(":")
     kind = pieces[0]
     amount = int(pieces[1])
