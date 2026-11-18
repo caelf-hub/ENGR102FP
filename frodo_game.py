@@ -29,7 +29,7 @@ BREATHER_HEAL = 8
 # ---------------------------------------------------------------- rooms
 
 def install_room(game, room):
-    """AI-assisted: [Owner: Member 1] receives the game and a freshly generated room; adds its units to the map, makes it the chamber the party is in and returns its name."""
+    """[Owner: Cael] receives the game and a freshly generated room; adds its units to the map, makes it the chamber the party is in and returns its name."""
     for unit in room["units"]:
         game["units"].append(unit)
     game["chamber"] = room["id"]
@@ -48,7 +48,7 @@ def install_room(game, room):
 
 
 def catch_breath(game):
-    """AI-assisted: [Owner: Member 1] receives the game; when a new chamber opens every standing hero heals; returns how many heroes healed."""
+    """[Owner: Cael] receives the game; when a new chamber opens every standing hero heals; returns how many heroes healed."""
     healed = 0
     for hero in game["heroes"]:
         if not hero["exhausted"]:
@@ -59,7 +59,7 @@ def catch_breath(game):
 
 
 def enter_room(game, number):
-    """AI-assisted: [Owner: Member 1] receives the game and the number of the chamber behind the door just opened; Spears carves and fills it from his memory of the party; returns the room's name."""
+    """[Owner: Cael] receives the game and the number of the chamber behind the door just opened; Spears carves and fills it from his memory of the party; returns the room's name."""
     if game["depth"] > 0:
         catch_breath(game)
     game["depth"] += 1
@@ -76,7 +76,7 @@ def enter_room(game, number):
 
 
 def start_dungeon(game):
-    """AI-assisted: [Owner: Member 1] receives the game; plans and digs the dungeon and puts the party in the first chamber; returns how many chambers were planned."""
+    """[Owner: Cael] receives the game; plans and digs the dungeon and puts the party in the first chamber; returns how many chambers were planned."""
     count = spears_ai.build_dungeon(game)
     logbook.say(game, "Spears has dug a dungeon of " + str(count) + " chambers. His throne waits in the dark.")
     enter_room(game, 0)
@@ -87,7 +87,7 @@ def start_dungeon(game):
 # ---------------------------------------------------------------- hero actions
 
 def spring_trap(game, hero):
-    """AI-assisted: [Owner: Member 1] receives the game and the hero who triggered a trap; hurts the hero, pushes the Doom Track and returns the damage."""
+    """[Owner: Cael] receives the game and the hero who triggered a trap; hurts the hero, pushes the Doom Track and returns the damage."""
     combat.apply_damage(hero, TRAP_DAMAGE)
     spears_ai.feel_hit(game, hero, TRAP_DAMAGE, "")
     game["stats"]["damage_taken"] += TRAP_DAMAGE
@@ -100,7 +100,7 @@ def spring_trap(game, hero):
 
 
 def open_chest(game, hero, max_rarity):
-    """AI-assisted: [Owner: Member 1] receives the game, the hero and the best rarity allowed; gives the hero an item, applies it and returns the item's name."""
+    """[Owner: Cael] receives the game, the hero and the best rarity allowed; gives the hero an item, applies it and returns the item's name."""
     item = cards.search_poi(hero, game["data"]["items"], max_rarity)
     if item is None:
         return ""
@@ -115,7 +115,7 @@ def open_chest(game, hero, max_rarity):
 
 
 def step_on_tile(game, hero):
-    """AI-assisted: [Owner: Member 1] receives the game and a hero who just stopped moving; resolves the chest, shrine, trap or door under the hero; returns the tile letter."""
+    """[Owner: Cael] receives the game and a hero who just stopped moving; resolves the chest, shrine, trap or door under the hero; returns the tile letter."""
     col = hero["pos"][0]
     row = hero["pos"][1]
     spot = game["grid"][row][col]
@@ -136,7 +136,7 @@ def step_on_tile(game, hero):
 
 
 def hero_move(game, hero, tile):
-    """AI-assisted: [Owner: Member 1] receives the game, a hero and the tile to move to; walks the hero there tile by tile (sliding smoothly on screen), using up moves; returns how many tiles were moved."""
+    """[Owner: Cael] receives the game, a hero and the tile to move to; walks the hero there tile by tile (sliding smoothly on screen), using up moves; returns how many tiles were moved."""
     blocked = movement.model_tiles(game["units"])
     path = movement.find_path(game["grid"], hero["pos"], tile, blocked, False)
     for index in range(1, len(path)):
@@ -153,7 +153,7 @@ def hero_move(game, hero, tile):
 
 
 def record_hit(game, half, damage):
-    """AI-assisted: [Owner: Member 1] receives the game, the attack action and the damage; updates the stats and Spears's memory; returns the memory key used."""
+    """[Owner: Cael] receives the game, the attack action and the damage; updates the stats and Spears's memory; returns the memory key used."""
     game["stats"]["damage_dealt"] += damage
     if half["range"] <= 1:
         key = "melee_hits"
@@ -165,7 +165,7 @@ def record_hit(game, half, damage):
 
 
 def hero_attack(game, hero, half, amount, tile):
-    """AI-assisted: [Owner: Member 1] receives the game, a hero, the attack action, its strength and the target tile; resolves the attack and returns the damage dealt."""
+    """[Owner: Cael] receives the game, a hero, the attack action, its strength and the target tile; resolves the attack and returns the damage dealt."""
     found = movement.model_at(game["units"], tile)
     if found is None:
         return 0
@@ -188,7 +188,7 @@ def hero_attack(game, hero, half, amount, tile):
 
 
 def hero_heal(game, hero, amount, tile):
-    """AI-assisted: [Owner: Member 1] receives the game, the healer, the heal strength and the target tile; heals the hero there and returns how much was healed."""
+    """[Owner: Cael] receives the game, the healer, the heal strength and the target tile; heals the hero there and returns how much was healed."""
     friend = movement.hero_at(game["heroes"], tile)
     if friend is None:
         return 0
@@ -200,7 +200,7 @@ def hero_heal(game, hero, amount, tile):
 
 
 def strike_style(hero, card):
-    """AI-assisted: [Owner: Member 1] receives a hero and the attack card they play; returns how the attack looks on screen: "melee", "arrow", "bolt" or "ranged"."""
+    """[Owner: Cael] receives a hero and the attack card they play; returns how the attack looks on screen: "melee", "arrow", "bolt" or "ranged"."""
     if card["action"]["range"] <= 1:
         return "melee"
     elif hero["kind"] == "archer":
@@ -211,7 +211,7 @@ def strike_style(hero, card):
 
 
 def play_card(game, hero, name, tile):
-    """AI-assisted: [Owner: Member 1] receives the game, a hero, the name of a card in their hand and the target tile; plays the card's action there and returns the action kind."""
+    """[Owner: Cael] receives the game, a hero, the name of a card in their hand and the target tile; plays the card's action there and returns the action kind."""
     card = cards.choose_card(hero, name)
     if card is None:
         return ""
@@ -238,7 +238,7 @@ def play_card(game, hero, name, tile):
 
 
 def do_request(game, hero, request):
-    """AI-assisted: [Owner: Team] receives the game, the hero whose turn it is and what the player asked for; carries it out and returns True if the turn is over."""
+    """[Owner: Team] receives the game, the hero whose turn it is and what the player asked for; carries it out and returns True if the turn is over."""
     kind = request["type"]
     if kind == "move":
         hero_move(game, hero, request["tile"])
@@ -255,7 +255,7 @@ def do_request(game, hero, request):
 
 
 def hero_turn(game, hero):
-    """AI-assisted: [Owner: Team] receives the game and a hero; lets the player walk and play one card until the turn ends; returns how many requests were carried out."""
+    """[Owner: Team] receives the game and a hero; lets the player walk and play one card until the turn ends; returns how many requests were carried out."""
     hero["moves_left"] = hero["move"] + hero["bonus_move"]
     hero["acted"] = False
     logbook.say(game, hero["name"] + "'s turn: " + str(hero["moves_left"]) + " moves and one card.")
@@ -269,7 +269,7 @@ def hero_turn(game, hero):
 
 
 def use_menu(game, choice):
-    """AI-assisted: [Owner: Member 1] receives the game and a menu choice made during a turn ("rules", "status", "save" or "quit"); shows or does it; returns the choice."""
+    """[Owner: Cael] receives the game and a menu choice made during a turn ("rules", "status", "save" or "quit"); shows or does it; returns the choice."""
     if choice == "rules":
         ui.show_rules()
     elif choice == "status":
@@ -284,7 +284,7 @@ def use_menu(game, choice):
 # ---------------------------------------------------------------- Spears's units
 
 def damage_words(before, game):
-    """AI-assisted: [Owner: Member 1] receives each hero's health before an enemy attacked and the game; returns words like "hits Pip for 3, Frodo for 2" (or "misses")."""
+    """[Owner: Cael] receives each hero's health before an enemy attacked and the game; returns words like "hits Pip for 3, Frodo for 2" (or "misses")."""
     hits = []
     for hero in game["heroes"]:
         lost = before[hero["name"]] - hero["hp"]
@@ -296,7 +296,7 @@ def damage_words(before, game):
 
 
 def health_now(game):
-    """AI-assisted: [Owner: Member 1] receives the game; returns a dictionary of every hero's health right now."""
+    """[Owner: Cael] receives the game; returns a dictionary of every hero's health right now."""
     health = {}
     for hero in game["heroes"]:
         health[hero["name"]] = hero["hp"]
@@ -304,7 +304,7 @@ def health_now(game):
 
 
 def spears_phase(game, unit):
-    """AI-assisted: [Owner: Member 1] receives the game and one enemy unit; runs its phases Move, Shoot, Charge, Fight, Morale while the screen shows each step; returns the damage it dealt."""
+    """[Owner: Cael] receives the game and one enemy unit; runs its phases Move, Shoot, Charge, Fight, Morale while the screen shows each step; returns the damage it dealt."""
     target = spears_ai.pick_target(game, unit)
     if target is None:
         return 0
@@ -336,7 +336,7 @@ def spears_phase(game, unit):
 
 
 def take_turn(game, entry):
-    """AI-assisted: [Owner: Team] receives the game and one [initiative, tie, kind, name] entry; gives that hero or unit its turn; returns the kind that acted."""
+    """[Owner: Team] receives the game and one [initiative, tie, kind, name] entry; gives that hero or unit its turn; returns the kind that acted."""
     game["turn_name"] = entry[3]
     movement.refresh_vision(game)
     if entry[2] == "hero":
@@ -356,7 +356,7 @@ def take_turn(game, entry):
 # ---------------------------------------------------------------- the round
 
 def start_round(game):
-    """AI-assisted: [Owner: Member 1] receives the game; resets the things that only last one round and returns the new round number."""
+    """[Owner: Cael] receives the game; resets the things that only last one round and returns the new round number."""
     game["round"] += 1
     game["order"] = []
     game["turn_name"] = ""
@@ -365,7 +365,7 @@ def start_round(game):
 
 
 def save_game(game):
-    """AI-assisted: [Owner: Member 1] receives the game; asks the player to type a file name and saves the whole game to name.sav; returns True if it was saved."""
+    """[Owner: Cael] receives the game; asks the player to type a file name and saves the whole game to name.sav; returns True if it was saved."""
     name = ui.ask_text(game, "Name your save file (letters and numbers):", "name", 0, 0)
     if name is None:
         return False
@@ -378,13 +378,13 @@ def save_game(game):
 
 
 def set_initiative(game, hero):
-    """AI-assisted: [Owner: Member 1] receives the game and a hero; rolls the hero's turn order for this round (speed plus a small random roll); returns it."""
+    """[Owner: Cael] receives the game and a hero; rolls the hero's turn order for this round (speed plus a small random roll); returns it."""
     hero["init"] = hero["speed"] + random.randint(0, 9)
     return hero["init"]
 
 
 def prepare_heroes(game):
-    """AI-assisted: [Owner: Member 1] receives the game; rolls turn order for every standing hero and every enemy unit; returns how many heroes will act."""
+    """[Owner: Cael] receives the game; rolls turn order for every standing hero and every enemy unit; returns how many heroes will act."""
     acting = 0
     for hero in game["heroes"]:
         if not hero["exhausted"]:
@@ -396,7 +396,7 @@ def prepare_heroes(game):
 
 
 def play_round(game):
-    """AI-assisted: [Owner: Team] receives the game; plays one full round (turn order, every hero and enemy unit takes a turn, end of round); returns the number of turns taken."""
+    """[Owner: Team] receives the game; plays one full round (turn order, every hero and enemy unit takes a turn, end of round); returns the number of turns taken."""
     start_round(game)
     prepare_heroes(game)
     game["order"] = combat.sort_turn_order(game["heroes"], game["units"])
@@ -414,7 +414,7 @@ def play_round(game):
 # ---------------------------------------------------------------- end of round
 
 def cleanup_cards(game):
-    """AI-assisted: [Owner: Member 1] receives the game; clears the bonuses that only last one round (shields); returns how many heroes were reset."""
+    """[Owner: Cael] receives the game; clears the bonuses that only last one round (shields); returns how many heroes were reset."""
     reset = 0
     for hero in game["heroes"]:
         hero["shield"] = 0
@@ -424,7 +424,7 @@ def cleanup_cards(game):
 
 
 def mark_exhausted(game):
-    """AI-assisted: [Owner: Member 1] receives the game; marks every hero with no hp or too few cards as exhausted; returns how many heroes still stand."""
+    """[Owner: Cael] receives the game; marks every hero with no hp or too few cards as exhausted; returns how many heroes still stand."""
     standing = 0
     for hero in game["heroes"]:
         if hero["exhausted"]:
@@ -437,7 +437,7 @@ def mark_exhausted(game):
 
 
 def count_clumping(game):
-    """AI-assisted: [Owner: Member 1] receives the game; counts heroes standing next to another hero and tells Spears's memory; returns that count."""
+    """[Owner: Cael] receives the game; counts heroes standing next to another hero and tells Spears's memory; returns that count."""
     tiles = movement.hero_tiles(game["heroes"])
     clumped = 0
     for tile in tiles:
@@ -451,7 +451,7 @@ def count_clumping(game):
 
 
 def end_round(game):
-    """AI-assisted: [Owner: Member 1] receives the game; runs the end of the round (shields wear off, elements wane, exhaustion, Spears's reinforcements, Doom +1, log file); returns the Doom Track value."""
+    """[Owner: Cael] receives the game; runs the end of the round (shields wear off, elements wane, exhaustion, Spears's reinforcements, Doom +1, log file); returns the Doom Track value."""
     cleanup_cards(game)
     cards.wane_elements(game["elements"])
     mark_exhausted(game)
@@ -469,7 +469,7 @@ def end_round(game):
 # ---------------------------------------------------------------- main
 
 def finish_game(game, result):
-    """AI-assisted: [Owner: Team] receives the game and "win", "lose" or "" (quit); writes the summary to the log and shows the end screen; returns True if the player wants to play again."""
+    """[Owner: Team] receives the game and "win", "lose" or "" (quit); writes the summary to the log and shows the end screen; returns True if the player wants to play again."""
     logbook.write_log(game["round_log"] + ["Result: " + str(result)], game["round"])
     summary = logbook.write_summary(game["stats"])
     if result == "" or not game["running"]:
@@ -478,7 +478,7 @@ def finish_game(game, result):
 
 
 def open_game(data, choice):
-    """AI-assisted: [Owner: Team] receives the loaded data and what the player chose on the title screen ({"party": [...]} or {"file": name}); returns a ready game, or None if a save could not be loaded."""
+    """[Owner: Team] receives the loaded data and what the player chose on the title screen ({"party": [...]} or {"file": name}); returns a ready game, or None if a save could not be loaded."""
     if "file" in choice:
         game = savegame.load_game(data, choice["file"])
         if game is not None:
@@ -492,7 +492,7 @@ def open_game(data, choice):
 
 
 def choose_game(data):
-    """AI-assisted: [Owner: Team] receives the loaded data; shows the title screens until the player starts a new game or loads one; returns the game (None if they quit)."""
+    """[Owner: Team] receives the loaded data; shows the title screens until the player starts a new game or loads one; returns the game (None if they quit)."""
     game = None
     note = ""
     ui.reset_screen()
@@ -506,7 +506,7 @@ def choose_game(data):
 
 
 def main():
-    """AI-assisted: [Owner: Team] receives nothing; loads the data, opens the window and runs each game round by round until win, lose or quit (then offers to play again); returns nothing."""
+    """[Owner: Team] receives nothing; loads the data, opens the window and runs each game round by round until win, lose or quit (then offers to play again); returns nothing."""
     data = game_data.load_dungeon("dungeon_data.txt")
     if data is None:
         print("Could not open dungeon_data.txt - keep it in the same folder as frodo_game.py")

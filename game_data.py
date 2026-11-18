@@ -6,7 +6,7 @@ import combat
 
 
 def clean_value(text):
-    """AI-assisted: [Owner: Member 1] receives one value from the data file; returns an int if it is a number, otherwise the text with _ turned into spaces."""
+    """[Owner: Cael] receives one value from the data file; returns an int if it is a number, otherwise the text with _ turned into spaces."""
     try:
         return int(text)
     except ValueError:
@@ -14,7 +14,7 @@ def clean_value(text):
 
 
 def parse_fields(text):
-    """AI-assisted: [Owner: Member 1] receives text like "move=3 role=melee"; returns a dictionary such as {"move": 3, "role": "melee"}."""
+    """[Owner: Cael] receives text like "move=3 role=melee"; returns a dictionary such as {"move": 3, "role": "melee"}."""
     fields = {}
     for pair in text.split():
         pieces = pair.split("=")
@@ -24,7 +24,7 @@ def parse_fields(text):
 
 
 def parse_action(text):
-    """AI-assisted: [Owner: Member 1] receives text like "attack:3:1"; returns an action dictionary with kind, amount and range."""
+    """[Owner: Cael] receives text like "attack:3:1"; returns an action dictionary with kind, amount and range."""
     pieces = str(text).split(":")
     action = {"kind": pieces[0], "amount": 0, "range": 1}
     try:
@@ -36,7 +36,7 @@ def parse_action(text):
 
 
 def make_card(owner, fields):
-    """AI-assisted: [Owner: Member 1] receives the hero name and the fields of a CARD line; returns a card dictionary with its one action."""
+    """[Owner: Cael] receives the hero name and the fields of a CARD line; returns a card dictionary with its one action."""
     card = {"name": fields["name"], "owner": owner}
     card["action"] = parse_action(fields["action"])
     card["element"] = fields["element"]
@@ -44,7 +44,7 @@ def make_card(owner, fields):
 
 
 def store_record(data, kind, name, fields):
-    """AI-assisted: [Owner: Member 1] receives the data so far, a record kind, its name and its fields; stores it in the right place and returns the kind."""
+    """[Owner: Cael] receives the data so far, a record kind, its name and its fields; stores it in the right place and returns the kind."""
     if kind == "CARD":
         if name in data["cards"]:
             data["cards"][name].append(make_card(name, fields))
@@ -69,7 +69,7 @@ def store_record(data, kind, name, fields):
 
 
 def read_line(data, line):
-    """AI-assisted: [Owner: Member 1] receives the data so far and one line of the file; stores the line if it is a record and returns True if it was one."""
+    """[Owner: Cael] receives the data so far and one line of the file; stores the line if it is a record and returns True if it was one."""
     if line == "" or line.startswith("#"):
         return False
     parts = line.split("|")
@@ -86,7 +86,7 @@ def read_line(data, line):
 
 
 def load_dungeon(filename):
-    """AI-assisted: [Owner: Member 1] receives the data file name; returns a dictionary of units, styles, the dungeon plan settings, the arena drawing, cards, items, heroes and settings, or None if the file cannot be opened."""
+    """[Owner: Cael] receives the data file name; returns a dictionary of units, styles, the dungeon plan settings, the arena drawing, cards, items, heroes and settings, or None if the file cannot be opened."""
     data = {"units": {}, "styles": [], "dungeon": {}, "arena": [], "cards": {}, "items": [], "heroes": {},
             "settings": {}, "levels": []}
     try:
@@ -100,7 +100,7 @@ def load_dungeon(filename):
 
 
 def make_hero(data, name):
-    """AI-assisted: [Owner: Member 1] receives the loaded data and a hero name; returns a fresh hero dictionary with a full hand of cards."""
+    """[Owner: Cael] receives the loaded data and a hero name; returns a fresh hero dictionary with a full hand of cards."""
     info = data["heroes"][name]
     hero = {"name": name, "kind": info["kind"], "title": info["title"], "blurb": info["blurb"]}
     hero["hp"] = info["hp"]
@@ -118,19 +118,19 @@ def make_hero(data, name):
 
 
 def new_memory():
-    """AI-assisted: [Owner: Member 1] receives nothing; returns Spears's memory dictionary with every count at 0."""
+    """[Owner: Cael] receives nothing; returns Spears's memory dictionary with every count at 0."""
     return {"melee_hits": 0, "ranged_hits": 0, "chests_opened": 0, "tiles_moved": 0,
             "clumped": 0}
 
 
 def new_stats():
-    """AI-assisted: [Owner: Member 1] receives nothing; returns the stats dictionary used for the end summary, all at 0."""
+    """[Owner: Cael] receives nothing; returns the stats dictionary used for the end summary, all at 0."""
     return {"rounds": 0, "damage_dealt": 0, "damage_taken": 0, "cards_played": 0,
             "loot_found": 0, "rooms_cleared": 0, "enemies_slain": 0}
 
 
 def find_level(data, name):
-    """AI-assisted: [Owner: Member 1] receives the loaded data and a difficulty name; returns that DIFFICULTY record (Normal if the name is unknown)."""
+    """[Owner: Cael] receives the loaded data and a difficulty name; returns that DIFFICULTY record (Normal if the name is unknown)."""
     for level in data["levels"]:
         if level["name"] == name:
             return level
@@ -138,7 +138,7 @@ def find_level(data, name):
 
 
 def apply_level(game, level):
-    """AI-assisted: [Owner: Member 1] receives a new game and a difficulty record; makes heroes tougher or frailer, the Doom Track longer or shorter and enemies hit harder or softer; returns the difficulty name."""
+    """[Owner: Cael] receives a new game and a difficulty record; makes heroes tougher or frailer, the Doom Track longer or shorter and enemies hit harder or softer; returns the difficulty name."""
     for hero in game["heroes"]:
         hero["max_hp"] = max(4, hero["max_hp"] + level["hero_hp"])
         hero["hp"] = hero["max_hp"]
@@ -149,7 +149,7 @@ def apply_level(game, level):
 
 
 def new_game(data, party, difficulty):
-    """AI-assisted: [Owner: Member 1] receives the loaded data, the list of chosen hero names and the difficulty name; returns the whole starting game dictionary."""
+    """[Owner: Cael] receives the loaded data, the list of chosen hero names and the difficulty name; returns the whole starting game dictionary."""
     settings = data["settings"]
     game = {"running": True, "data": data, "heroes": [], "units": [], "inventory": []}
     for name in party:
@@ -169,7 +169,7 @@ def new_game(data, party, difficulty):
 
 
 def find_hero(game, name):
-    """AI-assisted: [Owner: Member 1] receives the game and a hero name; returns that hero's dictionary, or None."""
+    """[Owner: Cael] receives the game and a hero name; returns that hero's dictionary, or None."""
     for hero in game["heroes"]:
         if hero["name"] == name:
             return hero
@@ -177,7 +177,7 @@ def find_hero(game, name):
 
 
 def place_party(game, starts):
-    """AI-assisted: [Owner: Member 1] receives the game and the room's start tiles; stands each living hero on one and returns how many were placed."""
+    """[Owner: Cael] receives the game and the room's start tiles; stands each living hero on one and returns how many were placed."""
     placed = 0
     for hero in game["heroes"]:
         if not hero["exhausted"] and placed < len(starts):

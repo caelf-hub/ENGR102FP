@@ -64,7 +64,7 @@ Run the game with `python frodo_game.py`. Run the tests with `python test_frodo.
 
 - Fill in the header line at the top of `frodo_game.py`.
 - Every function is tagged `AI-assisted`. Change a tag to `Team-written` only for functions your team wrote or rewrote.
-- Line numbers in `REQUIREMENTS_CHECK.md` shift when the code changes. Recheck them after your edits.
+- Line numbers in `docs/REQUIREMENTS_CHECK.md` shift when the code changes. Recheck them after your edits.
 
 ## Saves, Spears and enemy turns
 
@@ -79,4 +79,4 @@ Run the game with `python frodo_game.py`. Run the tests with `python test_frodo.
 - Difficulty levels are the `DIFFICULTY` lines in `dungeon_data.txt`; `game_data.apply_level()` applies one to a new game (`game["difficulty"]`, `game["enemy_bonus"]`).
 - Game-feel effects are requested by the game logic as `game["fx"]` entries: `strike` (an attack flying), `puff` (an enemy falls), `sparkle` (loot, heal, shield, dash, door), `shake` (a big hit), `hurt` (a hero's panel flashes red). `ui.consume_fx()` turns them into animation, each starting when the attack before it has landed.
 - Tooltips: `ui.tooltip_lines()` for the map, `ui.panel_tip()` for cards, the deck, the turn order, the orbs, the Doom bar and the hero panels.
-- Every function's owner is in its docstring (`AI-assisted: [Owner: Member 2] ...`); `OWNERS.md` lists them all. To re-make `OWNERS.md` after adding functions, copy the owner tag style and update the table by hand.
+- Every game-logic function's owner is in its docstring (`[Owner: Guilherme] ...`); `docs/OWNERS.md` lists them all. To re-make `OWNERS.md` after adding functions, copy the owner tag style and update the table by hand.

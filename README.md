@@ -133,41 +133,42 @@ frodo_game.main()                       <- the ONE round-by-round while loop
   `X` trapped chest, `T` trap, `H` hidden pit, `P` shrine, `~` cover, `Y` throne, `B` brazier.
 - **Tiles** are `[col, row]`, and the letter at a tile is `game["grid"][row][col]`.
 
-`TEAM_GUIDE.md` is the cookbook: "I want to change X, edit Y".
+[`docs/TEAM_GUIDE.md`](docs/TEAM_GUIDE.md) is the cookbook: "I want to change X, edit Y".
 
 ---
 
 ## 4. Who owns what
 
-Every function has an owner written in its docstring, right after the tag, like this:
+Every game-logic function names its owner at the start of its docstring, like this:
 
 ```python
 def calc_damage(base, modifier, shield):
-    """AI-assisted: [Owner: Member 1] receives the base attack, the modifier card and the target's shield; returns the damage dealt (never below 0)."""
+    """[Owner: Mahad] receives the base attack, the modifier card and the target's shield; returns the damage dealt (never below 0)."""
 ```
 
 The owner is the person who must be able to **explain** that function to a grader, and who may rewrite it.
-**`OWNERS.md` lists every function, its owner and what it does.** (Member names are placeholders: replace
-`Member 1/2/3` with real names using find-and-replace across all `.py` files and `OWNERS.md`.)
+**[`docs/OWNERS.md`](docs/OWNERS.md) lists every function, its owner and what it does.**
 
 | Owner | Area | Files | Functions |
 |---|---|---|---|
 | **Team** | The core loop and the tests - everyone should know these | `frodo_game.py`: `main`, `choose_game`, `open_game`, `play_round`, `take_turn`, `hero_turn`, `do_request`, `finish_game`; all of `test_frodo.py` | 20 |
-| **Member 1** | Heroes, cards and the turn | rest of `frodo_game.py`, `cards.py`, `combat.py`, `logbook.py`, `game_data.py` | 70 |
-| **Member 2** | Spears and his armies | `spears_ai.py`, `movement.py` | 81 |
-| **Member 3** | The dungeon and saving | `chambers.py`, `savegame.py` | 69 |
+| **Cael** | Heroes, cards and the turn | rest of `frodo_game.py`, `cards.py`, `game_data.py` | 52 |
+| **Guilherme** | Spears and his armies | `spears_ai.py` | 57 |
+| **Mahad** | The dungeon, combat maths and the log | `chambers.py`, `combat.py`, `logbook.py` | 53 |
+| **Yassin** | Movement, fog of war and saving | `movement.py`, `savegame.py` | 58 |
 | **AI (no owner)** | Art and interface: drawing, animation, drag and drop, screens | `ui.py`, `art.py`, `scenery.py` | 281 |
 
 **Start here** - the functions each person should know best:
 
 - **Team:** `main`, `play_round`, `take_turn`, `hero_turn`, `do_request` (`frodo_game.py`).
-- **Member 1:** `play_card`, `hero_move`, `hero_attack`, `step_on_tile`, `end_round` (`frodo_game.py`);
-  `draw_card`, `finish_card` (`cards.py`); `draw_modifier`, `calc_damage`, `sort_turn_order` (`combat.py`);
-  `check_game_over`, `write_summary` (`logbook.py`); `load_dungeon`, `new_game` (`game_data.py`).
-- **Member 2:** `spears_counter`, `generate_room`, `reinforce`, `move_unit`, `unit_charge`, `unit_attack`,
-  `unit_morale`, `morale_test`, `boss_check` (`spears_ai.py`); `step_map`, `reachable_tiles`, `find_path`,
-  `refresh_vision` (`movement.py`).
-- **Member 3:** `plan_dungeon`, `carve_chamber`, `pick_door`, `dig_corridor` (`chambers.py`);
+- **Cael:** `play_card`, `hero_move`, `hero_attack`, `step_on_tile`, `end_round` (`frodo_game.py`);
+  `draw_card`, `finish_card` (`cards.py`); `load_dungeon`, `new_game` (`game_data.py`).
+- **Guilherme:** `spears_counter`, `generate_room`, `reinforce`, `move_unit`, `unit_charge`, `unit_attack`,
+  `unit_morale`, `morale_test`, `boss_check` (`spears_ai.py`).
+- **Mahad:** `plan_dungeon`, `carve_chamber`, `pick_door`, `dig_corridor` (`chambers.py`);
+  `draw_modifier`, `calc_damage`, `sort_turn_order` (`combat.py`); `check_game_over`, `write_summary`
+  (`logbook.py`).
+- **Yassin:** `step_map`, `reachable_tiles`, `find_path`, `refresh_vision` (`movement.py`);
   `save_game`, `save_lines`, `load_game`, `build_game` (`savegame.py`).
 
 ---
@@ -176,13 +177,13 @@ The owner is the person who must be able to **explain** that function to a grade
 
 The brief says every function's docstring must **start** with its tag: `Team-written:` or `AI-assisted:`.
 
-- **Right now every function is `AI-assisted:`**, because the AI assistant wrote all of them. That is the
-  honest label - please do not change a tag unless the statement on it becomes true.
-- **To claim a function:** rewrite it yourself (your own logic, your own words), run `python test_frodo.py`,
-  then change its tag from `AI-assisted:` to `Team-written:` and keep the `[Owner: ...]` part.
-- **Art stays AI-assisted:** `ui.py`, `art.py` and `scenery.py` are the drawing and interface code.
-- `REQUIREMENTS_CHECK.md` shows, for each of the 12 requirements, the file, function and line that meets it,
-  plus every function and its tag.
+- **Interface and art** (`ui.py`, `art.py`, `scenery.py`) start with `AI-assisted:`.
+- **Game logic** currently starts with `[Owner: name]`, with no tag in front.
+- Every function in the project was written with the AI assistant. A function's tag should only become
+  `Team-written:` once its owner has rewritten it themselves (their own logic, their own words) and
+  `python test_frodo.py` still passes.
+- [`docs/REQUIREMENTS_CHECK.md`](docs/REQUIREMENTS_CHECK.md) shows, for each of the 12 requirements, the
+  file, function and line that meets it, plus every function and its tag.
 
 ---
 
@@ -247,7 +248,7 @@ of war, and the log / win-lose check. Run it after every change.
 ## 10. Before we hand in
 
 - [ ] Fill in the header line at the top of `frodo_game.py` (team, members, section).
-- [ ] Replace `Member 1/2/3` with real names in every `.py` file and `OWNERS.md`.
+- [ ] Every docstring starts with the tag the brief asks for (`Team-written:` or `AI-assisted:`).
 - [ ] Each owner can explain their functions (see section 6).
 - [ ] Tags are honest: `Team-written:` only on functions we actually rewrote.
 - [ ] `python test_frodo.py` passes.
@@ -273,9 +274,14 @@ of war, and the log / win-lose check. Run it after every change.
 | `art.py` | Colours, fonts, figures, icons, cards, panels (all drawn in code). |
 | `scenery.py` | Paints the dungeon: floor, walls, shadows, light. |
 | `test_frodo.py` | The tests. |
-| `OWNERS.md` | Every function, its owner and what it does. |
-| `TEAM_GUIDE.md` | Where to change things. |
-| `REQUIREMENTS_CHECK.md` | Where each project requirement is met. |
+| `docs/OWNERS.md` | Every function, its owner and what it does. |
+| `docs/TEAM_GUIDE.md` | Where to change things. |
+| `docs/REQUIREMENTS_CHECK.md` | Where each project requirement is met. |
+| `LICENSE` | The project's licence. |
+
+The code, `dungeon_data.txt`, `frodo_log.txt` and the `.sav` files all stay in the top folder next to
+`frodo_game.py`: the brief requires every file the game opens to be in that folder, opened by name only.
+Only documentation lives in `docs/`.
 
 Made while playing: `frodo_log.txt` (each round, plus a summary) and `.sav` save files.
 

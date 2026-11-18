@@ -1,16 +1,17 @@
 # Who owns which function
 
-Generated from the code. Every function was written with AI help and is tagged `AI-assisted:`.
-The `[Owner: ...]` after the tag says who on the team must be able to explain it and may rewrite it.
-When you rewrite a function yourself, change its tag to `Team-written:` (keep the owner).
+Generated from the docstrings in the code. Every function was written with the AI assistant.
+The `[Owner: ...]` at the start of a game-logic docstring says who on the team must be able to explain it
+and may rewrite it. Interface and art functions (`ui.py`, `art.py`, `scenery.py`) are tagged `AI-assisted:`.
 
 | Owner | Area | Functions |
 |---|---|---|
 | Team | Everyone (the core loop and the tests) | 20 |
-| Member 1 | Heroes, cards and the turn | 70 |
-| Member 2 | Spears and his armies | 81 |
-| Member 3 | The dungeon and saving | 69 |
-| AI (no owner) | AI art and interface (stays AI-assisted) | 281 |
+| Cael | Heroes, cards and the turn | 52 |
+| Guilherme | Spears and his armies | 57 |
+| Mahad | The dungeon, combat maths and the log | 53 |
+| Yassin | Movement, fog of war and saving | 58 |
+| AI (no owner) | AI art and interface (AI-assisted) | 281 |
 
 ## Team - Everyone (the core loop and the tests)
 
@@ -37,7 +38,7 @@ When you rewrite a function yourself, change its tag to `Team-written:` (keep th
 | `test_frodo.py` | `test_spears_ahead()` | 263 | receives nothing; checks that Spears never changes the chamber the party is in, only chambers ahead, and that his preparations appear when one is opened; returns True. |
 | `test_frodo.py` | `run_tests()` | 292 | receives nothing; runs every test and prints the results; returns how many passed. |
 
-## Member 1 - Heroes, cards and the turn
+## Cael - Heroes, cards and the turn
 
 | File | Function | Line | What it does |
 |---|---|---|---|
@@ -78,24 +79,6 @@ When you rewrite a function yourself, change its tag to `Team-written:` (keep th
 | `cards.py` | `search_poi()` | 87 | receives the searching hero, the item list and the best rarity allowed; adds a random item to the hero and returns it (None if nothing fits). |
 | `cards.py` | `cheese_feast()` | 100 | receives the game and a heal amount; Frodo heals that much, everyone else heals 1; returns a message. |
 | `cards.py` | `apply_item()` | 112 | receives the game, a hero and an item; applies the item's effect and returns a message about it. |
-| `combat.py` | `build_modifier_deck()` | 5 | receives nothing; returns a shuffled list of 20 attack modifier cards. |
-| `combat.py` | `draw_modifier()` | 16 | receives a modifier deck and its discard pile; returns the card drawn (like "+1", "x2" or "null"). |
-| `combat.py` | `calc_damage()` | 30 | receives the base attack, the modifier card and the target's shield; returns the damage dealt (never below 0). |
-| `combat.py` | `apply_damage()` | 47 | receives a hero or enemy model dictionary and a damage number; lowers its hp and returns the hp left. |
-| `combat.py` | `roll_attack()` | 55 | receives the game, "hero" or "enemy", the base attack and the shield; draws a modifier and returns [damage, modifier]. |
-| `combat.py` | `sort_turn_order()` | 66 | receives the heroes and enemy units; returns a list of [initiative, tie, kind, name] sorted lowest first. |
-| `logbook.py` | `say()` | 4 | receives the game and a sentence; adds it to the on-screen log and this round's file log; returns the sentence. |
-| `logbook.py` | `note()` | 11 | receives the game and a sentence the party cannot see happening; writes it only to the file log; returns the sentence. |
-| `logbook.py` | `tell()` | 17 | receives the game, whether the party can see the event, and a sentence; shows it on screen only if visible, but always logs it to the file; returns the sentence. |
-| `logbook.py` | `add_float()` | 24 | receives the game, a tile, some text and a color name; asks the screen to float that text over the tile. |
-| `logbook.py` | `add_banner()` | 30 | receives the game and a sentence; asks the screen to show it as a Spears banner; returns the sentence. |
-| `logbook.py` | `start_log()` | 36 | receives the list of hero names; starts a fresh frodo_log.txt and returns True if the file could be written. |
-| `logbook.py` | `write_log()` | 48 | receives this round's sentences and the round number; appends them to frodo_log.txt and returns how many lines were written. |
-| `logbook.py` | `write_summary()` | 63 | receives the stats dictionary; works out the averages, appends the summary to frodo_log.txt and returns the summary dictionary. |
-| `logbook.py` | `summary_lines()` | 83 | receives the summary dictionary; returns the list of sentences shown at the end and written to the log. |
-| `logbook.py` | `check_game_over()` | 98 | receives the heroes, the Doom Track, its end and whether the Warlord is dead; returns "win", "lose" or "" (keep playing). |
-| `logbook.py` | `status_lines()` | 112 | receives the game; returns a list of sentences describing the party, the room and the Doom Track. |
-| `logbook.py` | `hero_line()` | 124 | receives a hero; returns one sentence with the hero's hp, cards and items. |
 | `game_data.py` | `clean_value()` | 8 | receives one value from the data file; returns an int if it is a number, otherwise the text with _ turned into spaces. |
 | `game_data.py` | `parse_fields()` | 16 | receives text like "move=3 role=melee"; returns a dictionary such as {"move": 3, "role": "melee"}. |
 | `game_data.py` | `parse_action()` | 26 | receives text like "attack:3:1"; returns an action dictionary with kind, amount and range. |
@@ -112,7 +95,7 @@ When you rewrite a function yourself, change its tag to `Team-written:` (keep th
 | `game_data.py` | `find_hero()` | 171 | receives the game and a hero name; returns that hero's dictionary, or None. |
 | `game_data.py` | `place_party()` | 179 | receives the game and the room's start tiles; stands each living hero on one and returns how many were placed. |
 
-## Member 2 - Spears and his armies
+## Guilherme - Spears and his armies
 
 | File | Function | Line | What it does |
 |---|---|---|---|
@@ -173,35 +156,29 @@ When you rewrite a function yourself, change its tag to `Team-written:` (keep th
 | `spears_ai.py` | `summon_guards()` | 752 | receives the game and the Warlord; his guards rush in at the free guard marks of the arena; returns a message. |
 | `spears_ai.py` | `enrage()` | 766 | receives the Warlord; he grows stronger and faster; returns a message. |
 | `spears_ai.py` | `boss_check()` | 773 | receives the game and a unit that was just hit; if it is the Warlord, moves him into his next phase at half and at a quarter of his wounds; returns the phase he is in (0, 1 or 2). |
-| `movement.py` | `tile_distance()` | 11 | receives two tiles; returns how many up/down/left/right steps apart they are. |
-| `movement.py` | `in_bounds()` | 16 | receives the grid and a col/row; returns True if that spot is inside the room. |
-| `movement.py` | `is_floor()` | 21 | receives the grid, a col/row and whether sealed doors count as open; returns True if someone can stand there. |
-| `movement.py` | `blank_grid()` | 34 | receives the grid and a value; returns a new grid of the same size filled with that value. |
-| `movement.py` | `can_enter()` | 45 | receives the grid, the step counts so far, a tile and the blocked tiles; returns True if the search may step onto it. |
-| `movement.py` | `step_map()` | 54 | receives the grid, a start tile and blocked tiles; returns a grid of step counts from the start (-1 = cannot be reached). |
-| `movement.py` | `reachable_tiles()` | 69 | receives the grid, a start tile, a step limit, tiles that block the way and tiles nobody may stop on; returns the list of tiles that can be reached. |
-| `movement.py` | `lower_neighbor()` | 81 | receives the step counts and a tile; returns the neighbor tile that is one step closer to the start. |
-| `movement.py` | `find_path()` | 92 | receives the grid, a start tile and a goal tile; returns the list of tiles to walk (start first), or [] if there is no way. |
-| `movement.py` | `hero_tiles()` | 105 | receives the hero list; returns the tiles of every hero still standing. |
-| `movement.py` | `model_tiles()` | 114 | receives the enemy unit list; returns the tile of every enemy model. |
-| `movement.py` | `hero_at()` | 123 | receives the hero list and a tile; returns the standing hero on that tile, or None. |
-| `movement.py` | `model_at()` | 131 | receives the unit list and a tile; returns [unit, model] for the enemy on that tile, or None. |
-| `movement.py` | `learn_outline()` | 140 | receives the game; adds every floor tile, door, throne and brazier of the chambers the party has opened to what it knows (the shape of the rooms, not their contents); returns how many tiles were learned. |
-| `movement.py` | `shown_letter()` | 159 | receives a tile letter; returns the letter the party sees there (hidden pits look like floor, trapped chests like chests). |
-| `movement.py` | `lit_floor()` | 168 | receives the game; returns a grid marking every tile a standing hero can see: within SIGHT steps on foot, so walls block the view. |
-| `movement.py` | `wall_in_view()` | 180 | receives the game, the lit-floor grid and a wall tile; returns True if a lit floor tile touches that wall (so the wall is lit too). |
-| `movement.py` | `refresh_vision()` | 189 | receives the game; works out which tiles the heroes can see right now and remembers what is on them; returns how many tiles are visible. |
-| `movement.py` | `enemy_targets()` | 205 | receives the game, a tile and a range; returns the tiles of visible enemy models within range. |
-| `movement.py` | `friend_targets()` | 214 | receives the game, a tile and a range; returns the tiles of standing heroes within range. |
-| `movement.py` | `move_targets()` | 223 | receives the game and a hero; returns [tiles the hero can walk to with the moves left this turn, steps to each]. |
-| `movement.py` | `action_targets()` | 235 | receives the game, a hero and a card's action; returns the list of tiles that card can be dropped on. |
-| `movement.py` | `is_valid_drop()` | 245 | receives the tile under the mouse and the allowed tiles; returns True if the drop is allowed. |
-| `movement.py` | `drop_message()` | 250 | receives the game, a hero, the card's action (None for walking) and the bad drop tile; returns a friendly message saying why it did not work. |
 
-## Member 3 - The dungeon and saving
+## Mahad - The dungeon, combat maths and the log
 
 | File | Function | Line | What it does |
 |---|---|---|---|
+| `combat.py` | `build_modifier_deck()` | 5 | receives nothing; returns a shuffled list of 20 attack modifier cards. |
+| `combat.py` | `draw_modifier()` | 16 | receives a modifier deck and its discard pile; returns the card drawn (like "+1", "x2" or "null"). |
+| `combat.py` | `calc_damage()` | 30 | receives the base attack, the modifier card and the target's shield; returns the damage dealt (never below 0). |
+| `combat.py` | `apply_damage()` | 47 | receives a hero or enemy model dictionary and a damage number; lowers its hp and returns the hp left. |
+| `combat.py` | `roll_attack()` | 55 | receives the game, "hero" or "enemy", the base attack and the shield; draws a modifier and returns [damage, modifier]. |
+| `combat.py` | `sort_turn_order()` | 66 | receives the heroes and enemy units; returns a list of [initiative, tie, kind, name] sorted lowest first. |
+| `logbook.py` | `say()` | 4 | receives the game and a sentence; adds it to the on-screen log and this round's file log; returns the sentence. |
+| `logbook.py` | `note()` | 11 | receives the game and a sentence the party cannot see happening; writes it only to the file log; returns the sentence. |
+| `logbook.py` | `tell()` | 17 | receives the game, whether the party can see the event, and a sentence; shows it on screen only if visible, but always logs it to the file; returns the sentence. |
+| `logbook.py` | `add_float()` | 24 | receives the game, a tile, some text and a color name; asks the screen to float that text over the tile. |
+| `logbook.py` | `add_banner()` | 30 | receives the game and a sentence; asks the screen to show it as a Spears banner; returns the sentence. |
+| `logbook.py` | `start_log()` | 36 | receives the list of hero names; starts a fresh frodo_log.txt and returns True if the file could be written. |
+| `logbook.py` | `write_log()` | 48 | receives this round's sentences and the round number; appends them to frodo_log.txt and returns how many lines were written. |
+| `logbook.py` | `write_summary()` | 63 | receives the stats dictionary; works out the averages, appends the summary to frodo_log.txt and returns the summary dictionary. |
+| `logbook.py` | `summary_lines()` | 83 | receives the summary dictionary; returns the list of sentences shown at the end and written to the log. |
+| `logbook.py` | `check_game_over()` | 98 | receives the heroes, the Doom Track, its end and whether the Warlord is dead; returns "win", "lose" or "" (keep playing). |
+| `logbook.py` | `status_lines()` | 112 | receives the game; returns a list of sentences describing the party, the room and the Doom Track. |
+| `logbook.py` | `hero_line()` | 124 | receives a hero; returns one sentence with the hero's hp, cards and items. |
 | `chambers.py` | `blank_map()` | 18 | receives a width and height in tiles; returns a new map grid that is solid rock everywhere. |
 | `chambers.py` | `zone_box()` | 26 | receives the map grid and a zone [x, y, width, height]; returns [left, top, right, bottom], the tiles a chamber may use (always leaving a wall around it). |
 | `chambers.py` | `box_center()` | 35 | receives a box [left, top, right, bottom]; returns the tile in its middle. |
@@ -237,6 +214,35 @@ When you rewrite a function yourself, change its tag to `Team-written:` (keep th
 | `chambers.py` | `dig_corridor()` | 447 | receives the map grid, the door, the new chamber's tiles, the owner grid and the chamber numbers the corridor may cross; digs the corridor and returns its tiles. |
 | `chambers.py` | `far_cluster()` | 463 | receives floor tiles, a point and a count; returns that many tiles huddled together as far from the point as possible (where the party starts). |
 | `chambers.py` | `far_tiles()` | 481 | receives floor tiles and a point; returns the tiles in the far half of the chamber from that point (where Spears deploys). |
+
+## Yassin - Movement, fog of war and saving
+
+| File | Function | Line | What it does |
+|---|---|---|---|
+| `movement.py` | `tile_distance()` | 11 | receives two tiles; returns how many up/down/left/right steps apart they are. |
+| `movement.py` | `in_bounds()` | 16 | receives the grid and a col/row; returns True if that spot is inside the room. |
+| `movement.py` | `is_floor()` | 21 | receives the grid, a col/row and whether sealed doors count as open; returns True if someone can stand there. |
+| `movement.py` | `blank_grid()` | 34 | receives the grid and a value; returns a new grid of the same size filled with that value. |
+| `movement.py` | `can_enter()` | 45 | receives the grid, the step counts so far, a tile and the blocked tiles; returns True if the search may step onto it. |
+| `movement.py` | `step_map()` | 54 | receives the grid, a start tile and blocked tiles; returns a grid of step counts from the start (-1 = cannot be reached). |
+| `movement.py` | `reachable_tiles()` | 69 | receives the grid, a start tile, a step limit, tiles that block the way and tiles nobody may stop on; returns the list of tiles that can be reached. |
+| `movement.py` | `lower_neighbor()` | 81 | receives the step counts and a tile; returns the neighbor tile that is one step closer to the start. |
+| `movement.py` | `find_path()` | 92 | receives the grid, a start tile and a goal tile; returns the list of tiles to walk (start first), or [] if there is no way. |
+| `movement.py` | `hero_tiles()` | 105 | receives the hero list; returns the tiles of every hero still standing. |
+| `movement.py` | `model_tiles()` | 114 | receives the enemy unit list; returns the tile of every enemy model. |
+| `movement.py` | `hero_at()` | 123 | receives the hero list and a tile; returns the standing hero on that tile, or None. |
+| `movement.py` | `model_at()` | 131 | receives the unit list and a tile; returns [unit, model] for the enemy on that tile, or None. |
+| `movement.py` | `learn_outline()` | 140 | receives the game; adds every floor tile, door, throne and brazier of the chambers the party has opened to what it knows (the shape of the rooms, not their contents); returns how many tiles were learned. |
+| `movement.py` | `shown_letter()` | 159 | receives a tile letter; returns the letter the party sees there (hidden pits look like floor, trapped chests like chests). |
+| `movement.py` | `lit_floor()` | 168 | receives the game; returns a grid marking every tile a standing hero can see: within SIGHT steps on foot, so walls block the view. |
+| `movement.py` | `wall_in_view()` | 180 | receives the game, the lit-floor grid and a wall tile; returns True if a lit floor tile touches that wall (so the wall is lit too). |
+| `movement.py` | `refresh_vision()` | 189 | receives the game; works out which tiles the heroes can see right now and remembers what is on them; returns how many tiles are visible. |
+| `movement.py` | `enemy_targets()` | 205 | receives the game, a tile and a range; returns the tiles of visible enemy models within range. |
+| `movement.py` | `friend_targets()` | 214 | receives the game, a tile and a range; returns the tiles of standing heroes within range. |
+| `movement.py` | `move_targets()` | 223 | receives the game and a hero; returns [tiles the hero can walk to with the moves left this turn, steps to each]. |
+| `movement.py` | `action_targets()` | 235 | receives the game, a hero and a card's action; returns the list of tiles that card can be dropped on. |
+| `movement.py` | `is_valid_drop()` | 245 | receives the tile under the mouse and the allowed tiles; returns True if the drop is allowed. |
+| `movement.py` | `drop_message()` | 250 | receives the game, a hero, the card's action (None for walking) and the bad drop tile; returns a friendly message saying why it did not work. |
 | `savegame.py` | `word()` | 21 | receives some text; returns it with spaces turned into _ so it fits in one key=value pair. |
 | `savegame.py` | `tile_text()` | 26 | receives a tile [col, row] (or None); returns it written as "col,row" (or "-"). |
 | `savegame.py` | `tiles_text()` | 33 | receives a list of tiles; returns them written as "c,r/c,r/..." (or "-" if empty). |
@@ -272,7 +278,7 @@ When you rewrite a function yourself, change its tag to `Team-written:` (keep th
 | `savegame.py` | `list_saves()` | 399 | receives nothing; returns the names of the .sav files in this folder, newest first. |
 | `savegame.py` | `save_summary()` | 415 | receives a save name; returns a short line about it, like "round 12 - Kennel - 4 of 12 chambers" ("" if it cannot be read). |
 
-## AI art and interface - AI art and interface (stays AI-assisted)
+## AI art and interface - AI art and interface (AI-assisted)
 
 | File | Function | Line | What it does |
 |---|---|---|---|
