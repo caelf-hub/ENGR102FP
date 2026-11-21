@@ -9,17 +9,17 @@ SIGHT = 5
 
 
 def tile_distance(first, second):
-    """[Owner: Yassin] receives two tiles; returns how many up/down/left/right steps apart they are."""
+    """Team-written. [Owner: Yassin] receives two tiles; returns how many up/down/left/right steps apart they are."""
     return abs(first[0] - second[0]) + abs(first[1] - second[1])
 
 
 def in_bounds(grid, col, row):
-    """[Owner: Yassin] receives the grid and a col/row; returns True if that spot is inside the room."""
+    """Team-written. [Owner: Yassin] receives the grid and a col/row; returns True if that spot is inside the room."""
     return row >= 0 and row < len(grid) and col >= 0 and col < len(grid[0])
 
 
 def is_floor(grid, col, row, door_open):
-    """[Owner: Yassin] receives the grid, a col/row and whether sealed doors count as open; returns True if someone can stand there."""
+    """Team-written. [Owner: Yassin] receives the grid, a col/row and whether sealed doors count as open; returns True if someone can stand there."""
     if not in_bounds(grid, col, row):
         return False
     spot = grid[row][col]
@@ -32,7 +32,7 @@ def is_floor(grid, col, row, door_open):
 
 
 def blank_grid(grid, value):
-    """[Owner: Yassin] receives the grid and a value; returns a new grid of the same size filled with that value."""
+    """Team-written. [Owner: Yassin] receives the grid and a value; returns a new grid of the same size filled with that value."""
     new_grid = []
     for row in grid:
         line = []
@@ -43,7 +43,7 @@ def blank_grid(grid, value):
 
 
 def can_enter(grid, steps, tile, blocked, door_open):
-    """[Owner: Yassin] receives the grid, the step counts so far, a tile and the blocked tiles; returns True if the search may step onto it."""
+    """Team-written. [Owner: Yassin] receives the grid, the step counts so far, a tile and the blocked tiles; returns True if the search may step onto it."""
     if not is_floor(grid, tile[0], tile[1], door_open):
         return False
     if steps[tile[1]][tile[0]] != -1:
@@ -52,7 +52,7 @@ def can_enter(grid, steps, tile, blocked, door_open):
 
 
 def step_map(grid, start, blocked, door_open):
-    """[Owner: Yassin] receives the grid, a start tile and blocked tiles; returns a grid of step counts from the start (-1 = cannot be reached)."""
+    """Team-written. [Owner: Yassin] receives the grid, a start tile and blocked tiles; returns a grid of step counts from the start (-1 = cannot be reached)."""
     steps = blank_grid(grid, -1)
     steps[start[1]][start[0]] = 0
     queue = [start]
@@ -67,7 +67,7 @@ def step_map(grid, start, blocked, door_open):
 
 
 def reachable_tiles(grid, start, limit, blocked, occupied, door_open):
-    """[Owner: Yassin] receives the grid, a start tile, a step limit, tiles that block the way and tiles nobody may stop on; returns the list of tiles that can be reached."""
+    """Team-written. [Owner: Yassin] receives the grid, a start tile, a step limit, tiles that block the way and tiles nobody may stop on; returns the list of tiles that can be reached."""
     steps = step_map(grid, start, blocked, door_open)
     tiles = []
     for row in range(len(grid)):
@@ -79,7 +79,7 @@ def reachable_tiles(grid, start, limit, blocked, occupied, door_open):
 
 
 def lower_neighbor(steps, tile):
-    """[Owner: Yassin] receives the step counts and a tile; returns the neighbor tile that is one step closer to the start."""
+    """Team-written. [Owner: Yassin] receives the step counts and a tile; returns the neighbor tile that is one step closer to the start."""
     wanted = steps[tile[1]][tile[0]] - 1
     for step in STEPS:
         col = tile[0] + step[0]
@@ -90,7 +90,7 @@ def lower_neighbor(steps, tile):
 
 
 def find_path(grid, start, goal, blocked, door_open):
-    """[Owner: Yassin] receives the grid, a start tile and a goal tile; returns the list of tiles to walk (start first), or [] if there is no way."""
+    """Team-written. [Owner: Yassin] receives the grid, a start tile and a goal tile; returns the list of tiles to walk (start first), or [] if there is no way."""
     steps = step_map(grid, start, blocked, door_open)
     if steps[goal[1]][goal[0]] < 0:
         return []
@@ -103,7 +103,7 @@ def find_path(grid, start, goal, blocked, door_open):
 
 
 def hero_tiles(heroes):
-    """[Owner: Yassin] receives the hero list; returns the tiles of every hero still standing."""
+    """Team-written. [Owner: Yassin] receives the hero list; returns the tiles of every hero still standing."""
     tiles = []
     for hero in heroes:
         if not hero["exhausted"]:
@@ -112,7 +112,7 @@ def hero_tiles(heroes):
 
 
 def model_tiles(units):
-    """[Owner: Yassin] receives the enemy unit list; returns the tile of every enemy model."""
+    """Team-written. [Owner: Yassin] receives the enemy unit list; returns the tile of every enemy model."""
     tiles = []
     for unit in units:
         for model in unit["models"]:
@@ -121,7 +121,7 @@ def model_tiles(units):
 
 
 def hero_at(heroes, tile):
-    """[Owner: Yassin] receives the hero list and a tile; returns the standing hero on that tile, or None."""
+    """Team-written. [Owner: Yassin] receives the hero list and a tile; returns the standing hero on that tile, or None."""
     for hero in heroes:
         if not hero["exhausted"] and hero["pos"] == tile:
             return hero
@@ -129,7 +129,7 @@ def hero_at(heroes, tile):
 
 
 def model_at(units, tile):
-    """[Owner: Yassin] receives the unit list and a tile; returns [unit, model] for the enemy on that tile, or None."""
+    """Team-written. [Owner: Yassin] receives the unit list and a tile; returns [unit, model] for the enemy on that tile, or None."""
     for unit in units:
         for model in unit["models"]:
             if model["pos"] == tile:
@@ -138,7 +138,7 @@ def model_at(units, tile):
 
 
 def learn_outline(game):
-    """[Owner: Yassin] receives the game; adds every floor tile, door, throne and brazier of the chambers the party has opened to what it knows (the shape of the rooms, not their contents); returns how many tiles were learned."""
+    """Team-written. [Owner: Yassin] receives the game; adds every floor tile, door, throne and brazier of the chambers the party has opened to what it knows (the shape of the rooms, not their contents); returns how many tiles were learned."""
     learned = 0
     for row in range(len(game["grid"])):
         for col in range(len(game["grid"][0])):
@@ -157,7 +157,7 @@ def learn_outline(game):
 
 
 def shown_letter(spot):
-    """[Owner: Yassin] receives a tile letter; returns the letter the party sees there (hidden pits look like floor, trapped chests like chests)."""
+    """Team-written. [Owner: Yassin] receives a tile letter; returns the letter the party sees there (hidden pits look like floor, trapped chests like chests)."""
     if spot == "H":
         return "."
     elif spot == "X":
@@ -166,7 +166,7 @@ def shown_letter(spot):
 
 
 def lit_floor(game):
-    """[Owner: Yassin] receives the game; returns a grid marking every tile a standing hero can see: within SIGHT steps on foot, so walls block the view."""
+    """Team-written. [Owner: Yassin] receives the game; returns a grid marking every tile a standing hero can see: within SIGHT steps on foot, so walls block the view."""
     lit = blank_grid(game["grid"], False)
     for tile in hero_tiles(game["heroes"]):
         steps = step_map(game["grid"], tile, [], True)
@@ -178,7 +178,7 @@ def lit_floor(game):
 
 
 def wall_in_view(game, lit, col, row):
-    """[Owner: Yassin] receives the game, the lit-floor grid and a wall tile; returns True if a lit floor tile touches that wall (so the wall is lit too)."""
+    """Team-written. [Owner: Yassin] receives the game, the lit-floor grid and a wall tile; returns True if a lit floor tile touches that wall (so the wall is lit too)."""
     for near_row in range(row - 1, row + 2):
         for near_col in range(col - 1, col + 2):
             if in_bounds(lit, near_col, near_row) and lit[near_row][near_col]:
@@ -187,7 +187,7 @@ def wall_in_view(game, lit, col, row):
 
 
 def refresh_vision(game):
-    """[Owner: Yassin] receives the game; works out which tiles the heroes can see right now and remembers what is on them; returns how many tiles are visible."""
+    """Team-written. [Owner: Yassin] receives the game; works out which tiles the heroes can see right now and remembers what is on them; returns how many tiles are visible."""
     lit = lit_floor(game)
     count = 0
     for row in range(len(game["grid"])):
@@ -203,7 +203,7 @@ def refresh_vision(game):
 
 
 def enemy_targets(game, origin, reach):
-    """[Owner: Yassin] receives the game, a tile and a range; returns the tiles of visible enemy models within range."""
+    """Team-written. [Owner: Yassin] receives the game, a tile and a range; returns the tiles of visible enemy models within range."""
     tiles = []
     for tile in model_tiles(game["units"]):
         if game["seen"][tile[1]][tile[0]] and tile_distance(origin, tile) <= reach:
@@ -212,7 +212,7 @@ def enemy_targets(game, origin, reach):
 
 
 def friend_targets(game, origin, reach):
-    """[Owner: Yassin] receives the game, a tile and a range; returns the tiles of standing heroes within range."""
+    """Team-written. [Owner: Yassin] receives the game, a tile and a range; returns the tiles of standing heroes within range."""
     tiles = []
     for tile in hero_tiles(game["heroes"]):
         if tile_distance(origin, tile) <= reach:
@@ -221,7 +221,7 @@ def friend_targets(game, origin, reach):
 
 
 def move_targets(game, hero):
-    """[Owner: Yassin] receives the game and a hero; returns [tiles the hero can walk to with the moves left this turn, steps to each]."""
+    """Team-written. [Owner: Yassin] receives the game and a hero; returns [tiles the hero can walk to with the moves left this turn, steps to each]."""
     blocked = model_tiles(game["units"])
     occupied = hero_tiles(game["heroes"])
     steps = step_map(game["grid"], hero["pos"], blocked, False)
@@ -233,7 +233,7 @@ def move_targets(game, hero):
 
 
 def action_targets(game, hero, action):
-    """[Owner: Yassin] receives the game, a hero and a card's action; returns the list of tiles that card can be dropped on."""
+    """Team-written. [Owner: Yassin] receives the game, a hero and a card's action; returns the list of tiles that card can be dropped on."""
     if action["kind"] == "attack":
         return enemy_targets(game, hero["pos"], action["range"])
     elif action["kind"] == "heal":
@@ -243,12 +243,12 @@ def action_targets(game, hero, action):
 
 
 def is_valid_drop(tile, targets):
-    """[Owner: Yassin] receives the tile under the mouse and the allowed tiles; returns True if the drop is allowed."""
+    """Team-written. [Owner: Yassin] receives the tile under the mouse and the allowed tiles; returns True if the drop is allowed."""
     return tile is not None and tile in targets
 
 
 def drop_message(game, hero, action, tile):
-    """[Owner: Yassin] receives the game, a hero, the card's action (None for walking) and the bad drop tile; returns a friendly message saying why it did not work."""
+    """Team-written. [Owner: Yassin] receives the game, a hero, the card's action (None for walking) and the bad drop tile; returns a friendly message saying why it did not work."""
     name = hero["name"]
     if action is None:
         if hero["moves_left"] == 0:
