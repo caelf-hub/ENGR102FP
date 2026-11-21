@@ -19,19 +19,19 @@ EMPTY = "-"
 # ================================================================ writing values
 
 def word(text):
-    """[Owner: Yassin] receives some text; returns it with spaces turned into _ so it fits in one key=value pair."""
+    """Team-written. [Owner: Yassin] receives some text; returns it with spaces turned into _ so it fits in one key=value pair."""
     return str(text).replace(" ", "_").replace("|", "/")
 
 
 def tile_text(tile):
-    """[Owner: Yassin] receives a tile [col, row] (or None); returns it written as "col,row" (or "-")."""
+    """Team-written. [Owner: Yassin] receives a tile [col, row] (or None); returns it written as "col,row" (or "-")."""
     if tile is None:
         return EMPTY
     return str(tile[0]) + "," + str(tile[1])
 
 
 def tiles_text(tiles):
-    """[Owner: Yassin] receives a list of tiles; returns them written as "c,r/c,r/..." (or "-" if empty)."""
+    """Team-written. [Owner: Yassin] receives a list of tiles; returns them written as "c,r/c,r/..." (or "-" if empty)."""
     if len(tiles) == 0:
         return EMPTY
     parts = []
@@ -41,7 +41,7 @@ def tiles_text(tiles):
 
 
 def names_text(names):
-    """[Owner: Yassin] receives a list of names; returns them written as "a_b/c_d" (or "-" if empty)."""
+    """Team-written. [Owner: Yassin] receives a list of names; returns them written as "a_b/c_d" (or "-" if empty)."""
     if len(names) == 0:
         return EMPTY
     parts = []
@@ -51,7 +51,7 @@ def names_text(names):
 
 
 def card_names(pile):
-    """[Owner: Yassin] receives a list of cards; returns their names written with names_text()."""
+    """Team-written. [Owner: Yassin] receives a list of cards; returns their names written with names_text()."""
     names = []
     for card in pile:
         names.append(card["name"])
@@ -59,14 +59,14 @@ def card_names(pile):
 
 
 def yes_no(value):
-    """[Owner: Yassin] receives True or False; returns "yes" or "no"."""
+    """Team-written. [Owner: Yassin] receives True or False; returns "yes" or "no"."""
     if value:
         return "yes"
     return "no"
 
 
 def record(kind, name, pairs):
-    """[Owner: Yassin] receives a record kind, a name and a list of [key, value] pairs; returns one save-file line."""
+    """Team-written. [Owner: Yassin] receives a record kind, a name and a list of [key, value] pairs; returns one save-file line."""
     fields = []
     for pair in pairs:
         fields.append(pair[0] + "=" + str(pair[1]))
@@ -76,7 +76,7 @@ def record(kind, name, pairs):
 # ================================================================ reading values
 
 def read_tile(text):
-    """[Owner: Yassin] receives text like "3,4" (or "-"); returns the tile [3, 4] (or None)."""
+    """Team-written. [Owner: Yassin] receives text like "3,4" (or "-"); returns the tile [3, 4] (or None)."""
     text = str(text)
     if text == EMPTY:
         return None
@@ -85,7 +85,7 @@ def read_tile(text):
 
 
 def read_tiles(text):
-    """[Owner: Yassin] receives text like "3,4/5,6" (or "-"); returns the list of tiles."""
+    """Team-written. [Owner: Yassin] receives text like "3,4/5,6" (or "-"); returns the list of tiles."""
     text = str(text)
     tiles = []
     if text == EMPTY:
@@ -96,7 +96,7 @@ def read_tiles(text):
 
 
 def read_names(text):
-    """[Owner: Yassin] receives text like "Heroic Yap/Fetch" (or "-"); returns the list of names."""
+    """Team-written. [Owner: Yassin] receives text like "Heroic Yap/Fetch" (or "-"); returns the list of names."""
     text = str(text)
     if text == EMPTY:
         return []
@@ -104,14 +104,14 @@ def read_names(text):
 
 
 def is_yes(value):
-    """[Owner: Yassin] receives "yes" or "no"; returns True for "yes"."""
+    """Team-written. [Owner: Yassin] receives "yes" or "no"; returns True for "yes"."""
     return str(value) == "yes"
 
 
 # ================================================================ the game as lines
 
 def game_line(game):
-    """[Owner: Yassin] receives the game; returns the GAME line with all the single values (round, doom, chamber, ...)."""
+    """Team-written. [Owner: Yassin] receives the game; returns the GAME line with all the single values (round, doom, chamber, ...)."""
     pairs = [["round", game["round"]], ["depth", game["depth"]], ["doom", game["doom"]],
              ["doom_max", game["doom_max"]], ["seed", game["seed"]], ["chamber", game["chamber"]],
              ["rarity", game["rarity"]], ["boss_phase", game["boss_phase"]], ["unit_count", game["unit_count"]],
@@ -124,7 +124,7 @@ def game_line(game):
 
 
 def hero_line(hero):
-    """[Owner: Yassin] receives a hero; returns their HERO line (health, place, stats, cards and items)."""
+    """Team-written. [Owner: Yassin] receives a hero; returns their HERO line (health, place, stats, cards and items)."""
     pairs = [["hp", hero["hp"]], ["max_hp", hero["max_hp"]], ["pos", tile_text(hero["pos"])],
              ["move", hero["move"]], ["speed", hero["speed"]], ["attack_bonus", hero["attack_bonus"]],
              ["armor", hero["armor"]], ["exhausted", yes_no(hero["exhausted"])],
@@ -134,7 +134,7 @@ def hero_line(hero):
 
 
 def chamber_line(chamber):
-    """[Owner: Yassin] receives a planned chamber; returns its CHAMBER line."""
+    """Team-written. [Owner: Yassin] receives a planned chamber; returns its CHAMBER line."""
     parent = chamber["parent"]
     if parent is None:
         parent = -1
@@ -152,7 +152,7 @@ def chamber_line(chamber):
 
 
 def unit_line(unit):
-    """[Owner: Yassin] receives an enemy unit; returns its UNIT line (stats, chamber and every model's tile and wounds)."""
+    """Team-written. [Owner: Yassin] receives an enemy unit; returns its UNIT line (stats, chamber and every model's tile and wounds)."""
     models = []
     for model in unit["models"]:
         models.append(tile_text(model["pos"]) + "," + str(model["hp"]))
@@ -165,7 +165,7 @@ def unit_line(unit):
 
 
 def number_line(kind, values):
-    """[Owner: Yassin] receives a record kind and a dictionary of whole numbers (memory, stats, elements); returns its line."""
+    """Team-written. [Owner: Yassin] receives a record kind and a dictionary of whole numbers (memory, stats, elements); returns its line."""
     pairs = []
     for key in values:
         pairs.append([key, values[key]])
@@ -173,12 +173,12 @@ def number_line(kind, values):
 
 
 def raw_line(kind, name, text):
-    """[Owner: Yassin] receives a record kind, a name and some text; returns a line that keeps the text exactly (for modifier decks and the log)."""
+    """Team-written. [Owner: Yassin] receives a record kind, a name and some text; returns a line that keeps the text exactly (for modifier decks and the log)."""
     return kind + " | " + name + " | " + str(text).replace("|", "/")
 
 
 def map_lines(kind, grid):
-    """[Owner: Yassin] receives a record kind and a grid of letters; returns one line per row."""
+    """Team-written. [Owner: Yassin] receives a record kind and a grid of letters; returns one line per row."""
     lines = []
     for row in grid:
         lines.append(kind + " | row | " + "".join(row))
@@ -186,7 +186,7 @@ def map_lines(kind, grid):
 
 
 def save_lines(game):
-    """[Owner: Yassin] receives the game; returns every line of its save file."""
+    """Team-written. [Owner: Yassin] receives the game; returns every line of its save file."""
     lines = ["# Frodo and the Dungeon Lord - saved game", game_line(game)]
     for hero in game["heroes"]:
         lines.append(hero_line(hero))
@@ -209,7 +209,7 @@ def save_lines(game):
 
 
 def save_game(game, name):
-    """[Owner: Yassin] receives the game and a file name (without .sav); writes the whole game to name.sav; returns True if it worked."""
+    """Team-written. [Owner: Yassin] receives the game and a file name (without .sav); writes the whole game to name.sav; returns True if it worked."""
     try:
         save_file = open(name + ".sav", "w")
         for line in save_lines(game):
@@ -223,7 +223,7 @@ def save_game(game, name):
 # ================================================================ reading the game back
 
 def find_in_deck(data, owner, name):
-    """[Owner: Yassin] receives the loaded data, a hero name and a card name; returns that hero's card dictionary."""
+    """Team-written. [Owner: Yassin] receives the loaded data, a hero name and a card name; returns that hero's card dictionary."""
     for card in data["cards"][owner]:
         if card["name"] == name:
             return card
@@ -231,7 +231,7 @@ def find_in_deck(data, owner, name):
 
 
 def read_pile(data, owner, text):
-    """[Owner: Yassin] receives the loaded data, a hero name and a list of card names as text; returns the list of cards."""
+    """Team-written. [Owner: Yassin] receives the loaded data, a hero name and a list of card names as text; returns the list of cards."""
     pile = []
     for name in read_names(text):
         pile.append(find_in_deck(data, owner, name))
@@ -239,7 +239,7 @@ def read_pile(data, owner, text):
 
 
 def load_hero(game, data, name, fields):
-    """[Owner: Yassin] receives the game, the data, a hero name and the fields of their HERO line; puts the saved values on that hero; returns the hero."""
+    """Team-written. [Owner: Yassin] receives the game, the data, a hero name and the fields of their HERO line; puts the saved values on that hero; returns the hero."""
     hero = game_data.find_hero(game, name)
     for key in ["hp", "max_hp", "move", "speed", "attack_bonus", "armor"]:
         hero[key] = fields[key]
@@ -253,7 +253,7 @@ def load_hero(game, data, name, fields):
 
 
 def load_chamber(game, data, number, fields):
-    """[Owner: Yassin] receives the game, the data, a chamber number and the fields of its CHAMBER line; adds that chamber to the plan; returns it."""
+    """Team-written. [Owner: Yassin] receives the game, the data, a chamber number and the fields of its CHAMBER line; adds that chamber to the plan; returns it."""
     zone = []
     for piece in str(fields["zone"]).split(","):
         zone.append(int(piece))
@@ -273,7 +273,7 @@ def load_chamber(game, data, number, fields):
 
 
 def load_unit(game, data, name, fields):
-    """[Owner: Yassin] receives the game, the data, a unit name and the fields of its UNIT line; rebuilds the unit with its models; returns it."""
+    """Team-written. [Owner: Yassin] receives the game, the data, a unit name and the fields of its UNIT line; rebuilds the unit with its models; returns it."""
     unit = dict(data["units"][fields["type"]])
     unit.update({"type": fields["type"], "name": name, "chamber": fields["chamber"]})
     for key in ["move", "attack", "toughness", "wounds", "leadership", "range", "aoe", "start_models", "init"]:
@@ -288,7 +288,7 @@ def load_unit(game, data, name, fields):
 
 
 def load_game_line(game, fields):
-    """[Owner: Yassin] receives the game and the fields of the GAME line; puts the saved single values back; returns the round number."""
+    """Team-written. [Owner: Yassin] receives the game and the fields of the GAME line; puts the saved single values back; returns the round number."""
     for key in ["round", "depth", "doom", "doom_max", "seed", "chamber", "rarity", "boss_phase", "unit_count"]:
         game[key] = fields[key]
     game["warlord_dead"] = is_yes(fields["warlord_dead"])
@@ -304,7 +304,7 @@ def load_game_line(game, fields):
 
 
 def load_raw(game, kind, name, text):
-    """[Owner: Yassin] receives the game and a GRID, KNOWN, MODS or LOG record; puts it back; returns the kind."""
+    """Team-written. [Owner: Yassin] receives the game and a GRID, KNOWN, MODS or LOG record; puts it back; returns the kind."""
     if kind == "GRID":
         game["grid"].append(list(text))
     elif kind == "KNOWN":
@@ -319,7 +319,7 @@ def load_raw(game, kind, name, text):
 
 
 def load_record(game, data, kind, name, fields):
-    """[Owner: Yassin] receives the game, the data and one parsed key=value record; puts it back in the right place; returns the kind."""
+    """Team-written. [Owner: Yassin] receives the game, the data and one parsed key=value record; puts it back in the right place; returns the kind."""
     if kind == "GAME":
         load_game_line(game, fields)
     elif kind == "HERO":
@@ -340,7 +340,7 @@ def load_record(game, data, kind, name, fields):
 
 
 def read_save(name):
-    """[Owner: Yassin] receives a save name (without .sav); returns the list of its lines split into [kind, name, rest], or None if the file cannot be opened."""
+    """Team-written. [Owner: Yassin] receives a save name (without .sav); returns the list of its lines split into [kind, name, rest], or None if the file cannot be opened."""
     try:
         save_file = open(name + ".sav", "r")
         lines = save_file.readlines()
@@ -356,7 +356,7 @@ def read_save(name):
 
 
 def party_names(records):
-    """[Owner: Yassin] receives the records of a save file; returns the names of the heroes in it."""
+    """Team-written. [Owner: Yassin] receives the records of a save file; returns the names of the heroes in it."""
     names = []
     for item in records:
         if item[0] == "HERO":
@@ -365,7 +365,7 @@ def party_names(records):
 
 
 def build_game(data, records):
-    """[Owner: Yassin] receives the loaded data and the records of a save file; builds the whole game from them; returns the game."""
+    """Team-written. [Owner: Yassin] receives the loaded data and the records of a save file; builds the whole game from them; returns the game."""
     game = game_data.new_game(data, party_names(records), "Normal")
     for key in ["grid", "known", "log", "plan", "doors", "units"]:
         game[key] = []
@@ -381,7 +381,7 @@ def build_game(data, records):
 
 
 def load_game(data, name):
-    """[Owner: Yassin] receives the loaded data and a save name (without .sav); returns the saved game, or None if the file is missing or damaged."""
+    """Team-written. [Owner: Yassin] receives the loaded data and a save name (without .sav); returns the saved game, or None if the file is missing or damaged."""
     records = read_save(name)
     if records is None:
         return None
@@ -397,7 +397,7 @@ def load_game(data, name):
 # ================================================================ listing saves
 
 def list_saves():
-    """[Owner: Yassin] receives nothing; returns the names of the .sav files in this folder, newest first."""
+    """Team-written. [Owner: Yassin] receives nothing; returns the names of the .sav files in this folder, newest first."""
     found = []
     try:
         for file_name in os.listdir("."):
@@ -413,7 +413,7 @@ def list_saves():
 
 
 def save_summary(name):
-    """[Owner: Yassin] receives a save name; returns a short line about it, like "round 12 - Kennel - 4 of 12 chambers" ("" if it cannot be read)."""
+    """Team-written. [Owner: Yassin] receives a save name; returns a short line about it, like "round 12 - Kennel - 4 of 12 chambers" ("" if it cannot be read)."""
     records = read_save(name)
     if records is None:
         return ""
