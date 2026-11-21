@@ -16,7 +16,7 @@ import movement
 
 
 def blank_map(cols, rows):
-    """[Owner: Mahad] receives a width and height in tiles; returns a new map grid that is solid rock everywhere."""
+    """Team-written. [Owner: Mahad] receives a width and height in tiles; returns a new map grid that is solid rock everywhere."""
     grid = []
     for row in range(rows):
         grid.append(["#"] * cols)
@@ -24,7 +24,7 @@ def blank_map(cols, rows):
 
 
 def zone_box(grid, zone):
-    """[Owner: Mahad] receives the map grid and a zone [x, y, width, height]; returns [left, top, right, bottom], the tiles a chamber may use (always leaving a wall around it)."""
+    """Team-written. [Owner: Mahad] receives the map grid and a zone [x, y, width, height]; returns [left, top, right, bottom], the tiles a chamber may use (always leaving a wall around it)."""
     left = max(1, zone[0] + 1)
     top = max(1, zone[1] + 1)
     right = min(len(grid[0]) - 2, zone[0] + zone[2] - 2)
@@ -33,12 +33,12 @@ def zone_box(grid, zone):
 
 
 def box_center(box):
-    """[Owner: Mahad] receives a box [left, top, right, bottom]; returns the tile in its middle."""
+    """Team-written. [Owner: Mahad] receives a box [left, top, right, bottom]; returns the tile in its middle."""
     return [(box[0] + box[2]) // 2, (box[1] + box[3]) // 2]
 
 
 def shrink_box(box):
-    """[Owner: Mahad] receives a box [left, top, right, bottom]; returns a randomly smaller box inside it, so chambers differ in size and position."""
+    """Team-written. [Owner: Mahad] receives a box [left, top, right, bottom]; returns a randomly smaller box inside it, so chambers differ in size and position."""
     width = box[2] - box[0] + 1
     height = box[3] - box[1] + 1
     new_width = random.randint(max(3, width - 2), width)
@@ -49,7 +49,7 @@ def shrink_box(box):
 
 
 def box_tiles(box):
-    """[Owner: Mahad] receives a box [left, top, right, bottom]; returns the list of every tile inside it."""
+    """Team-written. [Owner: Mahad] receives a box [left, top, right, bottom]; returns the list of every tile inside it."""
     tiles = []
     for row in range(box[1], box[3] + 1):
         for col in range(box[0], box[2] + 1):
@@ -60,7 +60,7 @@ def box_tiles(box):
 # ================================================================ planning the dungeon
 
 def cell_zone(dungeon, cells):
-    """[Owner: Mahad] receives the DUNGEON settings and a list of cells [cx, cy]; returns the zone [x, y, width, height] that covers all of them."""
+    """Team-written. [Owner: Mahad] receives the DUNGEON settings and a list of cells [cx, cy]; returns the zone [x, y, width, height] that covers all of them."""
     left = 999
     top = 999
     right = -1
@@ -76,7 +76,7 @@ def cell_zone(dungeon, cells):
 
 
 def cell_neighbors(dungeon, cell):
-    """[Owner: Mahad] receives the DUNGEON settings and a cell; returns the cells next to it (up, down, left, right) that are on the map."""
+    """Team-written. [Owner: Mahad] receives the DUNGEON settings and a cell; returns the cells next to it (up, down, left, right) that are on the map."""
     near = []
     for step in movement.STEPS:
         col = cell[0] + step[0]
@@ -87,7 +87,7 @@ def cell_neighbors(dungeon, cell):
 
 
 def touches(dungeon, cell, cells):
-    """[Owner: Mahad] receives the DUNGEON settings, a cell and a list of cells; returns True if the cell is next to any of them."""
+    """Team-written. [Owner: Mahad] receives the DUNGEON settings, a cell and a list of cells; returns True if the cell is next to any of them."""
     for near in cell_neighbors(dungeon, cell):
         if near in cells:
             return True
@@ -95,14 +95,14 @@ def touches(dungeon, cell, cells):
 
 
 def boss_block(dungeon):
-    """[Owner: Mahad] receives the DUNGEON settings; returns the 4 cells of a random 2 x 2 block for the boss arena."""
+    """Team-written. [Owner: Mahad] receives the DUNGEON settings; returns the 4 cells of a random 2 x 2 block for the boss arena."""
     left = random.randint(0, dungeon["cell_cols"] - 2)
     top = random.randint(0, dungeon["cell_rows"] - 2)
     return [[left, top], [left + 1, top], [left, top + 1], [left + 1, top + 1]]
 
 
 def far_cell(dungeon, boss):
-    """[Owner: Mahad] receives the DUNGEON settings and the boss cells; returns a random cell among those farthest from the boss (where the party starts)."""
+    """Team-written. [Owner: Mahad] receives the DUNGEON settings and the boss cells; returns a random cell among those farthest from the boss (where the party starts)."""
     best = []
     best_gap = -1
     for row in range(dungeon["cell_rows"]):
@@ -121,7 +121,7 @@ def far_cell(dungeon, boss):
 
 
 def random_walk(dungeon, start, boss, length):
-    """[Owner: Mahad] receives the DUNGEON settings, the start cell, the boss cells and a wanted length; walks at random from the start and returns the path if it ends next to the boss at that length, else []."""
+    """Team-written. [Owner: Mahad] receives the DUNGEON settings, the start cell, the boss cells and a wanted length; walks at random from the start and returns the path if it ends next to the boss at that length, else []."""
     path = [start]
     while len(path) < length:
         options = []
@@ -137,7 +137,7 @@ def random_walk(dungeon, start, boss, length):
 
 
 def main_path(dungeon, boss, start):
-    """[Owner: Mahad] receives the DUNGEON settings, the boss cells and the start cell; returns a random main path of cells (as close to the wanted length as possible), or [] if none was found."""
+    """Team-written. [Owner: Mahad] receives the DUNGEON settings, the boss cells and the start cell; returns a random main path of cells (as close to the wanted length as possible), or [] if none was found."""
     for spread in [0, 1, 2, 3]:
         for attempt in range(250):
             length = dungeon["main"] + random.randint(-spread, spread)
@@ -148,14 +148,14 @@ def main_path(dungeon, boss, start):
 
 
 def make_chamber(number, kind, cells, parent, dungeon):
-    """[Owner: Mahad] receives a chamber number, its kind ("start", "main", "side" or "boss"), its cells, its parent's number and the DUNGEON settings; returns a new, not yet carved chamber dictionary."""
+    """Team-written. [Owner: Mahad] receives a chamber number, its kind ("start", "main", "side" or "boss"), its cells, its parent's number and the DUNGEON settings; returns a new, not yet carved chamber dictionary."""
     return {"id": number, "kind": kind, "cells": cells, "zone": cell_zone(dungeon, cells), "parent": parent,
             "carved": False, "cleared": False, "tiles": [], "name": "", "step": 0,
             "markers": {}, "prepared": []}
 
 
 def add_sides(dungeon, plan, path, boss):
-    """[Owner: Mahad] receives the DUNGEON settings, the plan so far, the main path and the boss cells; adds side chambers in free cells next to the main path; returns how many were added."""
+    """Team-written. [Owner: Mahad] receives the DUNGEON settings, the plan so far, the main path and the boss cells; adds side chambers in free cells next to the main path; returns how many were added."""
     used = list(path) + list(boss)
     added = 0
     order = list(range(len(path)))
@@ -178,7 +178,7 @@ def add_sides(dungeon, plan, path, boss):
 
 
 def plan_dungeon(dungeon):
-    """[Owner: Mahad] receives the DUNGEON settings; plans the whole dungeon at random (main path, side chambers and boss arena); returns the list of chambers (number 0 is where the party starts)."""
+    """Team-written. [Owner: Mahad] receives the DUNGEON settings; plans the whole dungeon at random (main path, side chambers and boss arena); returns the list of chambers (number 0 is where the party starts)."""
     path = []
     while len(path) == 0:
         boss = boss_block(dungeon)
@@ -201,7 +201,7 @@ def plan_dungeon(dungeon):
 
 
 def children(plan, number):
-    """[Owner: Mahad] receives the plan and a chamber number; returns the chambers whose door is in that chamber's wall."""
+    """Team-written. [Owner: Mahad] receives the plan and a chamber number; returns the chambers whose door is in that chamber's wall."""
     result = []
     for chamber in plan:
         if chamber["parent"] == number:
@@ -210,7 +210,7 @@ def children(plan, number):
 
 
 def owner_grid(grid, plan):
-    """[Owner: Mahad] receives the map grid and the plan; returns a grid saying which chamber's zone each tile is in (-1 = no chamber)."""
+    """Team-written. [Owner: Mahad] receives the map grid and the plan; returns a grid saying which chamber's zone each tile is in (-1 = no chamber)."""
     owners = movement.blank_grid(grid, -1)
     for chamber in plan:
         zone = chamber["zone"]
@@ -223,7 +223,7 @@ def owner_grid(grid, plan):
 # ================================================================ chamber shapes
 
 def shape_ell(box):
-    """[Owner: Mahad] receives a box; returns its tiles with one random corner block cut away (an L-shaped room)."""
+    """Team-written. [Owner: Mahad] receives a box; returns its tiles with one random corner block cut away (an L-shaped room)."""
     cut_width = max(1, (box[2] - box[0] + 1) // 2)
     cut_height = max(1, (box[3] - box[1] + 1) // 2)
     cut_left = random.choice([box[0], box[2] - cut_width + 1])
@@ -238,7 +238,7 @@ def shape_ell(box):
 
 
 def shape_round(box):
-    """[Owner: Mahad] receives a box; returns its tiles with the corners clipped off (a rounded room)."""
+    """Team-written. [Owner: Mahad] receives a box; returns its tiles with the corners clipped off (a rounded room)."""
     clip = 1
     if box[2] - box[0] >= 5 and box[3] - box[1] >= 5:
         clip = 2
@@ -252,7 +252,7 @@ def shape_round(box):
 
 
 def shape_cross(box):
-    """[Owner: Mahad] receives a box; returns the tiles of a plus-shaped room (a wide bar across and a wide bar down)."""
+    """Team-written. [Owner: Mahad] receives a box; returns the tiles of a plus-shaped room (a wide bar across and a wide bar down)."""
     width = box[2] - box[0] + 1
     height = box[3] - box[1] + 1
     band_cols = max(2, width // 2)
@@ -269,7 +269,7 @@ def shape_cross(box):
 
 
 def shape_cave(box):
-    """[Owner: Mahad] receives a box; returns its tiles with random bites taken out of the edge (a rough cave)."""
+    """Team-written. [Owner: Mahad] receives a box; returns its tiles with random bites taken out of the edge (a rough cave)."""
     tiles = []
     for tile in box_tiles(box):
         on_edge = tile[0] == box[0] or tile[0] == box[2] or tile[1] == box[1] or tile[1] == box[3]
@@ -279,7 +279,7 @@ def shape_cave(box):
 
 
 def connected(tiles):
-    """[Owner: Mahad] receives a list of floor tiles; returns only the tiles that can be walked to from the first one."""
+    """Team-written. [Owner: Mahad] receives a list of floor tiles; returns only the tiles that can be walked to from the first one."""
     if len(tiles) == 0:
         return []
     reached = [tiles[0]]
@@ -295,7 +295,7 @@ def connected(tiles):
 
 
 def shape_tiles(shape, box):
-    """[Owner: Mahad] receives a shape name and a box; returns the floor tiles of a chamber of that shape (a plain rectangle if the shape came out too small)."""
+    """Team-written. [Owner: Mahad] receives a shape name and a box; returns the floor tiles of a chamber of that shape (a plain rectangle if the shape came out too small)."""
     if shape == "ell":
         tiles = shape_ell(box)
     elif shape == "round":
@@ -313,7 +313,7 @@ def shape_tiles(shape, box):
 
 
 def is_open_floor(tiles, tile):
-    """[Owner: Mahad] receives the floor tiles and one tile; returns True if all eight tiles around it are floor too (a safe spot for a pillar)."""
+    """Team-written. [Owner: Mahad] receives the floor tiles and one tile; returns True if all eight tiles around it are floor too (a safe spot for a pillar)."""
     for row in range(tile[1] - 1, tile[1] + 2):
         for col in range(tile[0] - 1, tile[0] + 2):
             if [col, row] not in tiles:
@@ -322,7 +322,7 @@ def is_open_floor(tiles, tile):
 
 
 def add_pillars(tiles, count):
-    """[Owner: Mahad] receives the floor tiles and how many pillars to try for; turns that many open floor tiles back into rock without cutting the room in two; returns how many were placed."""
+    """Team-written. [Owner: Mahad] receives the floor tiles and how many pillars to try for; turns that many open floor tiles back into rock without cutting the room in two; returns how many were placed."""
     placed = 0
     for attempt in range(count * 8):
         if placed == count or len(tiles) < 26:
@@ -339,7 +339,7 @@ def add_pillars(tiles, count):
 
 
 def carve_chamber(grid, zone, style):
-    """[Owner: Mahad] receives the map grid, a zone and a room style; carves a random chamber of that style into the rock; returns its floor tiles."""
+    """Team-written. [Owner: Mahad] receives the map grid, a zone and a room style; carves a random chamber of that style into the rock; returns its floor tiles."""
     box = shrink_box(zone_box(grid, zone))
     tiles = shape_tiles(style["shape"], box)
     add_pillars(tiles, style["pillars"])
@@ -349,7 +349,7 @@ def carve_chamber(grid, zone, style):
 
 
 def carve_arena(grid, zone, rows):
-    """[Owner: Mahad] receives the map grid, the boss zone and the arena drawing from dungeon_data.txt; carves the throne hall into the middle of the zone; returns [floor tiles, markers] (markers: "W" warlord, "G" guard spawn spots)."""
+    """Team-written. [Owner: Mahad] receives the map grid, the boss zone and the arena drawing from dungeon_data.txt; carves the throne hall into the middle of the zone; returns [floor tiles, markers] (markers: "W" warlord, "G" guard spawn spots)."""
     box = zone_box(grid, zone)
     left = box[0] + max(0, (box[2] - box[0] + 1 - len(rows[0])) // 2)
     top = box[1] + max(0, (box[3] - box[1] + 1 - len(rows)) // 2)
@@ -373,12 +373,12 @@ def carve_arena(grid, zone, rows):
 # ================================================================ doors and corridors
 
 def inside(grid, col, row):
-    """[Owner: Mahad] receives the map grid and a col/row; returns True if a door or corridor may be there (not on the map's outer edge)."""
+    """Team-written. [Owner: Mahad] receives the map grid and a col/row; returns True if a door or corridor may be there (not on the map's outer edge)."""
     return col >= 1 and col <= len(grid[0]) - 2 and row >= 1 and row <= len(grid) - 2
 
 
 def open_sides(grid, tile):
-    """[Owner: Mahad] receives the map grid and a tile; returns how many of the four tiles next to it are not rock."""
+    """Team-written. [Owner: Mahad] receives the map grid and a tile; returns how many of the four tiles next to it are not rock."""
     count = 0
     for step in movement.STEPS:
         col = tile[0] + step[0]
@@ -389,7 +389,7 @@ def open_sides(grid, tile):
 
 
 def pick_door(grid, tiles, aim):
-    """[Owner: Mahad] receives the map grid, a chamber's floor tiles and a point to aim at; returns the wall tile for a door (closest to the aim), or None."""
+    """Team-written. [Owner: Mahad] receives the map grid, a chamber's floor tiles and a point to aim at; returns the wall tile for a door (closest to the aim), or None."""
     best = None
     best_gap = 999
     shuffled = list(tiles)
@@ -407,7 +407,7 @@ def pick_door(grid, tiles, aim):
 
 
 def can_dig(grid, steps, tile, rules):
-    """[Owner: Mahad] receives the map grid, the dig search so far, a tile and the dig rules (door, goal tiles, owner grid, allowed chambers, strict); returns True if the corridor may pass through this rock tile."""
+    """Team-written. [Owner: Mahad] receives the map grid, the dig search so far, a tile and the dig rules (door, goal tiles, owner grid, allowed chambers, strict); returns True if the corridor may pass through this rock tile."""
     if not inside(grid, tile[0], tile[1]) or grid[tile[1]][tile[0]] != "#":
         return False
     if steps[tile[1]][tile[0]] != -1:
@@ -423,7 +423,7 @@ def can_dig(grid, steps, tile, rules):
 
 
 def find_corridor(grid, rules):
-    """[Owner: Mahad] receives the map grid and the dig rules; returns the list of rock tiles to dig from the door to the new chamber ([] if there is no way)."""
+    """Team-written. [Owner: Mahad] receives the map grid and the dig rules; returns the list of rock tiles to dig from the door to the new chamber ([] if there is no way)."""
     door = rules["door"]
     steps = movement.blank_grid(grid, -1)
     steps[door[1]][door[0]] = 0
@@ -445,7 +445,7 @@ def find_corridor(grid, rules):
 
 
 def dig_corridor(grid, door, goal, owners, allowed):
-    """[Owner: Mahad] receives the map grid, the door, the new chamber's tiles, the owner grid and the chamber numbers the corridor may cross; digs the corridor and returns its tiles."""
+    """Team-written. [Owner: Mahad] receives the map grid, the door, the new chamber's tiles, the owner grid and the chamber numbers the corridor may cross; digs the corridor and returns its tiles."""
     rules = {"door": door, "goal": goal, "owners": owners, "allowed": allowed, "strict": True}
     path = find_corridor(grid, rules)
     if len(path) == 0:
@@ -461,7 +461,7 @@ def dig_corridor(grid, door, goal, owners, allowed):
 
 
 def far_cluster(tiles, origin, count):
-    """[Owner: Mahad] receives floor tiles, a point and a count; returns that many tiles huddled together as far from the point as possible (where the party starts)."""
+    """Team-written. [Owner: Mahad] receives floor tiles, a point and a count; returns that many tiles huddled together as far from the point as possible (where the party starts)."""
     far = tiles[0]
     for tile in tiles:
         if movement.tile_distance(tile, origin) > movement.tile_distance(far, origin):
@@ -479,7 +479,7 @@ def far_cluster(tiles, origin, count):
 
 
 def far_tiles(tiles, origin):
-    """[Owner: Mahad] receives floor tiles and a point; returns the tiles in the far half of the chamber from that point (where Spears deploys)."""
+    """Team-written. [Owner: Mahad] receives floor tiles and a point; returns the tiles in the far half of the chamber from that point (where Spears deploys)."""
     longest = 1
     for tile in tiles:
         longest = max(longest, movement.tile_distance(tile, origin))
