@@ -1764,9 +1764,9 @@ def type_loop(game, prompt, kind, low, high):
 
 
 def ask_yes_no(game, question):
-    """AI-assisted: receives the game and a yes/no question; waits for Y or N (or a click); returns True for yes."""
-    yes = make_button("yes", "Yes (Y)", pygame.Rect(W // 2 - 130, H // 2 + 14, 110, 34))
-    no = make_button("no", "No (N)", pygame.Rect(W // 2 + 20, H // 2 + 14, 110, 34))
+    """AI-assisted: receives the game and a yes/no question; waits for Y or Enter (yes), N or Esc (no), or a click; returns True for yes."""
+    yes = make_button("yes", "Yes (Y / Enter)", pygame.Rect(W // 2 - 160, H // 2 + 14, 150, 34))
+    no = make_button("no", "No (N / Esc)", pygame.Rect(W // 2 + 10, H // 2 + 14, 150, 34))
     while game["running"]:
         draw_game(game)
         dim_screen()
@@ -1775,9 +1775,9 @@ def ask_yes_no(game, question):
         art.draw_button(yes)
         art.draw_button(no)
         for event in present(game):
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_y:
+            if event.type == pygame.KEYDOWN and event.key in [pygame.K_y, pygame.K_RETURN, pygame.K_KP_ENTER]:
                 return True
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_n:
+            elif event.type == pygame.KEYDOWN and event.key in [pygame.K_n, pygame.K_ESCAPE]:
                 return False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 choice = button_at([yes, no], event.pos)
@@ -1954,15 +1954,60 @@ def turn_mouse_up(game, hero, pos):
     return tile_request(game, hero, tile)
 
 
+def nearest_first(tiles, origin):
+    """AI-assisted: receives a list of tiles and a starting tile; returns the tiles sorted from nearest to farthest."""
+    ranked = []
+    for tile in tiles:
+        ranked.append([movement.tile_distance(tile, origin), tile[0], tile[1]])
+    ranked.sort()
+    result = []
+    for item in ranked:
+        result.append([item[1], item[2]])
+    return result
+
+
+def next_target(game, hero, step):
+    """AI-assisted: receives the game, the acting hero and 1 (next) or -1 (back); moves the keyboard cursor to the next glowing tile, nearest first; returns the new cursor tile (None if nothing glows)."""
+    tiles = nearest_first(UI["highlights"], hero["pos"])
+    if len(tiles) == 0:
+        set_message("Nothing glows right now - press 1, 2 or 3 to choose a card, or E to end the turn.")
+        return None
+    index = -1
+    if UI["cursor"] in tiles:
+        index = tiles.index(UI["cursor"])
+    UI["cursor"] = list(tiles[(index + step) % len(tiles)])
+    UI["cursor_on"] = True
+    follow(UI["cursor"])
+    set_message(keyboard_words(game, hero, UI["cursor"]))
+    return UI["cursor"]
+
+
+def keyboard_words(game, hero, tile):
+    """AI-assisted: receives the game, the acting hero and the cursor tile; returns a line saying what Enter will do there."""
+    if UI["card"] is not None and UI["card"] < len(hero["hand"]):
+        return "Enter = " + preview_words(game, hero, hero["hand"][UI["card"]], tile) + ".   Tab = next target, Esc = cancel."
+    if tile in UI["highlights"]:
+        return "Enter = " + preview_words(game, hero, None, tile) + ".   Tab = next tile, 1-3 = choose a card."
+    return "Tab jumps between glowing tiles; Enter acts on the white cursor."
+
+
 def turn_key(game, hero, key):
-    """AI-assisted: receives the game, the acting hero and a key; returns the request it makes, or None."""
+    """AI-assisted: receives the game, the acting hero and a key; returns the request it makes, or None. (Tab / Shift+Tab jump the cursor between glowing tiles.)"""
     if pygame.K_1 <= key <= pygame.K_9:
-        pick_card(hero, key - pygame.K_1)
+        if pick_card(hero, key - pygame.K_1):
+            refresh_glow(game, hero)
+            next_target(game, hero, 1)
     elif key in ARROWS:
         move_cursor(game, key)
+        set_message(keyboard_words(game, hero, UI["cursor"]))
+    elif key == pygame.K_TAB:
+        step = 1
+        if pygame.key.get_mods() & pygame.KMOD_SHIFT:
+            step = -1
+        next_target(game, hero, step)
     elif key == pygame.K_ESCAPE:
         UI["card"] = None
-        set_message("Cancelled.")
+        set_message("Cancelled. " + turn_intro(hero))
     elif key == pygame.K_e:
         return {"type": "end"}
     elif key == pygame.K_m:
@@ -1981,7 +2026,7 @@ def turn_intro(hero):
     elif hero["acted"]:
         return hero["name"] + ": click a glowing tile to walk (" + str(hero["moves_left"]) + " moves left), or End turn."
     return (hero["name"] + "'s turn: click a glowing tile to walk (" + str(hero["moves_left"])
-            + " moves), and drag one card onto a target.")
+            + " moves) and drag one card onto a target.   Keys: Tab + Enter, 1-3, E.")
 
 
 def get_hero_action(game, hero):
@@ -2075,8 +2120,8 @@ def draw_load_screen(saves, summaries):
             title = "Autosave (last door opened)"
         art.text(str(index + 1) + ".  " + title, rect.x + 16, rect.y + 6, "bold", art.INK, "left")
         art.text(summaries[index], rect.x + 40, rect.y + 27, "small", art.BLOOD, "left")
-    art.text("Click a save (or press its number) to load it.   Esc = back", W // 2, 650, "body", art.PARCHMENT_DARK,
-             "center")
+    art.text("Click a save, press its number, or use Up / Down and Enter.   Esc = back", W // 2, 650, "body",
+             art.PARCHMENT_DARK, "center")
 
 
 def hover_border(rect):
@@ -2086,19 +2131,40 @@ def hover_border(rect):
     return art.BRASS_DARK
 
 
+def load_key(key, saves, chosen):
+    """AI-assisted: receives a key, the save names and the highlighted row; returns [the save to load ("" for none, "back" to leave), the new highlighted row]."""
+    if key == pygame.K_ESCAPE:
+        return ["back", chosen]
+    elif key == pygame.K_UP:
+        return ["", max(0, chosen - 1)]
+    elif key == pygame.K_DOWN:
+        return ["", min(len(saves) - 1, chosen + 1)]
+    elif (key == pygame.K_RETURN or key == pygame.K_KP_ENTER) and len(saves) > 0:
+        return [saves[chosen], chosen]
+    elif pygame.K_1 <= key < pygame.K_1 + len(saves):
+        return [saves[key - pygame.K_1], chosen]
+    return ["", chosen]
+
+
 def load_screen():
-    """AI-assisted: receives nothing; lists the saved games and waits for the player to pick one; returns its name, or "" to go back."""
+    """AI-assisted: receives nothing; lists the saved games and waits for the player to pick one (click, number key, or arrows and Enter); returns its name, or "" to go back."""
     saves = savegame.list_saves()[:8]
     summaries = []
     for name in saves:
         summaries.append(savegame.save_summary(name))
+    chosen = 0
     while not UI["closed"]:
         draw_load_screen(saves, summaries)
+        if len(saves) > 0:
+            pygame.draw.rect(UI["screen"], art.GOLD, save_rect(chosen).inflate(8, 8), 3, 8)
         for event in present(None):
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                return ""
-            elif event.type == pygame.KEYDOWN and pygame.K_1 <= event.key < pygame.K_1 + len(saves):
-                return saves[event.key - pygame.K_1]
+            if event.type == pygame.KEYDOWN:
+                result = load_key(event.key, saves, chosen)
+                chosen = result[1]
+                if result[0] == "back":
+                    return ""
+                elif result[0] != "":
+                    return result[0]
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 for index in range(len(saves)):
                     if save_rect(index).collidepoint(event.pos):
@@ -2311,13 +2377,16 @@ RULES = [
         "MENU (always at the bottom right on a hero's turn): F1 Rules, F2 Status, F3 Save, F9 Quit.",
         "SAVING: F3 saves the whole game under a name you type. The game also saves itself every time a door",
         "    opens. Choose Continue on the title screen to load a save.   Hold SPACE to speed up enemy turns.",
-        "WALK: arrows move the white cursor, Enter walks to the cursor tile.",
+        "TAB jumps the white cursor to the next glowing tile (Shift+Tab goes back). Arrows move it one tile.",
+        "WALK: Tab (or arrows) to a blue tile, then Enter.",
         "    Or press M, type how many tiles, then press an arrow key for the direction.",
-        "CARDS: 1, 2 or 3 chooses a card, arrows move the cursor to a target, Enter plays it. Esc puts it back.",
+        "CARDS: 1, 2 or 3 chooses a card and jumps the cursor to its nearest target; Tab for the next one;",
+        "    Enter plays it. Esc puts it back.",
         "E = end the turn.",
         "TYPED BOXES: type, Enter to confirm, Esc to cancel. A wrong entry shows a message and asks again.",
         "CAMERA: W A S D pan, + and - zoom, Home = whole map.   Mouse wheel over the log scrolls it.",
-        "POP-UP QUESTIONS: Y = yes, N = no.   F11 = full screen."]],
+        "POP-UP QUESTIONS: Y or Enter = yes, N or Esc = no.   F11 = full screen.",
+        "TITLE: 1-4.  PARTY: 1-4 add or remove, Left / Right difficulty, Enter begin.  CONTINUE: Up / Down + Enter."]],
     ["Cards and Combat", [
         "Every hero has a deck of 8 cards and holds 3 of them. Each card is ONE action, shown by its big icon:",
         "    ATTACK 3, range 4 = 3 damage to an enemy up to 4 tiles away (melee = the tile right next to you).",

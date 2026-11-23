@@ -87,13 +87,14 @@ with a caption saying what they do; hold `Space` to speed them up.
 
 | Action | Mouse | Keyboard |
 |---|---|---|
-| Walk | click a blue tile, or drag the hero | arrows + `Enter`, or `M` then type a number and an arrow |
-| Play a card | drag it onto a glowing target (or click card, then target) | `1`-`3`, arrows + `Enter`, `Esc` cancels |
+| Walk | click a blue tile, or drag the hero | `Tab` to a blue tile + `Enter` (arrows move one tile), or `M`, a number and an arrow |
+| Play a card | drag it onto a glowing target (or click card, then target) | `1`-`3` (jumps to the nearest target), `Tab` for the next, `Enter`; `Esc` cancels |
 | End turn | *End turn* | `E` |
 | Menu | buttons, bottom right | `F1` Rules, `F2` Status, `F3` Save, `F9` Quit |
 | Zoom / pan the map | wheel / right-drag | `+` `-` / `W` `A` `S` `D`, `Home` = whole map |
 | Speed up enemy turns | | hold `Space` |
-| Pop-up questions | Yes / No | `Y` / `N` |
+| Pop-up questions | Yes / No | `Y` or `Enter` / `N` or `Esc` |
+| Title, party, Continue | click | `1`-`4`; party: `Left`/`Right` difficulty, `Enter` begin; Continue: `Up`/`Down` + `Enter` |
 | Full screen | | `F11` |
 
 ---
@@ -143,7 +144,7 @@ Every game-logic function names its owner at the start of its docstring, like th
 
 ```python
 def calc_damage(base, modifier, shield):
-    """[Owner: Mahad] receives the base attack, the modifier card and the target's shield; returns the damage dealt (never below 0)."""
+    """Team-written. [Owner: Mahad] receives the base attack, the modifier card and the target's shield; returns the damage dealt (never below 0)."""
 ```
 
 The owner is the person who must be able to **explain** that function to a grader, and who may rewrite it.
@@ -178,7 +179,8 @@ The owner is the person who must be able to **explain** that function to a grade
 The brief says every function's docstring must **start** with its tag: `Team-written:` or `AI-assisted:`.
 
 - **Interface and art** (`ui.py`, `art.py`, `scenery.py`) start with `AI-assisted:`.
-- **Game logic** currently starts with `[Owner: name]`, with no tag in front.
+- **Game logic** currently starts with `Team-written.` followed by `[Owner: name]` (set by the team), except
+  `make_unit` and `place_models` in `spears_ai.py`, which start with `AI-assisted:`.
 - Every function in the project was written with the AI assistant. A function's tag should only become
   `Team-written:` once its owner has rewritten it themselves (their own logic, their own words) and
   `python test_frodo.py` still passes.

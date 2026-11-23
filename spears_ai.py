@@ -244,7 +244,7 @@ def connect_chamber(game, chamber):
 
 
 def make_unit(data, type_name, number):
-    """[Owner: Guilherme] receives the data, a unit type name and a unit number; returns a new unit dictionary with no models placed yet."""
+    """AI-assisted: [Owner: Guilherme] receives the data, a unit type name and a unit number; returns a new unit dictionary with no models placed yet."""
     unit = dict(data["units"][type_name])
     unit["type"] = type_name
     unit["name"] = type_name + " " + LETTERS[number % 26]
@@ -256,7 +256,7 @@ def make_unit(data, type_name, number):
 
 
 def place_models(grid, unit, spawn, taken):
-    """[Owner: Guilherme] receives the grid, a unit, a spawn tile and the tiles already taken; stands the unit's models on and around the spawn; returns how many were placed."""
+    """AI-assisted: [Owner: Guilherme] receives the grid, a unit, a spawn tile and the tiles already taken; stands the unit's models on and around the spawn; returns how many were placed."""
     tiles = [spawn] + movement.reachable_tiles(grid, spawn, COHERENCY, [], [], False)
     for tile in tiles:
         if len(unit["models"]) == unit["start_models"]:
