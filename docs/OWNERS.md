@@ -16,14 +16,14 @@ Generated from the docstrings in the code. The Tag column is copied from each do
 
 | File | Function | Line | Tag | What it does |
 |---|---|---|---|---|
-| `frodo_game.py` | `do_request()` | 240 | Team-written | receives the game, the hero whose turn it is and what the player asked for; carries it out and returns True if the turn is over. |
-| `frodo_game.py` | `hero_turn()` | 257 | Team-written | receives the game and a hero; lets the player walk and play one card until the turn ends; returns how many requests were carried out. |
-| `frodo_game.py` | `take_turn()` | 338 | Team-written | receives the game and one [initiative, tie, kind, name] entry; gives that hero or unit its turn; returns the kind that acted. |
-| `frodo_game.py` | `play_round()` | 398 | Team-written | receives the game; plays one full round (turn order, every hero and enemy unit takes a turn, end of round); returns the number of turns taken. |
-| `frodo_game.py` | `finish_game()` | 471 | Team-written | receives the game and "win", "lose" or "" (quit); writes the summary to the log and shows the end screen; returns True if the player wants to play again. |
-| `frodo_game.py` | `open_game()` | 480 | Team-written | receives the loaded data and what the player chose on the title screen ({"party": [...]} or {"file": name}); returns a ready game, or None if a save could not be loaded. |
-| `frodo_game.py` | `choose_game()` | 494 | Team-written | receives the loaded data; shows the title screens until the player starts a new game or loads one; returns the game (None if they quit). |
-| `frodo_game.py` | `main()` | 508 | Team-written | receives nothing; loads the data, opens the window and runs each game round by round until win, lose or quit (then offers to play again); returns nothing. |
+| `frodo_game.py` | `do_request()` | 328 | Team-written | receives the game, the hero whose turn it is and what the player asked for; carries it out and returns True if the turn is over. |
+| `frodo_game.py` | `hero_turn()` | 352 | Team-written | receives the game and a hero; lets the player walk and play one card until the turn ends; returns how many requests were carried out. |
+| `frodo_game.py` | `take_turn()` | 468 | Team-written | receives the game and one [initiative, tie, kind, name] entry; gives that hero or unit its turn; returns the kind that acted. |
+| `frodo_game.py` | `play_round()` | 554 | Team-written | receives the game; plays one full round (turn order, every hero and enemy unit takes a turn, end of round); returns the number of turns taken. |
+| `frodo_game.py` | `finish_game()` | 660 | Team-written | receives the game and "win", "lose" or "" (quit); writes the summary to the log and shows the end screen; returns True if the player wants to play again. |
+| `frodo_game.py` | `open_game()` | 674 | Team-written | receives the loaded data and what the player chose on the title screen ({"party": [...]} or {"file": name}); returns a ready game, or None if a save could not be loaded. |
+| `frodo_game.py` | `choose_game()` | 696 | Team-written | receives the loaded data; shows the title screens until the player starts a new game or loads one; returns the game (None if they quit). |
+| `frodo_game.py` | `main()` | 718 | Team-written | receives nothing; loads the data, opens the window and runs each game round by round until win, lose or quit (then offers to play again); returns nothing. |
 | `test_frodo.py` | `make_test_game()` | 21 | Team-written | receives nothing; returns a small game with Frodo and Brother Biscuit standing in the first chamber of a freshly dug dungeon, for testing. |
 | `test_frodo.py` | `test_load_dungeon()` | 30 | Team-written | receives nothing; checks that dungeon_data.txt loads fully and a missing file returns None; returns True. |
 | `test_frodo.py` | `test_combat()` | 51 | Team-written | receives nothing; checks draw_modifier, calc_damage, apply_damage and sort_turn_order; returns True. |
@@ -42,240 +42,240 @@ Generated from the docstrings in the code. The Tag column is copied from each do
 | File | Function | Line | Tag | What it does |
 |---|---|---|---|---|
 | `frodo_game.py` | `install_room()` | 31 | Team-written | receives the game and a freshly generated room; adds its units to the map, makes it the chamber the party is in and returns its name. |
-| `frodo_game.py` | `catch_breath()` | 50 | Team-written | receives the game; when a new chamber opens every standing hero heals; returns how many heroes healed. |
-| `frodo_game.py` | `enter_room()` | 61 | Team-written | receives the game and the number of the chamber behind the door just opened; Spears carves and fills it from his memory of the party; returns the room's name. |
-| `frodo_game.py` | `start_dungeon()` | 78 | Team-written | receives the game; plans and digs the dungeon and puts the party in the first chamber; returns how many chambers were planned. |
-| `frodo_game.py` | `spring_trap()` | 89 | Team-written | receives the game and the hero who triggered a trap; hurts the hero, pushes the Doom Track and returns the damage. |
-| `frodo_game.py` | `open_chest()` | 102 | Team-written | receives the game, the hero and the best rarity allowed; gives the hero an item, applies it and returns the item's name. |
-| `frodo_game.py` | `step_on_tile()` | 117 | Team-written | receives the game and a hero who just stopped moving; resolves the chest, shrine, trap or door under the hero; returns the tile letter. |
-| `frodo_game.py` | `hero_move()` | 138 | Team-written | receives the game, a hero and the tile to move to; walks the hero there tile by tile (sliding smoothly on screen), using up moves; returns how many tiles were moved. |
-| `frodo_game.py` | `record_hit()` | 155 | Team-written | receives the game, the attack action and the damage; updates the stats and Spears's memory; returns the memory key used. |
-| `frodo_game.py` | `hero_attack()` | 167 | Team-written | receives the game, a hero, the attack action, its strength and the target tile; resolves the attack and returns the damage dealt. |
-| `frodo_game.py` | `hero_heal()` | 190 | Team-written | receives the game, the healer, the heal strength and the target tile; heals the hero there and returns how much was healed. |
-| `frodo_game.py` | `strike_style()` | 202 | Team-written | receives a hero and the attack card they play; returns how the attack looks on screen: "melee", "arrow", "bolt" or "ranged". |
-| `frodo_game.py` | `play_card()` | 213 | Team-written | receives the game, a hero, the name of a card in their hand and the target tile; plays the card's action there and returns the action kind. |
-| `frodo_game.py` | `use_menu()` | 271 | Team-written | receives the game and a menu choice made during a turn ("rules", "status", "save" or "quit"); shows or does it; returns the choice. |
-| `frodo_game.py` | `damage_words()` | 286 | Team-written | receives each hero's health before an enemy attacked and the game; returns words like "hits Pip for 3, Frodo for 2" (or "misses"). |
-| `frodo_game.py` | `health_now()` | 298 | Team-written | receives the game; returns a dictionary of every hero's health right now. |
-| `frodo_game.py` | `spears_phase()` | 306 | Team-written | receives the game and one enemy unit; runs its phases Move, Shoot, Charge, Fight, Morale while the screen shows each step; returns the damage it dealt. |
-| `frodo_game.py` | `start_round()` | 358 | Team-written | receives the game; resets the things that only last one round and returns the new round number. |
-| `frodo_game.py` | `save_game()` | 367 | Team-written | receives the game; asks the player to type a file name and saves the whole game to name.sav; returns True if it was saved. |
-| `frodo_game.py` | `set_initiative()` | 380 | Team-written | receives the game and a hero; rolls the hero's turn order for this round (speed plus a small random roll); returns it. |
-| `frodo_game.py` | `prepare_heroes()` | 386 | Team-written | receives the game; rolls turn order for every standing hero and every enemy unit; returns how many heroes will act. |
-| `frodo_game.py` | `cleanup_cards()` | 416 | Team-written | receives the game; clears the bonuses that only last one round (shields); returns how many heroes were reset. |
-| `frodo_game.py` | `mark_exhausted()` | 426 | Team-written | receives the game; marks every hero with no hp or too few cards as exhausted; returns how many heroes still stand. |
-| `frodo_game.py` | `count_clumping()` | 439 | Team-written | receives the game; counts heroes standing next to another hero and tells Spears's memory; returns that count. |
-| `frodo_game.py` | `end_round()` | 453 | Team-written | receives the game; runs the end of the round (shields wear off, elements wane, exhaustion, Spears's reinforcements, Doom +1, log file); returns the Doom Track value. |
+| `frodo_game.py` | `catch_breath()` | 57 | Team-written | receives the game; when a new chamber opens every standing hero heals; returns how many heroes healed. |
+| `frodo_game.py` | `enter_room()` | 74 | Team-written | receives the game and the number of the chamber behind the door just opened; Spears carves and fills it from his memory of the party; returns the room's name. |
+| `frodo_game.py` | `start_dungeon()` | 99 | Team-written | receives the game; plans and digs the dungeon and puts the party in the first chamber; returns how many chambers were planned. |
+| `frodo_game.py` | `spring_trap()` | 116 | Team-written | receives the game and the hero who triggered a trap; hurts the hero, pushes the Doom Track and returns the damage. |
+| `frodo_game.py` | `open_chest()` | 135 | Team-written | receives the game, the hero and the best rarity allowed; gives the hero an item, applies it and returns the item's name. |
+| `frodo_game.py` | `step_on_tile()` | 155 | Team-written | receives the game and a hero who just stopped moving; resolves the chest, shrine, trap or door under the hero; returns the tile letter. |
+| `frodo_game.py` | `hero_move()` | 185 | Team-written | receives the game, a hero and the tile to move to; walks the hero there tile by tile (sliding smoothly on screen), using up moves; returns how many tiles were moved. |
+| `frodo_game.py` | `record_hit()` | 211 | Team-written | receives the game, the attack action and the damage; updates the stats and Spears's memory; returns the memory key used. |
+| `frodo_game.py` | `hero_attack()` | 227 | Team-written | receives the game, a hero, the attack action, its strength and the target tile; resolves the attack and returns the damage dealt. |
+| `frodo_game.py` | `hero_heal()` | 259 | Team-written | receives the game, the healer, the heal strength and the target tile; heals the hero there and returns how much was healed. |
+| `frodo_game.py` | `strike_style()` | 276 | Team-written | receives a hero and the attack card they play; returns how the attack looks on screen: "melee", "arrow", "bolt" or "ranged". |
+| `frodo_game.py` | `play_card()` | 291 | Team-written | receives the game, a hero, the name of a card in their hand and the target tile; plays the card's action there and returns the action kind. |
+| `frodo_game.py` | `use_menu()` | 374 | Team-written | receives the game and a menu choice made during a turn ("rules", "status", "save" or "quit"); shows or does it; returns the choice. |
+| `frodo_game.py` | `damage_words()` | 397 | Team-written | receives each hero's health before an enemy attacked and the game; returns words like "hits Pip for 3, Frodo for 2" (or "misses"). |
+| `frodo_game.py` | `health_now()` | 414 | Team-written | receives the game; returns a dictionary of every hero's health right now. |
+| `frodo_game.py` | `spears_phase()` | 426 | Team-written | receives the game and one enemy unit; runs its phases Move, Shoot, Charge, Fight, Morale while the screen shows each step; returns the damage it dealt. |
+| `frodo_game.py` | `start_round()` | 496 | Team-written | receives the game; resets the things that only last one round and returns the new round number. |
+| `frodo_game.py` | `save_game()` | 509 | Team-written | receives the game; asks the player to type a file name and saves the whole game to name.sav; returns True if it was saved. |
+| `frodo_game.py` | `set_initiative()` | 527 | Team-written | receives the game and a hero; rolls the hero's turn order for this round (speed plus a small random roll); returns it. |
+| `frodo_game.py` | `prepare_heroes()` | 536 | Team-written | receives the game; rolls turn order for every standing hero and every enemy unit; returns how many heroes will act. |
+| `frodo_game.py` | `cleanup_cards()` | 581 | Team-written | receives the game; clears the bonuses that only last one round (shields); returns how many heroes were reset. |
+| `frodo_game.py` | `mark_exhausted()` | 595 | Team-written | receives the game; marks every hero with no hp or too few cards as exhausted; returns how many heroes still stand. |
+| `frodo_game.py` | `count_clumping()` | 614 | Team-written | receives the game; counts heroes standing next to another hero and tells Spears's memory; returns that count. |
+| `frodo_game.py` | `end_round()` | 634 | Team-written | receives the game; runs the end of the round (shields wear off, elements wane, exhaustion, Spears's reinforcements, Doom +1, log file); returns the Doom Track value. |
 | `cards.py` | `find_card()` | 7 | Team-written | receives a list of cards and a card name; returns that card, or None if it is not there. |
-| `cards.py` | `choose_card()` | 15 | Team-written | receives a hero and a card name; takes that card out of the hand and returns it (None if it is not in the hand). |
-| `cards.py` | `finish_card()` | 23 | Team-written | receives a hero and the card they just played; puts it on the discard pile and draws a new card; returns how many cards are now in hand. |
-| `cards.py` | `draw_card()` | 29 | Team-written | receives a hero; moves the top card of their deck into their hand (shuffling the discard pile back into the deck first if the deck is empty); returns the card drawn, or None. |
-| `cards.py` | `refill_hand()` | 43 | Team-written | receives a hero; draws cards until they hold HAND_SIZE (or run out); returns how many cards are in hand. |
-| `cards.py` | `is_exhausted()` | 51 | Team-written | receives a hero; returns True if the hero has no hp left. |
-| `cards.py` | `heal_hero()` | 56 | Team-written | receives a hero and a heal amount; raises hp (not past max) and returns how much was healed. |
-| `cards.py` | `use_element()` | 65 | Team-written | receives the elements dictionary and an element name; if it is glowing, uses it up and returns 1 (bonus), otherwise starts it glowing and returns 0. |
-| `cards.py` | `wane_elements()` | 76 | Team-written | receives the elements dictionary; lowers every glowing element by 1 and returns how many are still glowing. |
-| `cards.py` | `search_poi()` | 87 | Team-written | receives the searching hero, the item list and the best rarity allowed; adds a random item to the hero and returns it (None if nothing fits). |
-| `cards.py` | `cheese_feast()` | 100 | Team-written | receives the game and a heal amount; Frodo heals that much, everyone else heals 1; returns a message. |
-| `cards.py` | `apply_item()` | 112 | Team-written | receives the game, a hero and an item; applies the item's effect and returns a message about it. |
+| `cards.py` | `choose_card()` | 20 | Team-written | receives a hero and a card name; takes that card out of the hand and returns it (None if it is not in the hand). |
+| `cards.py` | `finish_card()` | 33 | Team-written | receives a hero and the card they just played; puts it on the discard pile and draws a new card; returns how many cards are now in hand. |
+| `cards.py` | `draw_card()` | 44 | Team-written | receives a hero; moves the top card of their deck into their hand (shuffling the discard pile back into the deck first if the deck is empty); returns the card drawn, or None. |
+| `cards.py` | `refill_hand()` | 65 | Team-written | receives a hero; draws cards until they hold HAND_SIZE (or run out); returns how many cards are in hand. |
+| `cards.py` | `is_exhausted()` | 80 | Team-written | receives a hero; returns True if the hero has no hp left. |
+| `cards.py` | `heal_hero()` | 88 | Team-written | receives a hero and a heal amount; raises hp (not past max) and returns how much was healed. |
+| `cards.py` | `use_element()` | 101 | Team-written | receives the elements dictionary and an element name; if it is glowing, uses it up and returns 1 (bonus), otherwise starts it glowing and returns 0. |
+| `cards.py` | `wane_elements()` | 118 | Team-written | receives the elements dictionary; lowers every glowing element by 1 and returns how many are still glowing. |
+| `cards.py` | `search_poi()` | 134 | Team-written | receives the searching hero, the item list and the best rarity allowed; adds a random item to the hero and returns it (None if nothing fits). |
+| `cards.py` | `cheese_feast()` | 152 | Team-written | receives the game and a heal amount; Frodo heals that much, everyone else heals 1; returns a message. |
+| `cards.py` | `apply_item()` | 170 | Team-written | receives the game, a hero and an item; applies the item's effect and returns a message about it. |
 | `game_data.py` | `clean_value()` | 8 | Team-written | receives one value from the data file; returns an int if it is a number, otherwise the text with _ turned into spaces. |
-| `game_data.py` | `parse_fields()` | 16 | Team-written | receives text like "move=3 role=melee"; returns a dictionary such as {"move": 3, "role": "melee"}. |
-| `game_data.py` | `parse_action()` | 26 | Team-written | receives text like "attack:3:1"; returns an action dictionary with kind, amount and range. |
-| `game_data.py` | `make_card()` | 38 | Team-written | receives the hero name and the fields of a CARD line; returns a card dictionary with its one action. |
-| `game_data.py` | `store_record()` | 46 | Team-written | receives the data so far, a record kind, its name and its fields; stores it in the right place and returns the kind. |
-| `game_data.py` | `read_line()` | 71 | Team-written | receives the data so far and one line of the file; stores the line if it is a record and returns True if it was one. |
-| `game_data.py` | `load_dungeon()` | 88 | Team-written | receives the data file name; returns a dictionary of units, styles, the dungeon plan settings, the arena drawing, cards, items, heroes and settings, or None if the file cannot be opened. |
-| `game_data.py` | `make_hero()` | 102 | Team-written | receives the loaded data and a hero name; returns a fresh hero dictionary with a full hand of cards. |
-| `game_data.py` | `new_memory()` | 120 | Team-written | receives nothing; returns Spears's memory dictionary with every count at 0. |
-| `game_data.py` | `new_stats()` | 126 | Team-written | receives nothing; returns the stats dictionary used for the end summary, all at 0. |
-| `game_data.py` | `find_level()` | 132 | Team-written | receives the loaded data and a difficulty name; returns that DIFFICULTY record (Normal if the name is unknown). |
-| `game_data.py` | `apply_level()` | 140 | Team-written | receives a new game and a difficulty record; makes heroes tougher or frailer, the Doom Track longer or shorter and enemies hit harder or softer; returns the difficulty name. |
-| `game_data.py` | `new_game()` | 151 | Team-written | receives the loaded data, the list of chosen hero names and the difficulty name; returns the whole starting game dictionary. |
-| `game_data.py` | `find_hero()` | 171 | Team-written | receives the game and a hero name; returns that hero's dictionary, or None. |
-| `game_data.py` | `place_party()` | 179 | Team-written | receives the game and the room's start tiles; stands each living hero on one and returns how many were placed. |
+| `game_data.py` | `parse_fields()` | 19 | Team-written | receives text like "move=3 role=melee"; returns a dictionary such as {"move": 3, "role": "melee"}. |
+| `game_data.py` | `parse_action()` | 37 | Team-written | receives text like "attack:3:1"; returns an action dictionary with kind, amount and range. |
+| `game_data.py` | `make_card()` | 52 | Team-written | receives the hero name and the fields of a CARD line; returns a card dictionary with its one action. |
+| `game_data.py` | `store_record()` | 64 | Team-written | receives the data so far, a record kind, its name and its fields; stores it in the right place and returns the kind. |
+| `game_data.py` | `read_line()` | 95 | Team-written | receives the data so far and one line of the file; stores the line if it is a record and returns True if it was one. |
+| `game_data.py` | `load_dungeon()` | 117 | Team-written | receives the data file name; returns a dictionary of units, styles, the dungeon plan settings, the arena drawing, cards, items, heroes and settings, or None if the file cannot be opened. |
+| `game_data.py` | `make_hero()` | 138 | Team-written | receives the loaded data and a hero name; returns a fresh hero dictionary with a full hand of cards. |
+| `game_data.py` | `new_memory()` | 161 | Team-written | receives nothing; returns Spears's memory dictionary with every count at 0. |
+| `game_data.py` | `new_stats()` | 170 | Team-written | receives nothing; returns the stats dictionary used for the end summary, all at 0. |
+| `game_data.py` | `find_level()` | 179 | Team-written | receives the loaded data and a difficulty name; returns that DIFFICULTY record (Normal if the name is unknown). |
+| `game_data.py` | `apply_level()` | 192 | Team-written | receives a new game and a difficulty record; makes heroes tougher or frailer, the Doom Track longer or shorter and enemies hit harder or softer; returns the difficulty name. |
+| `game_data.py` | `new_game()` | 207 | Team-written | receives the loaded data, the list of chosen hero names and the difficulty name; returns the whole starting game dictionary. |
+| `game_data.py` | `find_hero()` | 234 | Team-written | receives the game and a hero name; returns that hero's dictionary, or None. |
+| `game_data.py` | `place_party()` | 247 | Team-written | receives the game and the room's start tiles; stands each living hero on one and returns how many were placed. |
 
 ## Guilherme - Spears and his armies
 
 | File | Function | Line | Tag | What it does |
 |---|---|---|---|---|
 | `spears_ai.py` | `spears_counter()` | 31 | Team-written | receives Spears's memory dictionary; returns the party habit he will punish next: "melee", "ranged", "loot", "clump", "rest" or "none". |
-| `spears_ai.py` | `fade_memory()` | 44 | Team-written | receives Spears's memory; halves every count so newer habits matter more; returns the memory. |
-| `spears_ai.py` | `unit_plan()` | 51 | Team-written | receives the habit to counter, how far along the main path this chamber is and its kind; returns the list of unit type names Spears deploys. |
-| `spears_ai.py` | `pick_style()` | 72 | Team-written | receives the room styles and the habit to counter; returns a random style that matches (or any normal style). |
-| `spears_ai.py` | `build_dungeon()` | 86 | Team-written | receives the game; plans the whole dungeon, starts the map as solid rock and carves the boss arena (its outline is known from the start); returns how many chambers were planned. |
-| `spears_ai.py` | `boss_chamber()` | 108 | Team-written | receives the game; returns the boss arena's chamber dictionary. |
-| `spears_ai.py` | `chamber_at()` | 116 | Team-written | receives the game and a tile; returns the chamber whose zone holds that tile, or None. |
-| `spears_ai.py` | `door_at()` | 124 | Team-written | receives the game and a tile; returns the door record {"tile", "from", "to"} on that tile, or None. |
-| `spears_ai.py` | `place_letters()` | 132 | Team-written | receives the map grid, the list of free floor tiles, a tile letter and a count; puts that letter on random free tiles (removing them from the list); returns how many were placed. |
-| `spears_ai.py` | `furnish()` | 142 | Team-written | receives the game, the new room, its style and the habit to counter; fills the chamber with chests, traps, cover and shrines, twisted to punish that habit (side chambers get an extra chest); returns how many floor tiles are still empty. |
-| `spears_ai.py` | `deploy_room()` | 168 | Team-written | receives the game, the new room and the habit to counter; Spears deploys his units in the far half of the chamber; returns how many units were placed. |
-| `spears_ai.py` | `add_unit()` | 183 | Team-written | receives the game, a room, a unit type, a spawn tile and the tiles already taken; makes the unit, stands it around the spawn and adds it to the room; returns the unit (None if no model fitted). |
-| `spears_ai.py` | `deploy_boss()` | 195 | Team-written | receives the game and the boss arena room; stands the Warlord at his mark and his guards at theirs; returns how many units were placed. |
-| `spears_ai.py` | `place_exits()` | 207 | Team-written | receives the game and a freshly carved chamber; puts a sealed door in its wall towards every chamber that branches off it; returns the door to the main path (or None). |
-| `spears_ai.py` | `nearest_tile()` | 226 | Team-written | receives a list of tiles and a point; returns the tile closest to the point. |
-| `spears_ai.py` | `connect_chamber()` | 235 | Team-written | receives the game and the chamber being entered; digs a corridor from the door that leads to it and swings that door open for good; returns the door tile, or None for the first chamber. |
-| `spears_ai.py` | `make_unit()` | 246 | AI-assisted | receives the data, a unit type name and a unit number; returns a new unit dictionary with no models placed yet. |
-| `spears_ai.py` | `place_models()` | 258 | AI-assisted | receives the grid, a unit, a spawn tile and the tiles already taken; stands the unit's models on and around the spawn; returns how many were placed. |
-| `spears_ai.py` | `generate_room()` | 270 | Team-written | receives the game, the number of the chamber being opened and the party habit Spears wants to counter; carves the chamber (the arena is already carved), furnishes it and deploys his units; returns the room dictionary. |
-| `spears_ai.py` | `find_unit()` | 308 | Team-written | receives the unit list and a unit name; returns that unit, or None if it has been destroyed. |
-| `spears_ai.py` | `unit_visible()` | 316 | Team-written | receives the game and a unit; returns True if the party can see at least one of its models right now. |
-| `spears_ai.py` | `pick_initiative()` | 324 | Team-written | receives a unit; returns a random activation initiative that suits its role (fast units go early, heavy ones late). |
-| `spears_ai.py` | `pick_target()` | 336 | Team-written | receives the game and a unit; returns the hero Spears wants dead most (weak and close), or None if no hero stands. |
-| `spears_ai.py` | `coherency_ok()` | 352 | Team-written | receives a unit, one of its models and a tile; returns True if the model would be within 2 tiles of another model of the unit there. |
-| `spears_ai.py` | `goal_tile()` | 364 | Team-written | receives the game, a unit and its target hero; returns the tile the unit heads for (heavy units hold the door until heroes come close). |
-| `spears_ai.py` | `is_flank()` | 373 | Team-written | receives the game, a unit and a tile next to its goal; returns True if another enemy model stands on the opposite side (a flank). |
-| `spears_ai.py` | `ranged_score()` | 380 | Team-written | receives the distance to the target and the shooting range; returns a score (low is good) for keeping a safe shooting distance. |
-| `spears_ai.py` | `tile_score()` | 390 | Team-written | receives the game, a unit, a tile and the step map from the goal; returns how good that tile is (low is good). |
-| `spears_ai.py` | `best_tile()` | 403 | Team-written | receives the game, a unit, one model, the step map from the goal and a move limit; returns the best tile that keeps coherency. |
-| `spears_ai.py` | `move_unit()` | 424 | Team-written | receives the game, a unit, its target hero and a move limit; moves every model toward the goal (remembering where each came from, for the animation); returns how many models moved. |
-| `spears_ai.py` | `choose_victim()` | 438 | Team-written | receives the game, a model, its reach and the unit's target; returns the hero this model attacks (the target if in reach, else the weakest in reach, else None). |
-| `spears_ai.py` | `cover_bonus()` | 451 | Team-written | receives the game, the attacking unit and the hero; returns 1 if the hero is behind cover from a shot, else 0. |
-| `spears_ai.py` | `hero_falls()` | 459 | Team-written | receives the game and a hero with no hp; marks the hero exhausted and returns a message. |
-| `spears_ai.py` | `splash()` | 467 | Team-written | receives the game, an area-attack unit and the hero it hit; deals 1 damage to heroes next to that hero; returns how many were splashed. |
-| `spears_ai.py` | `feel_hit()` | 484 | Team-written | receives the game, a hero who was just hit, the damage and the modifier card; asks the screen to flash the hero's portrait, and to shake on a big hit; returns the damage. |
-| `spears_ai.py` | `unit_attack()` | 493 | Team-written | receives the game, a unit, one of its models and a hero; resolves one enemy attack and returns the damage dealt. |
-| `spears_ai.py` | `unit_shoot()` | 518 | Team-written | receives the game, a ranged unit and its target; every model in range shoots; returns the total damage. |
-| `spears_ai.py` | `touching_hero()` | 528 | Team-written | receives the game and a unit; returns True if any of its models stands next to a hero. |
-| `spears_ai.py` | `nearest_gap()` | 537 | Team-written | receives a unit and its target hero; returns how many tiles the closest model must cross to stand next to the hero. |
-| `spears_ai.py` | `unit_charge()` | 547 | Team-written | receives the game, a melee unit and its target; rolls a charge distance and moves in if it is enough; returns True on a successful charge. |
-| `spears_ai.py` | `unit_fight()` | 564 | Team-written | receives the game, a unit and its target; every model next to a hero attacks; returns the total damage. |
-| `spears_ai.py` | `morale_test()` | 576 | Team-written | receives a unit's leadership and a 2d6 roll; returns True if the unit holds (roll is leadership or less). |
-| `spears_ai.py` | `check_room_clear()` | 581 | Team-written | receives the game and a chamber number; if none of that chamber's units are left, unseals all its doors and returns True. |
-| `spears_ai.py` | `destroy_unit()` | 602 | Team-written | receives the game, a unit with no models left and the tile where it fell; removes the unit, maybe drops loot, and returns True if loot dropped. |
-| `spears_ai.py` | `remove_model()` | 616 | Team-written | receives the game, a unit and a dead or fleeing model; removes the model and returns how many models the unit has left. |
-| `spears_ai.py` | `safest_tile()` | 627 | Team-written | receives the game, a model and a move limit; returns the reachable tile farthest from every hero. |
-| `spears_ai.py` | `fall_back()` | 644 | Team-written | receives the game and a broken unit; every model runs away from the heroes (remembering where each came from, for the animation); returns how many models moved. |
-| `spears_ai.py` | `break_unit()` | 656 | Team-written | receives the game and a unit that failed morale; it randomly loses a model or falls back; returns what happened. |
-| `spears_ai.py` | `unit_morale()` | 672 | Team-written | receives the game and a unit; if it is below half strength it rolls 2d6 against leadership; returns True if the unit holds. |
-| `spears_ai.py` | `advance_doom()` | 690 | Team-written | receives the Doom Track value, how much to add and the track's end; returns the new value (never past the end). |
-| `spears_ai.py` | `prepare_ahead()` | 698 | Team-written | receives the game and a chamber the party has not opened yet; Spears secretly adds a trap, a guard or a trapped chest to it; returns what he added. |
-| `spears_ai.py` | `reinforce()` | 706 | Team-written | receives the game; after a round Spears may secretly strengthen one chamber the party has not opened yet (never the one they are in); returns what he added ("" if he waits). |
-| `spears_ai.py` | `apply_preparations()` | 722 | Team-written | receives the game, a freshly carved room and its chamber; puts in the traps, guards and trapped chests Spears prepared; returns how many were added. |
-| `spears_ai.py` | `warlord()` | 744 | Team-written | receives the game; returns the Warlord's unit if he is on the map, else None. |
-| `spears_ai.py` | `summon_guards()` | 752 | Team-written | receives the game and the Warlord; his guards rush in at the free guard marks of the arena; returns a message. |
-| `spears_ai.py` | `enrage()` | 766 | Team-written | receives the Warlord; he grows stronger and faster; returns a message. |
-| `spears_ai.py` | `boss_check()` | 773 | Team-written | receives the game and a unit that was just hit; if it is the Warlord, moves him into his next phase at half and at a quarter of his wounds; returns the phase he is in (0, 1 or 2). |
+| `spears_ai.py` | `fade_memory()` | 51 | Team-written | receives Spears's memory; halves every count so newer habits matter more; returns the memory. |
+| `spears_ai.py` | `unit_plan()` | 62 | Team-written | receives the habit to counter, how far along the main path this chamber is and its kind; returns the list of unit type names Spears deploys. |
+| `spears_ai.py` | `pick_style()` | 88 | Team-written | receives the room styles and the habit to counter; returns a random style that matches (or any normal style). |
+| `spears_ai.py` | `build_dungeon()` | 107 | Team-written | receives the game; plans the whole dungeon, starts the map as solid rock and carves the boss arena (its outline is known from the start); returns how many chambers were planned. |
+| `spears_ai.py` | `boss_chamber()` | 134 | Team-written | receives the game; returns the boss arena's chamber dictionary. |
+| `spears_ai.py` | `chamber_at()` | 147 | Team-written | receives the game and a tile; returns the chamber whose zone holds that tile, or None. |
+| `spears_ai.py` | `door_at()` | 159 | Team-written | receives the game and a tile; returns the door record {"tile", "from", "to"} on that tile, or None. |
+| `spears_ai.py` | `place_letters()` | 172 | Team-written | receives the map grid, the list of free floor tiles, a tile letter and a count; puts that letter on random free tiles (removing them from the list); returns how many were placed. |
+| `spears_ai.py` | `furnish()` | 186 | Team-written | receives the game, the new room, its style and the habit to counter; fills the chamber with chests, traps, cover and shrines, twisted to punish that habit (side chambers get an extra chest); returns how many floor tiles are still empty. |
+| `spears_ai.py` | `deploy_room()` | 220 | Team-written | receives the game, the new room and the habit to counter; Spears deploys his units in the far half of the chamber; returns how many units were placed. |
+| `spears_ai.py` | `add_unit()` | 241 | Team-written | receives the game, a room, a unit type, a spawn tile and the tiles already taken; makes the unit, stands it around the spawn and adds it to the room; returns the unit (None if no model fitted). |
+| `spears_ai.py` | `deploy_boss()` | 258 | Team-written | receives the game and the boss arena room; stands the Warlord at his mark and his guards at theirs; returns how many units were placed. |
+| `spears_ai.py` | `place_exits()` | 275 | Team-written | receives the game and a freshly carved chamber; puts a sealed door in its wall towards every chamber that branches off it; returns the door to the main path (or None). |
+| `spears_ai.py` | `nearest_tile()` | 301 | Team-written | receives a list of tiles and a point; returns the tile closest to the point. |
+| `spears_ai.py` | `connect_chamber()` | 316 | Team-written | receives the game and the chamber being entered; digs a corridor from the door that leads to it and swings that door open for good; returns the door tile, or None for the first chamber. |
+| `spears_ai.py` | `make_unit()` | 333 | AI-assisted | receives the data, a unit type name and a unit number; returns a new unit dictionary with no models placed yet. |
+| `spears_ai.py` | `place_models()` | 348 | AI-assisted | receives the grid, a unit, a spawn tile and the tiles already taken; stands the unit's models on and around the spawn; returns how many were placed. |
+| `spears_ai.py` | `generate_room()` | 366 | Team-written | receives the game, the number of the chamber being opened and the party habit Spears wants to counter; carves the chamber (the arena is already carved), furnishes it and deploys his units; returns the room dictionary. |
+| `spears_ai.py` | `find_unit()` | 414 | Team-written | receives the unit list and a unit name; returns that unit, or None if it has been destroyed. |
+| `spears_ai.py` | `unit_visible()` | 427 | Team-written | receives the game and a unit; returns True if the party can see at least one of its models right now. |
+| `spears_ai.py` | `pick_initiative()` | 440 | Team-written | receives a unit; returns a random activation initiative that suits its role (fast units go early, heavy ones late). |
+| `spears_ai.py` | `pick_target()` | 456 | Team-written | receives the game and a unit; returns the hero Spears wants dead most (weak and close), or None if no hero stands. |
+| `spears_ai.py` | `coherency_ok()` | 480 | Team-written | receives a unit, one of its models and a tile; returns True if the model would be within 2 tiles of another model of the unit there. |
+| `spears_ai.py` | `goal_tile()` | 498 | Team-written | receives the game, a unit and its target hero; returns the tile the unit heads for (heavy units hold the door until heroes come close). |
+| `spears_ai.py` | `is_flank()` | 512 | Team-written | receives the game, a unit and a tile next to its goal; returns True if another enemy model stands on the opposite side (a flank). |
+| `spears_ai.py` | `ranged_score()` | 523 | Team-written | receives the distance to the target and the shooting range; returns a score (low is good) for keeping a safe shooting distance. |
+| `spears_ai.py` | `tile_score()` | 537 | Team-written | receives the game, a unit, a tile and the step map from the goal; returns how good that tile is (low is good). |
+| `spears_ai.py` | `best_tile()` | 555 | Team-written | receives the game, a unit, one model, the step map from the goal and a move limit; returns the best tile that keeps coherency. |
+| `spears_ai.py` | `move_unit()` | 583 | Team-written | receives the game, a unit, its target hero and a move limit; moves every model toward the goal (remembering where each came from, for the animation); returns how many models moved. |
+| `spears_ai.py` | `choose_victim()` | 605 | Team-written | receives the game, a model, its reach and the unit's target; returns the hero this model attacks (the target if in reach, else the weakest in reach, else None). |
+| `spears_ai.py` | `cover_bonus()` | 625 | Team-written | receives the game, the attacking unit and the hero; returns 1 if the hero is behind cover from a shot, else 0. |
+| `spears_ai.py` | `hero_falls()` | 637 | Team-written | receives the game and a hero with no hp; marks the hero exhausted and returns a message. |
+| `spears_ai.py` | `splash()` | 650 | Team-written | receives the game, an area-attack unit and the hero it hit; deals 1 damage to heroes next to that hero; returns how many were splashed. |
+| `spears_ai.py` | `feel_hit()` | 673 | Team-written | receives the game, a hero who was just hit, the damage and the modifier card; asks the screen to flash the hero's portrait, and to shake on a big hit; returns the damage. |
+| `spears_ai.py` | `unit_attack()` | 686 | Team-written | receives the game, a unit, one of its models and a hero; resolves one enemy attack and returns the damage dealt. |
+| `spears_ai.py` | `unit_shoot()` | 719 | Team-written | receives the game, a ranged unit and its target; every model in range shoots; returns the total damage. |
+| `spears_ai.py` | `touching_hero()` | 735 | Team-written | receives the game and a unit; returns True if any of its models stands next to a hero. |
+| `spears_ai.py` | `nearest_gap()` | 750 | Team-written | receives a unit and its target hero; returns how many tiles the closest model must cross to stand next to the hero. |
+| `spears_ai.py` | `unit_charge()` | 766 | Team-written | receives the game, a melee unit and its target; rolls a charge distance and moves in if it is enough; returns True on a successful charge. |
+| `spears_ai.py` | `unit_fight()` | 791 | Team-written | receives the game, a unit and its target; every model next to a hero attacks; returns the total damage. |
+| `spears_ai.py` | `morale_test()` | 809 | Team-written | receives a unit's leadership and a 2d6 roll; returns True if the unit holds (roll is leadership or less). |
+| `spears_ai.py` | `check_room_clear()` | 818 | Team-written | receives the game and a chamber number; if none of that chamber's units are left, unseals all its doors and returns True. |
+| `spears_ai.py` | `destroy_unit()` | 846 | Team-written | receives the game, a unit with no models left and the tile where it fell; removes the unit, maybe drops loot, and returns True if loot dropped. |
+| `spears_ai.py` | `remove_model()` | 865 | Team-written | receives the game, a unit and a dead or fleeing model; removes the model and returns how many models the unit has left. |
+| `spears_ai.py` | `safest_tile()` | 881 | Team-written | receives the game, a model and a move limit; returns the reachable tile farthest from every hero. |
+| `spears_ai.py` | `fall_back()` | 904 | Team-written | receives the game and a broken unit; every model runs away from the heroes (remembering where each came from, for the animation); returns how many models moved. |
+| `spears_ai.py` | `break_unit()` | 922 | Team-written | receives the game and a unit that failed morale; it randomly loses a model or falls back; returns what happened. |
+| `spears_ai.py` | `unit_morale()` | 943 | Team-written | receives the game and a unit; if it is below half strength it rolls 2d6 against leadership; returns True if the unit holds. |
+| `spears_ai.py` | `advance_doom()` | 969 | Team-written | receives the Doom Track value, how much to add and the track's end; returns the new value (never past the end). |
+| `spears_ai.py` | `prepare_ahead()` | 981 | Team-written | receives the game and a chamber the party has not opened yet; Spears secretly adds a trap, a guard or a trapped chest to it; returns what he added. |
+| `spears_ai.py` | `reinforce()` | 993 | Team-written | receives the game; after a round Spears may secretly strengthen one chamber the party has not opened yet (never the one they are in); returns what he added ("" if he waits). |
+| `spears_ai.py` | `apply_preparations()` | 1018 | Team-written | receives the game, a freshly carved room and its chamber; puts in the traps, guards and trapped chests Spears prepared; returns how many were added. |
+| `spears_ai.py` | `warlord()` | 1047 | Team-written | receives the game; returns the Warlord's unit if he is on the map, else None. |
+| `spears_ai.py` | `summon_guards()` | 1060 | Team-written | receives the game and the Warlord; his guards rush in at the free guard marks of the arena; returns a message. |
+| `spears_ai.py` | `enrage()` | 1080 | Team-written | receives the Warlord; he grows stronger and faster; returns a message. |
+| `spears_ai.py` | `boss_check()` | 1090 | Team-written | receives the game and a unit that was just hit; if it is the Warlord, moves him into his next phase at half and at a quarter of his wounds; returns the phase he is in (0, 1 or 2). |
 
 ## Mahad - The dungeon, combat maths and the log
 
 | File | Function | Line | Tag | What it does |
 |---|---|---|---|---|
 | `combat.py` | `build_modifier_deck()` | 5 | Team-written | receives nothing; returns a shuffled list of 20 attack modifier cards. |
-| `combat.py` | `draw_modifier()` | 16 | Team-written | receives a modifier deck and its discard pile; returns the card drawn (like "+1", "x2" or "null"). |
-| `combat.py` | `calc_damage()` | 30 | Team-written | receives the base attack, the modifier card and the target's shield; returns the damage dealt (never below 0). |
-| `combat.py` | `apply_damage()` | 47 | Team-written | receives a hero or enemy model dictionary and a damage number; lowers its hp and returns the hp left. |
-| `combat.py` | `roll_attack()` | 55 | Team-written | receives the game, "hero" or "enemy", the base attack and the shield; draws a modifier and returns [damage, modifier]. |
-| `combat.py` | `sort_turn_order()` | 66 | Team-written | receives the heroes and enemy units; returns a list of [initiative, tie, kind, name] sorted lowest first. |
+| `combat.py` | `draw_modifier()` | 20 | Team-written | receives a modifier deck and its discard pile; returns the card drawn (like "+1", "x2" or "null"). |
+| `combat.py` | `calc_damage()` | 41 | Team-written | receives the base attack, the modifier card and the target's shield; returns the damage dealt (never below 0). |
+| `combat.py` | `apply_damage()` | 64 | Team-written | receives a hero or enemy model dictionary and a damage number; lowers its hp and returns the hp left. |
+| `combat.py` | `roll_attack()` | 76 | Team-written | receives the game, "hero" or "enemy", the base attack and the shield; draws a modifier and returns [damage, modifier]. |
+| `combat.py` | `sort_turn_order()` | 94 | Team-written | receives the heroes and enemy units; returns a list of [initiative, tie, kind, name] sorted lowest first. |
 | `logbook.py` | `say()` | 4 | Team-written | receives the game and a sentence; adds it to the on-screen log and this round's file log; returns the sentence. |
-| `logbook.py` | `note()` | 11 | Team-written | receives the game and a sentence the party cannot see happening; writes it only to the file log; returns the sentence. |
-| `logbook.py` | `tell()` | 17 | Team-written | receives the game, whether the party can see the event, and a sentence; shows it on screen only if visible, but always logs it to the file; returns the sentence. |
-| `logbook.py` | `add_float()` | 24 | Team-written | receives the game, a tile, some text and a color name; asks the screen to float that text over the tile. |
-| `logbook.py` | `add_banner()` | 30 | Team-written | receives the game and a sentence; asks the screen to show it as a Spears banner; returns the sentence. |
-| `logbook.py` | `start_log()` | 36 | Team-written | receives the list of hero names; starts a fresh frodo_log.txt and returns True if the file could be written. |
-| `logbook.py` | `write_log()` | 48 | Team-written | receives this round's sentences and the round number; appends them to frodo_log.txt and returns how many lines were written. |
-| `logbook.py` | `write_summary()` | 63 | Team-written | receives the stats dictionary; works out the averages, appends the summary to frodo_log.txt and returns the summary dictionary. |
-| `logbook.py` | `summary_lines()` | 83 | Team-written | receives the summary dictionary; returns the list of sentences shown at the end and written to the log. |
-| `logbook.py` | `check_game_over()` | 98 | Team-written | receives the heroes, the Doom Track, its end and whether the Warlord is dead; returns "win", "lose" or "" (keep playing). |
-| `logbook.py` | `status_lines()` | 112 | Team-written | receives the game; returns a list of sentences describing the party, the room and the Doom Track. |
-| `logbook.py` | `hero_line()` | 124 | Team-written | receives a hero; returns one sentence with the hero's hp, cards and items. |
+| `logbook.py` | `note()` | 18 | Team-written | receives the game and a sentence the party cannot see happening; writes it only to the file log; returns the sentence. |
+| `logbook.py` | `tell()` | 27 | Team-written | receives the game, whether the party can see the event, and a sentence; shows it on screen only if visible, but always logs it to the file; returns the sentence. |
+| `logbook.py` | `add_float()` | 39 | Team-written | receives the game, a tile, some text and a color name; asks the screen to float that text over the tile. |
+| `logbook.py` | `add_banner()` | 49 | Team-written | receives the game and a sentence; asks the screen to show it as a Spears banner; returns the sentence. |
+| `logbook.py` | `start_log()` | 58 | Team-written | receives the list of hero names; starts a fresh frodo_log.txt and returns True if the file could be written. |
+| `logbook.py` | `write_log()` | 73 | Team-written | receives this round's sentences and the round number; appends them to frodo_log.txt and returns how many lines were written. |
+| `logbook.py` | `write_summary()` | 94 | Team-written | receives the stats dictionary; works out the averages, appends the summary to frodo_log.txt and returns the summary dictionary. |
+| `logbook.py` | `summary_lines()` | 121 | Team-written | receives the summary dictionary; returns the list of sentences shown at the end and written to the log. |
+| `logbook.py` | `check_game_over()` | 139 | Team-written | receives the heroes, the Doom Track, its end and whether the Warlord is dead; returns "win", "lose" or "" (keep playing). |
+| `logbook.py` | `status_lines()` | 160 | Team-written | receives the game; returns a list of sentences describing the party, the room and the Doom Track. |
+| `logbook.py` | `hero_line()` | 177 | Team-written | receives a hero; returns one sentence with the hero's hp, cards and items. |
 | `chambers.py` | `blank_map()` | 18 | Team-written | receives a width and height in tiles; returns a new map grid that is solid rock everywhere. |
-| `chambers.py` | `zone_box()` | 26 | Team-written | receives the map grid and a zone [x, y, width, height]; returns [left, top, right, bottom], the tiles a chamber may use (always leaving a wall around it). |
-| `chambers.py` | `box_center()` | 35 | Team-written | receives a box [left, top, right, bottom]; returns the tile in its middle. |
-| `chambers.py` | `shrink_box()` | 40 | Team-written | receives a box [left, top, right, bottom]; returns a randomly smaller box inside it, so chambers differ in size and position. |
-| `chambers.py` | `box_tiles()` | 51 | Team-written | receives a box [left, top, right, bottom]; returns the list of every tile inside it. |
-| `chambers.py` | `cell_zone()` | 62 | Team-written | receives the DUNGEON settings and a list of cells [cx, cy]; returns the zone [x, y, width, height] that covers all of them. |
-| `chambers.py` | `cell_neighbors()` | 78 | Team-written | receives the DUNGEON settings and a cell; returns the cells next to it (up, down, left, right) that are on the map. |
-| `chambers.py` | `touches()` | 89 | Team-written | receives the DUNGEON settings, a cell and a list of cells; returns True if the cell is next to any of them. |
-| `chambers.py` | `boss_block()` | 97 | Team-written | receives the DUNGEON settings; returns the 4 cells of a random 2 x 2 block for the boss arena. |
-| `chambers.py` | `far_cell()` | 104 | Team-written | receives the DUNGEON settings and the boss cells; returns a random cell among those farthest from the boss (where the party starts). |
-| `chambers.py` | `random_walk()` | 123 | Team-written | receives the DUNGEON settings, the start cell, the boss cells and a wanted length; walks at random from the start and returns the path if it ends next to the boss at that length, else []. |
-| `chambers.py` | `main_path()` | 139 | Team-written | receives the DUNGEON settings, the boss cells and the start cell; returns a random main path of cells (as close to the wanted length as possible), or [] if none was found. |
-| `chambers.py` | `make_chamber()` | 150 | Team-written | receives a chamber number, its kind ("start", "main", "side" or "boss"), its cells, its parent's number and the DUNGEON settings; returns a new, not yet carved chamber dictionary. |
-| `chambers.py` | `add_sides()` | 157 | Team-written | receives the DUNGEON settings, the plan so far, the main path and the boss cells; adds side chambers in free cells next to the main path; returns how many were added. |
-| `chambers.py` | `plan_dungeon()` | 180 | Team-written | receives the DUNGEON settings; plans the whole dungeon at random (main path, side chambers and boss arena); returns the list of chambers (number 0 is where the party starts). |
-| `chambers.py` | `children()` | 203 | Team-written | receives the plan and a chamber number; returns the chambers whose door is in that chamber's wall. |
-| `chambers.py` | `owner_grid()` | 212 | Team-written | receives the map grid and the plan; returns a grid saying which chamber's zone each tile is in (-1 = no chamber). |
-| `chambers.py` | `shape_ell()` | 225 | Team-written | receives a box; returns its tiles with one random corner block cut away (an L-shaped room). |
-| `chambers.py` | `shape_round()` | 240 | Team-written | receives a box; returns its tiles with the corners clipped off (a rounded room). |
-| `chambers.py` | `shape_cross()` | 254 | Team-written | receives a box; returns the tiles of a plus-shaped room (a wide bar across and a wide bar down). |
-| `chambers.py` | `shape_cave()` | 271 | Team-written | receives a box; returns its tiles with random bites taken out of the edge (a rough cave). |
-| `chambers.py` | `connected()` | 281 | Team-written | receives a list of floor tiles; returns only the tiles that can be walked to from the first one. |
-| `chambers.py` | `shape_tiles()` | 297 | Team-written | receives a shape name and a box; returns the floor tiles of a chamber of that shape (a plain rectangle if the shape came out too small). |
-| `chambers.py` | `is_open_floor()` | 315 | Team-written | receives the floor tiles and one tile; returns True if all eight tiles around it are floor too (a safe spot for a pillar). |
-| `chambers.py` | `add_pillars()` | 324 | Team-written | receives the floor tiles and how many pillars to try for; turns that many open floor tiles back into rock without cutting the room in two; returns how many were placed. |
-| `chambers.py` | `carve_chamber()` | 341 | Team-written | receives the map grid, a zone and a room style; carves a random chamber of that style into the rock; returns its floor tiles. |
-| `chambers.py` | `carve_arena()` | 351 | Team-written | receives the map grid, the boss zone and the arena drawing from dungeon_data.txt; carves the throne hall into the middle of the zone; returns [floor tiles, markers] (markers: "W" warlord, "G" guard spawn spots). |
-| `chambers.py` | `inside()` | 375 | Team-written | receives the map grid and a col/row; returns True if a door or corridor may be there (not on the map's outer edge). |
-| `chambers.py` | `open_sides()` | 380 | Team-written | receives the map grid and a tile; returns how many of the four tiles next to it are not rock. |
-| `chambers.py` | `pick_door()` | 391 | Team-written | receives the map grid, a chamber's floor tiles and a point to aim at; returns the wall tile for a door (closest to the aim), or None. |
-| `chambers.py` | `can_dig()` | 409 | Team-written | receives the map grid, the dig search so far, a tile and the dig rules (door, goal tiles, owner grid, allowed chambers, strict); returns True if the corridor may pass through this rock tile. |
-| `chambers.py` | `find_corridor()` | 425 | Team-written | receives the map grid and the dig rules; returns the list of rock tiles to dig from the door to the new chamber ([] if there is no way). |
-| `chambers.py` | `dig_corridor()` | 447 | Team-written | receives the map grid, the door, the new chamber's tiles, the owner grid and the chamber numbers the corridor may cross; digs the corridor and returns its tiles. |
-| `chambers.py` | `far_cluster()` | 463 | Team-written | receives floor tiles, a point and a count; returns that many tiles huddled together as far from the point as possible (where the party starts). |
-| `chambers.py` | `far_tiles()` | 481 | Team-written | receives floor tiles and a point; returns the tiles in the far half of the chamber from that point (where Spears deploys). |
+| `chambers.py` | `zone_box()` | 30 | Team-written | receives the map grid and a zone [x, y, width, height]; returns [left, top, right, bottom], the tiles a chamber may use (always leaving a wall around it). |
+| `chambers.py` | `box_center()` | 42 | Team-written | receives a box [left, top, right, bottom]; returns the tile in its middle. |
+| `chambers.py` | `shrink_box()` | 50 | Team-written | receives a box [left, top, right, bottom]; returns a randomly smaller box inside it, so chambers differ in size and position. |
+| `chambers.py` | `box_tiles()` | 64 | Team-written | receives a box [left, top, right, bottom]; returns the list of every tile inside it. |
+| `chambers.py` | `cell_zone()` | 79 | Team-written | receives the DUNGEON settings and a list of cells [cx, cy]; returns the zone [x, y, width, height] that covers all of them. |
+| `chambers.py` | `cell_neighbors()` | 99 | Team-written | receives the DUNGEON settings and a cell; returns the cells next to it (up, down, left, right) that are on the map. |
+| `chambers.py` | `touches()` | 115 | Team-written | receives the DUNGEON settings, a cell and a list of cells; returns True if the cell is next to any of them. |
+| `chambers.py` | `boss_block()` | 129 | Team-written | receives the DUNGEON settings; returns the 4 cells of a random 2 x 2 block for the boss arena. |
+| `chambers.py` | `far_cell()` | 139 | Team-written | receives the DUNGEON settings and the boss cells; returns a random cell among those farthest from the boss (where the party starts). |
+| `chambers.py` | `random_walk()` | 164 | Team-written | receives the DUNGEON settings, the start cell, the boss cells and a wanted length; walks at random from the start and returns the path if it ends next to the boss at that length, else []. |
+| `chambers.py` | `main_path()` | 187 | Team-written | receives the DUNGEON settings, the boss cells and the start cell; returns a random main path of cells (as close to the wanted length as possible), or [] if none was found. |
+| `chambers.py` | `make_chamber()` | 204 | Team-written | receives a chamber number, its kind ("start", "main", "side" or "boss"), its cells, its parent's number and the DUNGEON settings; returns a new, not yet carved chamber dictionary. |
+| `chambers.py` | `add_sides()` | 215 | Team-written | receives the DUNGEON settings, the plan so far, the main path and the boss cells; adds side chambers in free cells next to the main path; returns how many were added. |
+| `chambers.py` | `plan_dungeon()` | 244 | Team-written | receives the DUNGEON settings; plans the whole dungeon at random (main path, side chambers and boss arena); returns the list of chambers (number 0 is where the party starts). |
+| `chambers.py` | `children()` | 275 | Team-written | receives the plan and a chamber number; returns the chambers whose door is in that chamber's wall. |
+| `chambers.py` | `owner_grid()` | 289 | Team-written | receives the map grid and the plan; returns a grid saying which chamber's zone each tile is in (-1 = no chamber). |
+| `chambers.py` | `shape_ell()` | 308 | Team-written | receives a box; returns its tiles with one random corner block cut away (an L-shaped room). |
+| `chambers.py` | `shape_round()` | 329 | Team-written | receives a box; returns its tiles with the corners clipped off (a rounded room). |
+| `chambers.py` | `shape_cross()` | 349 | Team-written | receives a box; returns the tiles of a plus-shaped room (a wide bar across and a wide bar down). |
+| `chambers.py` | `shape_cave()` | 372 | Team-written | receives a box; returns its tiles with random bites taken out of the edge (a rough cave). |
+| `chambers.py` | `connected()` | 388 | Team-written | receives a list of floor tiles; returns only the tiles that can be walked to from the first one. |
+| `chambers.py` | `shape_tiles()` | 411 | Team-written | receives a shape name and a box; returns the floor tiles of a chamber of that shape (a plain rectangle if the shape came out too small). |
+| `chambers.py` | `is_open_floor()` | 437 | Team-written | receives the floor tiles and one tile; returns True if all eight tiles around it are floor too (a safe spot for a pillar). |
+| `chambers.py` | `add_pillars()` | 451 | Team-written | receives the floor tiles and how many pillars to try for; turns that many open floor tiles back into rock without cutting the room in two; returns how many were placed. |
+| `chambers.py` | `carve_chamber()` | 475 | Team-written | receives the map grid, a zone and a room style; carves a random chamber of that style into the rock; returns its floor tiles. |
+| `chambers.py` | `carve_arena()` | 493 | Team-written | receives the map grid, the boss zone and the arena drawing from dungeon_data.txt; carves the throne hall into the middle of the zone; returns [floor tiles, markers] (markers: "W" warlord, "G" guard spawn spots). |
+| `chambers.py` | `inside()` | 524 | Team-written | receives the map grid and a col/row; returns True if a door or corridor may be there (not on the map's outer edge). |
+| `chambers.py` | `open_sides()` | 532 | Team-written | receives the map grid and a tile; returns how many of the four tiles next to it are not rock. |
+| `chambers.py` | `pick_door()` | 549 | Team-written | receives the map grid, a chamber's floor tiles and a point to aim at; returns the wall tile for a door (closest to the aim), or None. |
+| `chambers.py` | `can_dig()` | 576 | Team-written | receives the map grid, the dig search so far, a tile and the dig rules (door, goal tiles, owner grid, allowed chambers, strict); returns True if the corridor may pass through this rock tile. |
+| `chambers.py` | `find_corridor()` | 599 | Team-written | receives the map grid and the dig rules; returns the list of rock tiles to dig from the door to the new chamber ([] if there is no way). |
+| `chambers.py` | `dig_corridor()` | 627 | Team-written | receives the map grid, the door, the new chamber's tiles, the owner grid and the chamber numbers the corridor may cross; digs the corridor and returns its tiles. |
+| `chambers.py` | `far_cluster()` | 651 | Team-written | receives floor tiles, a point and a count; returns that many tiles huddled together as far from the point as possible (where the party starts). |
+| `chambers.py` | `far_tiles()` | 676 | Team-written | receives floor tiles and a point; returns the tiles in the far half of the chamber from that point (where Spears deploys). |
 
 ## Yassin - Movement, fog of war and saving
 
 | File | Function | Line | Tag | What it does |
 |---|---|---|---|---|
 | `movement.py` | `tile_distance()` | 11 | Team-written | receives two tiles; returns how many up/down/left/right steps apart they are. |
-| `movement.py` | `in_bounds()` | 16 | Team-written | receives the grid and a col/row; returns True if that spot is inside the room. |
-| `movement.py` | `is_floor()` | 21 | Team-written | receives the grid, a col/row and whether sealed doors count as open; returns True if someone can stand there. |
-| `movement.py` | `blank_grid()` | 34 | Team-written | receives the grid and a value; returns a new grid of the same size filled with that value. |
-| `movement.py` | `can_enter()` | 45 | Team-written | receives the grid, the step counts so far, a tile and the blocked tiles; returns True if the search may step onto it. |
-| `movement.py` | `step_map()` | 54 | Team-written | receives the grid, a start tile and blocked tiles; returns a grid of step counts from the start (-1 = cannot be reached). |
-| `movement.py` | `reachable_tiles()` | 69 | Team-written | receives the grid, a start tile, a step limit, tiles that block the way and tiles nobody may stop on; returns the list of tiles that can be reached. |
-| `movement.py` | `lower_neighbor()` | 81 | Team-written | receives the step counts and a tile; returns the neighbor tile that is one step closer to the start. |
-| `movement.py` | `find_path()` | 92 | Team-written | receives the grid, a start tile and a goal tile; returns the list of tiles to walk (start first), or [] if there is no way. |
-| `movement.py` | `hero_tiles()` | 105 | Team-written | receives the hero list; returns the tiles of every hero still standing. |
-| `movement.py` | `model_tiles()` | 114 | Team-written | receives the enemy unit list; returns the tile of every enemy model. |
-| `movement.py` | `hero_at()` | 123 | Team-written | receives the hero list and a tile; returns the standing hero on that tile, or None. |
-| `movement.py` | `model_at()` | 131 | Team-written | receives the unit list and a tile; returns [unit, model] for the enemy on that tile, or None. |
-| `movement.py` | `learn_outline()` | 140 | Team-written | receives the game; adds every floor tile, door, throne and brazier of the chambers the party has opened to what it knows (the shape of the rooms, not their contents); returns how many tiles were learned. |
-| `movement.py` | `shown_letter()` | 159 | Team-written | receives a tile letter; returns the letter the party sees there (hidden pits look like floor, trapped chests like chests). |
-| `movement.py` | `lit_floor()` | 168 | Team-written | receives the game; returns a grid marking every tile a standing hero can see: within SIGHT steps on foot, so walls block the view. |
-| `movement.py` | `wall_in_view()` | 180 | Team-written | receives the game, the lit-floor grid and a wall tile; returns True if a lit floor tile touches that wall (so the wall is lit too). |
-| `movement.py` | `refresh_vision()` | 189 | Team-written | receives the game; works out which tiles the heroes can see right now and remembers what is on them; returns how many tiles are visible. |
-| `movement.py` | `enemy_targets()` | 205 | Team-written | receives the game, a tile and a range; returns the tiles of visible enemy models within range. |
-| `movement.py` | `friend_targets()` | 214 | Team-written | receives the game, a tile and a range; returns the tiles of standing heroes within range. |
-| `movement.py` | `move_targets()` | 223 | Team-written | receives the game and a hero; returns [tiles the hero can walk to with the moves left this turn, steps to each]. |
-| `movement.py` | `action_targets()` | 235 | Team-written | receives the game, a hero and a card's action; returns the list of tiles that card can be dropped on. |
-| `movement.py` | `is_valid_drop()` | 245 | Team-written | receives the tile under the mouse and the allowed tiles; returns True if the drop is allowed. |
-| `movement.py` | `drop_message()` | 250 | Team-written | receives the game, a hero, the card's action (None for walking) and the bad drop tile; returns a friendly message saying why it did not work. |
+| `movement.py` | `in_bounds()` | 23 | Team-written | receives the grid and a col/row; returns True if that spot is inside the room. |
+| `movement.py` | `is_floor()` | 32 | Team-written | receives the grid, a col/row and whether sealed doors count as open; returns True if someone can stand there. |
+| `movement.py` | `blank_grid()` | 52 | Team-written | receives the grid and a value; returns a new grid of the same size filled with that value. |
+| `movement.py` | `can_enter()` | 68 | Team-written | receives the grid, the step counts so far, a tile and the blocked tiles; returns True if the search may step onto it. |
+| `movement.py` | `step_map()` | 82 | Team-written | receives the grid, a start tile and blocked tiles; returns a grid of step counts from the start (-1 = cannot be reached). |
+| `movement.py` | `reachable_tiles()` | 105 | Team-written | receives the grid, a start tile, a step limit, tiles that block the way and tiles nobody may stop on; returns the list of tiles that can be reached. |
+| `movement.py` | `lower_neighbor()` | 125 | Team-written | receives the step counts and a tile; returns the neighbor tile that is one step closer to the start. |
+| `movement.py` | `find_path()` | 142 | Team-written | receives the grid, a start tile and a goal tile; returns the list of tiles to walk (start first), or [] if there is no way. |
+| `movement.py` | `hero_tiles()` | 163 | Team-written | receives the hero list; returns the tiles of every hero still standing. |
+| `movement.py` | `model_tiles()` | 180 | Team-written | receives the enemy unit list; returns the tile of every enemy model. |
+| `movement.py` | `hero_at()` | 195 | Team-written | receives the hero list and a tile; returns the standing hero on that tile, or None. |
+| `movement.py` | `model_at()` | 208 | Team-written | receives the unit list and a tile; returns [unit, model] for the enemy on that tile, or None. |
+| `movement.py` | `learn_outline()` | 222 | Team-written | receives the game; adds every floor tile, door, throne and brazier of the chambers the party has opened to what it knows (the shape of the rooms, not their contents); returns how many tiles were learned. |
+| `movement.py` | `shown_letter()` | 247 | Team-written | receives a tile letter; returns the letter the party sees there (hidden pits look like floor, trapped chests like chests). |
+| `movement.py` | `lit_floor()` | 260 | Team-written | receives the game; returns a grid marking every tile a standing hero can see: within SIGHT steps on foot, so walls block the view. |
+| `movement.py` | `wall_in_view()` | 278 | Team-written | receives the game, the lit-floor grid and a wall tile; returns True if a lit floor tile touches that wall (so the wall is lit too). |
+| `movement.py` | `refresh_vision()` | 293 | Team-written | receives the game; works out which tiles the heroes can see right now and remembers what is on them; returns how many tiles are visible. |
+| `movement.py` | `enemy_targets()` | 317 | Team-written | receives the game, a tile and a range; returns the tiles of visible enemy models within range. |
+| `movement.py` | `friend_targets()` | 332 | Team-written | receives the game, a tile and a range; returns the tiles of standing heroes within range. |
+| `movement.py` | `move_targets()` | 347 | Team-written | receives the game and a hero; returns [tiles the hero can walk to with the moves left this turn, steps to each]. |
+| `movement.py` | `action_targets()` | 364 | Team-written | receives the game, a hero and a card's action; returns the list of tiles that card can be dropped on. |
+| `movement.py` | `is_valid_drop()` | 379 | Team-written | receives the tile under the mouse and the allowed tiles; returns True if the drop is allowed. |
+| `movement.py` | `drop_message()` | 387 | Team-written | receives the game, a hero, the card's action (None for walking) and the bad drop tile; returns a friendly message saying why it did not work. |
 | `savegame.py` | `word()` | 21 | Team-written | receives some text; returns it with spaces turned into _ so it fits in one key=value pair. |
-| `savegame.py` | `tile_text()` | 26 | Team-written | receives a tile [col, row] (or None); returns it written as "col,row" (or "-"). |
-| `savegame.py` | `tiles_text()` | 33 | Team-written | receives a list of tiles; returns them written as "c,r/c,r/..." (or "-" if empty). |
-| `savegame.py` | `names_text()` | 43 | Team-written | receives a list of names; returns them written as "a_b/c_d" (or "-" if empty). |
-| `savegame.py` | `card_names()` | 53 | Team-written | receives a list of cards; returns their names written with names_text(). |
-| `savegame.py` | `yes_no()` | 61 | Team-written | receives True or False; returns "yes" or "no". |
-| `savegame.py` | `record()` | 68 | Team-written | receives a record kind, a name and a list of [key, value] pairs; returns one save-file line. |
-| `savegame.py` | `read_tile()` | 78 | Team-written | receives text like "3,4" (or "-"); returns the tile [3, 4] (or None). |
-| `savegame.py` | `read_tiles()` | 87 | Team-written | receives text like "3,4/5,6" (or "-"); returns the list of tiles. |
-| `savegame.py` | `read_names()` | 98 | Team-written | receives text like "Heroic Yap/Fetch" (or "-"); returns the list of names. |
-| `savegame.py` | `is_yes()` | 106 | Team-written | receives "yes" or "no"; returns True for "yes". |
-| `savegame.py` | `game_line()` | 113 | Team-written | receives the game; returns the GAME line with all the single values (round, doom, chamber, ...). |
-| `savegame.py` | `hero_line()` | 126 | Team-written | receives a hero; returns their HERO line (health, place, stats, cards and items). |
-| `savegame.py` | `chamber_line()` | 136 | Team-written | receives a planned chamber; returns its CHAMBER line. |
-| `savegame.py` | `unit_line()` | 154 | Team-written | receives an enemy unit; returns its UNIT line (stats, chamber and every model's tile and wounds). |
-| `savegame.py` | `number_line()` | 167 | Team-written | receives a record kind and a dictionary of whole numbers (memory, stats, elements); returns its line. |
-| `savegame.py` | `raw_line()` | 175 | Team-written | receives a record kind, a name and some text; returns a line that keeps the text exactly (for modifier decks and the log). |
-| `savegame.py` | `map_lines()` | 180 | Team-written | receives a record kind and a grid of letters; returns one line per row. |
-| `savegame.py` | `save_lines()` | 188 | Team-written | receives the game; returns every line of its save file. |
-| `savegame.py` | `save_game()` | 211 | Team-written | receives the game and a file name (without .sav); writes the whole game to name.sav; returns True if it worked. |
-| `savegame.py` | `find_in_deck()` | 225 | Team-written | receives the loaded data, a hero name and a card name; returns that hero's card dictionary. |
-| `savegame.py` | `read_pile()` | 233 | Team-written | receives the loaded data, a hero name and a list of card names as text; returns the list of cards. |
-| `savegame.py` | `load_hero()` | 241 | Team-written | receives the game, the data, a hero name and the fields of their HERO line; puts the saved values on that hero; returns the hero. |
-| `savegame.py` | `load_chamber()` | 255 | Team-written | receives the game, the data, a chamber number and the fields of its CHAMBER line; adds that chamber to the plan; returns it. |
-| `savegame.py` | `load_unit()` | 275 | Team-written | receives the game, the data, a unit name and the fields of its UNIT line; rebuilds the unit with its models; returns it. |
-| `savegame.py` | `load_game_line()` | 290 | Team-written | receives the game and the fields of the GAME line; puts the saved single values back; returns the round number. |
-| `savegame.py` | `load_raw()` | 306 | Team-written | receives the game and a GRID, KNOWN, MODS or LOG record; puts it back; returns the kind. |
-| `savegame.py` | `load_record()` | 321 | Team-written | receives the game, the data and one parsed key=value record; puts it back in the right place; returns the kind. |
-| `savegame.py` | `read_save()` | 342 | Team-written | receives a save name (without .sav); returns the list of its lines split into [kind, name, rest], or None if the file cannot be opened. |
-| `savegame.py` | `party_names()` | 358 | Team-written | receives the records of a save file; returns the names of the heroes in it. |
-| `savegame.py` | `build_game()` | 367 | Team-written | receives the loaded data and the records of a save file; builds the whole game from them; returns the game. |
-| `savegame.py` | `load_game()` | 383 | Team-written | receives the loaded data and a save name (without .sav); returns the saved game, or None if the file is missing or damaged. |
-| `savegame.py` | `list_saves()` | 399 | Team-written | receives nothing; returns the names of the .sav files in this folder, newest first. |
-| `savegame.py` | `save_summary()` | 415 | Team-written | receives a save name; returns a short line about it, like "round 12 - Kennel - 4 of 12 chambers" ("" if it cannot be read). |
+| `savegame.py` | `tile_text()` | 29 | Team-written | receives a tile [col, row] (or None); returns it written as "col,row" (or "-"). |
+| `savegame.py` | `tiles_text()` | 40 | Team-written | receives a list of tiles; returns them written as "c,r/c,r/..." (or "-" if empty). |
+| `savegame.py` | `names_text()` | 56 | Team-written | receives a list of names; returns them written as "a_b/c_d" (or "-" if empty). |
+| `savegame.py` | `card_names()` | 72 | Team-written | receives a list of cards; returns their names written with names_text(). |
+| `savegame.py` | `yes_no()` | 85 | Team-written | receives True or False; returns "yes" or "no". |
+| `savegame.py` | `record()` | 96 | Team-written | receives a record kind, a name and a list of [key, value] pairs; returns one save-file line. |
+| `savegame.py` | `read_tile()` | 111 | Team-written | receives text like "3,4" (or "-"); returns the tile [3, 4] (or None). |
+| `savegame.py` | `read_tiles()` | 124 | Team-written | receives text like "3,4/5,6" (or "-"); returns the list of tiles. |
+| `savegame.py` | `read_names()` | 141 | Team-written | receives text like "Heroic Yap/Fetch" (or "-"); returns the list of names. |
+| `savegame.py` | `is_yes()` | 153 | Team-written | receives "yes" or "no"; returns True for "yes". |
+| `savegame.py` | `game_line()` | 163 | Team-written | receives the game; returns the GAME line with all the single values (round, doom, chamber, ...). |
+| `savegame.py` | `hero_line()` | 180 | Team-written | receives a hero; returns their HERO line (health, place, stats, cards and items). |
+| `savegame.py` | `chamber_line()` | 194 | Team-written | receives a planned chamber; returns its CHAMBER line. |
+| `savegame.py` | `unit_line()` | 218 | Team-written | receives an enemy unit; returns its UNIT line (stats, chamber and every model's tile and wounds). |
+| `savegame.py` | `number_line()` | 236 | Team-written | receives a record kind and a dictionary of whole numbers (memory, stats, elements); returns its line. |
+| `savegame.py` | `raw_line()` | 249 | Team-written | receives a record kind, a name and some text; returns a line that keeps the text exactly (for modifier decks and the log). |
+| `savegame.py` | `map_lines()` | 257 | Team-written | receives a record kind and a grid of letters; returns one line per row. |
+| `savegame.py` | `save_lines()` | 269 | Team-written | receives the game; returns every line of its save file. |
+| `savegame.py` | `save_game()` | 300 | Team-written | receives the game and a file name (without .sav); writes the whole game to name.sav; returns True if it worked. |
+| `savegame.py` | `find_in_deck()` | 321 | Team-written | receives the loaded data, a hero name and a card name; returns that hero's card dictionary. |
+| `savegame.py` | `read_pile()` | 334 | Team-written | receives the loaded data, a hero name and a list of card names as text; returns the list of cards. |
+| `savegame.py` | `load_hero()` | 347 | Team-written | receives the game, the data, a hero name and the fields of their HERO line; puts the saved values on that hero; returns the hero. |
+| `savegame.py` | `load_chamber()` | 366 | Team-written | receives the game, the data, a chamber number and the fields of its CHAMBER line; adds that chamber to the plan; returns it. |
+| `savegame.py` | `load_unit()` | 392 | Team-written | receives the game, the data, a unit name and the fields of its UNIT line; rebuilds the unit with its models; returns it. |
+| `savegame.py` | `load_game_line()` | 413 | Team-written | receives the game and the fields of the GAME line; puts the saved single values back; returns the round number. |
+| `savegame.py` | `load_raw()` | 434 | Team-written | receives the game and a GRID, KNOWN, MODS or LOG record; puts it back; returns the kind. |
+| `savegame.py` | `load_record()` | 453 | Team-written | receives the game, the data and one parsed key=value record; puts it back in the right place; returns the kind. |
+| `savegame.py` | `read_save()` | 480 | Team-written | receives a save name (without .sav); returns the list of its lines split into [kind, name, rest], or None if the file cannot be opened. |
+| `savegame.py` | `party_names()` | 501 | Team-written | receives the records of a save file; returns the names of the heroes in it. |
+| `savegame.py` | `build_game()` | 515 | Team-written | receives the loaded data and the records of a save file; builds the whole game from them; returns the game. |
+| `savegame.py` | `load_game()` | 540 | Team-written | receives the loaded data and a save name (without .sav); returns the saved game, or None if the file is missing or damaged. |
+| `savegame.py` | `list_saves()` | 563 | Team-written | receives nothing; returns the names of the .sav files in this folder, newest first. |
+| `savegame.py` | `save_summary()` | 584 | Team-written | receives a save name; returns a short line about it, like "round 12 - Kennel - 4 of 12 chambers" ("" if it cannot be read). |
 
 ## AI art and interface - AI art and interface (AI-assisted)
 

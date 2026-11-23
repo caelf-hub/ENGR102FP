@@ -3,7 +3,11 @@ import random
 
 
 def build_modifier_deck():
-    """Team-written. [Owner: Mahad] receives nothing; returns a shuffled list of 20 attack modifier cards."""
+    """Team-written. [Owner: Mahad] receives nothing; returns a shuffled list of 20 attack modifier cards.
+
+    Called by: game_data.new_game
+    Loops: for name in counts; for copy in range(counts[name])
+    """
     counts = {"+0": 6, "+1": 5, "-1": 5, "+2": 1, "-2": 1, "x2": 1, "null": 1}
     deck = []
     for name in counts:
@@ -14,7 +18,14 @@ def build_modifier_deck():
 
 
 def draw_modifier(deck, discard):
-    """Team-written. [Owner: Mahad] receives a modifier deck and its discard pile; returns the card drawn (like "+1", "x2" or "null")."""
+    """Team-written. [Owner: Mahad] receives a modifier deck and its discard pile; returns the card drawn (like "+1", "x2" or "null").
+
+    Called by: roll_attack
+    Decides: if len(deck) == 0; if len(deck) == 0
+    Loops: for card in discard
+    Why: Works like a real deck: when it is empty, the discard pile is shuffled back in. A random card is
+        popped from the deck and added to the discard pile.
+    """
     if len(deck) == 0:
         for card in discard:
             deck.append(card)
@@ -28,7 +39,13 @@ def draw_modifier(deck, discard):
 
 
 def calc_damage(base, modifier, shield):
-    """Team-written. [Owner: Mahad] receives the base attack, the modifier card and the target's shield; returns the damage dealt (never below 0)."""
+    """Team-written. [Owner: Mahad] receives the base attack, the modifier card and the target's shield; returns the damage dealt (never below 0).
+
+    Called by: roll_attack
+    Decides: if modifier == "null"; if modifier == "x2"; if damage < 0
+    Why: 'null' is a miss (0 damage), 'x2' doubles, anything else ('+1', '-2' ...) is added. The shield is
+        subtracted afterwards, and damage never goes below 0. Example: calc_damage(3, 'x2', 1) = 6 - 1 = 5.
+    """
     if modifier == "null":
         damage = 0
     elif modifier == "x2":
@@ -45,7 +62,11 @@ def calc_damage(base, modifier, shield):
 
 
 def apply_damage(target, damage):
-    """Team-written. [Owner: Mahad] receives a hero or enemy model dictionary and a damage number; lowers its hp and returns the hp left."""
+    """Team-written. [Owner: Mahad] receives a hero or enemy model dictionary and a damage number; lowers its hp and returns the hp left.
+
+    Called by: frodo_game.spring_trap, frodo_game.hero_attack, spears_ai.splash, spears_ai.unit_attack
+    Decides: if target["hp"] < 0
+    """
     target["hp"] = target["hp"] - damage
     if target["hp"] < 0:
         target["hp"] = 0
@@ -53,7 +74,14 @@ def apply_damage(target, damage):
 
 
 def roll_attack(game, side, base, shield):
-    """Team-written. [Owner: Mahad] receives the game, "hero" or "enemy", the base attack and the shield; draws a modifier and returns [damage, modifier]."""
+    """Team-written. [Owner: Mahad] receives the game, "hero" or "enemy", the base attack and the shield; draws a modifier and returns [damage, modifier].
+
+    Called by: frodo_game.hero_attack, spears_ai.unit_attack
+    Uses: draw_modifier, calc_damage
+    Decides: if side == "hero"
+    Why: Heroes and enemies each draw from their own modifier deck. The drawn card is also sent to the
+        screen (the 'mod' effect).
+    """
     if side == "hero":
         modifier = draw_modifier(game["hero_deck"], game["hero_discard"])
     else:
@@ -64,7 +92,14 @@ def roll_attack(game, side, base, shield):
 
 
 def sort_turn_order(heroes, units):
-    """Team-written. [Owner: Mahad] receives the heroes and enemy units; returns a list of [initiative, tie, kind, name] sorted lowest first."""
+    """Team-written. [Owner: Mahad] receives the heroes and enemy units; returns a list of [initiative, tie, kind, name] sorted lowest first.
+
+    Called by: frodo_game.play_round
+    Decides: if not hero["exhausted"]; if len(unit["models"]) > 0
+    Loops: for hero in heroes; for unit in units
+    Why: Builds [initiative, tie, kind, name] lists and sorts them. Python sorts lists by their first item,
+        so the lowest initiative acts first; on a tie, heroes (tie 0) go before enemies (tie 1).
+    """
     order = []
     for hero in heroes:
         if not hero["exhausted"]:

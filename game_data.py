@@ -6,7 +6,10 @@ import combat
 
 
 def clean_value(text):
-    """Team-written. [Owner: Cael] receives one value from the data file; returns an int if it is a number, otherwise the text with _ turned into spaces."""
+    """Team-written. [Owner: Cael] receives one value from the data file; returns an int if it is a number, otherwise the text with _ turned into spaces.
+
+    Called by: parse_fields
+    """
     try:
         return int(text)
     except ValueError:
@@ -14,7 +17,15 @@ def clean_value(text):
 
 
 def parse_fields(text):
-    """Team-written. [Owner: Cael] receives text like "move=3 role=melee"; returns a dictionary such as {"move": 3, "role": "melee"}."""
+    """Team-written. [Owner: Cael] receives text like "move=3 role=melee"; returns a dictionary such as {"move": 3, "role": "melee"}.
+
+    Called by: read_line, savegame.build_game, savegame.save_summary
+    Uses: clean_value
+    Decides: if len(pieces) == 2
+    Loops: for pair in text.split()
+    Why: Turns 'move=3 role=melee' into {'move': 3, 'role': 'melee'}: split() on spaces, then split('=') on
+        each pair; clean_value() turns numbers into ints.
+    """
     fields = {}
     for pair in text.split():
         pieces = pair.split("=")
@@ -24,7 +35,10 @@ def parse_fields(text):
 
 
 def parse_action(text):
-    """Team-written. [Owner: Cael] receives text like "attack:3:1"; returns an action dictionary with kind, amount and range."""
+    """Team-written. [Owner: Cael] receives text like "attack:3:1"; returns an action dictionary with kind, amount and range.
+
+    Called by: make_card
+    """
     pieces = str(text).split(":")
     action = {"kind": pieces[0], "amount": 0, "range": 1}
     try:
@@ -36,7 +50,11 @@ def parse_action(text):
 
 
 def make_card(owner, fields):
-    """Team-written. [Owner: Cael] receives the hero name and the fields of a CARD line; returns a card dictionary with its one action."""
+    """Team-written. [Owner: Cael] receives the hero name and the fields of a CARD line; returns a card dictionary with its one action.
+
+    Called by: store_record
+    Uses: parse_action
+    """
     card = {"name": fields["name"], "owner": owner}
     card["action"] = parse_action(fields["action"])
     card["element"] = fields["element"]
@@ -44,7 +62,13 @@ def make_card(owner, fields):
 
 
 def store_record(data, kind, name, fields):
-    """Team-written. [Owner: Cael] receives the data so far, a record kind, its name and its fields; stores it in the right place and returns the kind."""
+    """Team-written. [Owner: Cael] receives the data so far, a record kind, its name and its fields; stores it in the right place and returns the kind.
+
+    Called by: read_line
+    Uses: make_card
+    Decides: if kind == "CARD"; if name in data["cards"]; if kind == "UNIT"; if kind == "HERO"; if kind ==
+        "ITEM"; if kind == "SETTING"
+    """
     if kind == "CARD":
         if name in data["cards"]:
             data["cards"][name].append(make_card(name, fields))
@@ -69,7 +93,12 @@ def store_record(data, kind, name, fields):
 
 
 def read_line(data, line):
-    """Team-written. [Owner: Cael] receives the data so far and one line of the file; stores the line if it is a record and returns True if it was one."""
+    """Team-written. [Owner: Cael] receives the data so far and one line of the file; stores the line if it is a record and returns True if it was one.
+
+    Called by: load_dungeon
+    Uses: store_record, parse_fields
+    Decides: if line == "" or line.startswith("#"); if len(parts) < 3; if parts[0].strip() == "ARENA"
+    """
     if line == "" or line.startswith("#"):
         return False
     parts = line.split("|")
@@ -86,7 +115,14 @@ def read_line(data, line):
 
 
 def load_dungeon(filename):
-    """Team-written. [Owner: Cael] receives the data file name; returns a dictionary of units, styles, the dungeon plan settings, the arena drawing, cards, items, heroes and settings, or None if the file cannot be opened."""
+    """Team-written. [Owner: Cael] receives the data file name; returns a dictionary of units, styles, the dungeon plan settings, the arena drawing, cards, items, heroes and settings, or None if the file cannot be opened.
+
+    Called by: frodo_game.main
+    Uses: read_line
+    Loops: for line in data_file
+    Why: Reads dungeon_data.txt line by line and splits each line with split(). Returns None if the file
+        cannot be opened (try/except OSError), so main() can print a message instead of crashing.
+    """
     data = {"units": {}, "styles": [], "dungeon": {}, "arena": [], "cards": {}, "items": [], "heroes": {},
             "settings": {}, "levels": []}
     try:
@@ -100,7 +136,12 @@ def load_dungeon(filename):
 
 
 def make_hero(data, name):
-    """Team-written. [Owner: Cael] receives the loaded data and a hero name; returns a fresh hero dictionary with a full hand of cards."""
+    """Team-written. [Owner: Cael] receives the loaded data and a hero name; returns a fresh hero dictionary with a full hand of cards.
+
+    Called by: new_game
+    Uses: cards.refill_hand
+    Loops: for card in data["cards"][name]
+    """
     info = data["heroes"][name]
     hero = {"name": name, "kind": info["kind"], "title": info["title"], "blurb": info["blurb"]}
     hero["hp"] = info["hp"]
@@ -118,19 +159,30 @@ def make_hero(data, name):
 
 
 def new_memory():
-    """Team-written. [Owner: Cael] receives nothing; returns Spears's memory dictionary with every count at 0."""
+    """Team-written. [Owner: Cael] receives nothing; returns Spears's memory dictionary with every count at 0.
+
+    Called by: new_game
+    """
     return {"melee_hits": 0, "ranged_hits": 0, "chests_opened": 0, "tiles_moved": 0,
             "clumped": 0}
 
 
 def new_stats():
-    """Team-written. [Owner: Cael] receives nothing; returns the stats dictionary used for the end summary, all at 0."""
+    """Team-written. [Owner: Cael] receives nothing; returns the stats dictionary used for the end summary, all at 0.
+
+    Called by: new_game
+    """
     return {"rounds": 0, "damage_dealt": 0, "damage_taken": 0, "cards_played": 0,
             "loot_found": 0, "rooms_cleared": 0, "enemies_slain": 0}
 
 
 def find_level(data, name):
-    """Team-written. [Owner: Cael] receives the loaded data and a difficulty name; returns that DIFFICULTY record (Normal if the name is unknown)."""
+    """Team-written. [Owner: Cael] receives the loaded data and a difficulty name; returns that DIFFICULTY record (Normal if the name is unknown).
+
+    Called by: new_game
+    Decides: if level["name"] == name
+    Loops: for level in data["levels"]
+    """
     for level in data["levels"]:
         if level["name"] == name:
             return level
@@ -138,7 +190,11 @@ def find_level(data, name):
 
 
 def apply_level(game, level):
-    """Team-written. [Owner: Cael] receives a new game and a difficulty record; makes heroes tougher or frailer, the Doom Track longer or shorter and enemies hit harder or softer; returns the difficulty name."""
+    """Team-written. [Owner: Cael] receives a new game and a difficulty record; makes heroes tougher or frailer, the Doom Track longer or shorter and enemies hit harder or softer; returns the difficulty name.
+
+    Called by: new_game
+    Loops: for hero in game["heroes"]
+    """
     for hero in game["heroes"]:
         hero["max_hp"] = max(4, hero["max_hp"] + level["hero_hp"])
         hero["hp"] = hero["max_hp"]
@@ -149,7 +205,14 @@ def apply_level(game, level):
 
 
 def new_game(data, party, difficulty):
-    """Team-written. [Owner: Cael] receives the loaded data, the list of chosen hero names and the difficulty name; returns the whole starting game dictionary."""
+    """Team-written. [Owner: Cael] receives the loaded data, the list of chosen hero names and the difficulty name; returns the whole starting game dictionary.
+
+    Called by: frodo_game.open_game, savegame.build_game
+    Uses: make_hero, new_memory, new_stats, combat.build_modifier_deck, apply_level, find_level
+    Loops: for name in party
+    Why: Builds the one game dictionary that everything else changes. apply_level() then adjusts hero HP,
+        the Doom Track and enemy damage for the chosen difficulty.
+    """
     settings = data["settings"]
     game = {"running": True, "data": data, "heroes": [], "units": [], "inventory": []}
     for name in party:
@@ -169,7 +232,12 @@ def new_game(data, party, difficulty):
 
 
 def find_hero(game, name):
-    """Team-written. [Owner: Cael] receives the game and a hero name; returns that hero's dictionary, or None."""
+    """Team-written. [Owner: Cael] receives the game and a hero name; returns that hero's dictionary, or None.
+
+    Called by: frodo_game.take_turn, savegame.load_hero
+    Decides: if hero["name"] == name
+    Loops: for hero in game["heroes"]
+    """
     for hero in game["heroes"]:
         if hero["name"] == name:
             return hero
@@ -177,7 +245,12 @@ def find_hero(game, name):
 
 
 def place_party(game, starts):
-    """Team-written. [Owner: Cael] receives the game and the room's start tiles; stands each living hero on one and returns how many were placed."""
+    """Team-written. [Owner: Cael] receives the game and the room's start tiles; stands each living hero on one and returns how many were placed.
+
+    Called by: frodo_game.install_room
+    Decides: if not hero["exhausted"] and placed < len(starts)
+    Loops: for hero in game["heroes"]
+    """
     placed = 0
     for hero in game["heroes"]:
         if not hero["exhausted"] and placed < len(starts):

@@ -29,7 +29,14 @@ BREATHER_HEAL = 8
 # ---------------------------------------------------------------- rooms
 
 def install_room(game, room):
-    """Team-written. [Owner: Cael] receives the game and a freshly generated room; adds its units to the map, makes it the chamber the party is in and returns its name."""
+    """Team-written. [Owner: Cael] receives the game and a freshly generated room; adds its units to the map, makes it the chamber the party is in and returns its name.
+
+    Called by: enter_room
+    Uses: game_data.place_party, movement.learn_outline, movement.refresh_vision, spears_ai.advance_doom,
+        spears_ai.check_room_clear, ui.show_chamber
+    Decides: if room["kind"] == "side"; if room["entry"] is None
+    Loops: for unit in room["units"]
+    """
     for unit in room["units"]:
         game["units"].append(unit)
     game["chamber"] = room["id"]
@@ -48,7 +55,13 @@ def install_room(game, room):
 
 
 def catch_breath(game):
-    """Team-written. [Owner: Cael] receives the game; when a new chamber opens every standing hero heals; returns how many heroes healed."""
+    """Team-written. [Owner: Cael] receives the game; when a new chamber opens every standing hero heals; returns how many heroes healed.
+
+    Called by: enter_room
+    Uses: cards.heal_hero, logbook.say
+    Decides: if not hero["exhausted"]
+    Loops: for hero in game["heroes"]
+    """
     healed = 0
     for hero in game["heroes"]:
         if not hero["exhausted"]:
@@ -59,7 +72,15 @@ def catch_breath(game):
 
 
 def enter_room(game, number):
-    """Team-written. [Owner: Cael] receives the game and the number of the chamber behind the door just opened; Spears carves and fills it from his memory of the party; returns the room's name."""
+    """Team-written. [Owner: Cael] receives the game and the number of the chamber behind the door just opened; Spears carves and fills it from his memory of the party; returns the room's name.
+
+    Called by: start_dungeon, step_on_tile
+    Uses: catch_breath, spears_ai.spears_counter, spears_ai.generate_room, install_room,
+        spears_ai.fade_memory, logbook.say, logbook.add_banner, savegame.save_game
+    Decides: if game["depth"] > 0
+    Why: Heals the party (not for the first chamber), asks Spears which party habit to counter, has him
+        build the chamber, adds it to the map, shows the banner, then autosaves.
+    """
     if game["depth"] > 0:
         catch_breath(game)
     game["depth"] += 1
@@ -76,7 +97,13 @@ def enter_room(game, number):
 
 
 def start_dungeon(game):
-    """Team-written. [Owner: Cael] receives the game; plans and digs the dungeon and puts the party in the first chamber; returns how many chambers were planned."""
+    """Team-written. [Owner: Cael] receives the game; plans and digs the dungeon and puts the party in the first chamber; returns how many chambers were planned.
+
+    Called by: open_game
+    Uses: spears_ai.build_dungeon, logbook.say, enter_room, ui.show_quickstart
+    Why: Spears plans the whole map, the first chamber is entered (party placed there), and the quick-start
+        card is shown.
+    """
     count = spears_ai.build_dungeon(game)
     logbook.say(game, "Spears has dug a dungeon of " + str(count) + " chambers. His throne waits in the dark.")
     enter_room(game, 0)
@@ -87,7 +114,13 @@ def start_dungeon(game):
 # ---------------------------------------------------------------- hero actions
 
 def spring_trap(game, hero):
-    """Team-written. [Owner: Cael] receives the game and the hero who triggered a trap; hurts the hero, pushes the Doom Track and returns the damage."""
+    """Team-written. [Owner: Cael] receives the game and the hero who triggered a trap; hurts the hero, pushes the Doom Track and returns the damage.
+
+    Called by: step_on_tile
+    Uses: combat.apply_damage, spears_ai.feel_hit, spears_ai.advance_doom, logbook.say, logbook.add_float,
+        spears_ai.hero_falls
+    Decides: if hero["hp"] <= 0
+    """
     combat.apply_damage(hero, TRAP_DAMAGE)
     spears_ai.feel_hit(game, hero, TRAP_DAMAGE, "")
     game["stats"]["damage_taken"] += TRAP_DAMAGE
@@ -100,7 +133,12 @@ def spring_trap(game, hero):
 
 
 def open_chest(game, hero, max_rarity):
-    """Team-written. [Owner: Cael] receives the game, the hero and the best rarity allowed; gives the hero an item, applies it and returns the item's name."""
+    """Team-written. [Owner: Cael] receives the game, the hero and the best rarity allowed; gives the hero an item, applies it and returns the item's name.
+
+    Called by: step_on_tile
+    Uses: cards.search_poi, cards.apply_item, logbook.say, logbook.add_float
+    Decides: if item is None
+    """
     item = cards.search_poi(hero, game["data"]["items"], max_rarity)
     if item is None:
         return ""
@@ -115,7 +153,16 @@ def open_chest(game, hero, max_rarity):
 
 
 def step_on_tile(game, hero):
-    """Team-written. [Owner: Cael] receives the game and a hero who just stopped moving; resolves the chest, shrine, trap or door under the hero; returns the tile letter."""
+    """Team-written. [Owner: Cael] receives the game and a hero who just stopped moving; resolves the chest, shrine, trap or door under the hero; returns the tile letter.
+
+    Called by: hero_move
+    Uses: open_chest, spring_trap, enter_room, spears_ai.door_at
+    Decides: if spot not in "DdE~"; if spot == "C" or spot == "X"; if spot == "X"; if spot == "P"; if spot
+        == "T" or spot == "H"; if spot == "E"
+    Why: Only the tile where the hero STOPS counts. C or X = chest (X also springs a trap), P = shrine, T or
+        H = trap, E = an unsealed door, which opens the next chamber. The tile becomes plain floor after
+        use; doors and cover stay.
+    """
     col = hero["pos"][0]
     row = hero["pos"][1]
     spot = game["grid"][row][col]
@@ -136,7 +183,16 @@ def step_on_tile(game, hero):
 
 
 def hero_move(game, hero, tile):
-    """Team-written. [Owner: Cael] receives the game, a hero and the tile to move to; walks the hero there tile by tile (sliding smoothly on screen), using up moves; returns how many tiles were moved."""
+    """Team-written. [Owner: Cael] receives the game, a hero and the tile to move to; walks the hero there tile by tile (sliding smoothly on screen), using up moves; returns how many tiles were moved.
+
+    Called by: do_request
+    Uses: movement.model_tiles, movement.find_path, ui.slide_hero, movement.refresh_vision, ui.follow,
+        step_on_tile
+    Loops: for index in range(1, len(path))
+    Why: Walks along find_path() one tile at a time so the fog of war and camera update at every step, then
+        subtracts the steps from moves_left. step_on_tile() then handles a chest, trap or door where the
+        hero stops.
+    """
     blocked = movement.model_tiles(game["units"])
     path = movement.find_path(game["grid"], hero["pos"], tile, blocked, False)
     for index in range(1, len(path)):
@@ -153,7 +209,11 @@ def hero_move(game, hero, tile):
 
 
 def record_hit(game, half, damage):
-    """Team-written. [Owner: Cael] receives the game, the attack action and the damage; updates the stats and Spears's memory; returns the memory key used."""
+    """Team-written. [Owner: Cael] receives the game, the attack action and the damage; updates the stats and Spears's memory; returns the memory key used.
+
+    Called by: hero_attack
+    Decides: if half["range"] <= 1; if damage > 0
+    """
     game["stats"]["damage_dealt"] += damage
     if half["range"] <= 1:
         key = "melee_hits"
@@ -165,7 +225,16 @@ def record_hit(game, half, damage):
 
 
 def hero_attack(game, hero, half, amount, tile):
-    """Team-written. [Owner: Cael] receives the game, a hero, the attack action, its strength and the target tile; resolves the attack and returns the damage dealt."""
+    """Team-written. [Owner: Cael] receives the game, a hero, the attack action, its strength and the target tile; resolves the attack and returns the damage dealt.
+
+    Called by: play_card
+    Uses: movement.model_at, combat.roll_attack, combat.apply_damage, record_hit, logbook.say,
+        logbook.add_float, spears_ai.remove_model, spears_ai.boss_check
+    Decides: if found is None; if result[1] == "x2"; if model["hp"] <= 0
+    Why: Base damage = card amount + item bonus. combat.roll_attack() draws the modifier card and subtracts
+        the enemy's toughness. A model at 0 HP is removed; otherwise boss_check() may move the Warlord into
+        his next phase.
+    """
     found = movement.model_at(game["units"], tile)
     if found is None:
         return 0
@@ -188,7 +257,12 @@ def hero_attack(game, hero, half, amount, tile):
 
 
 def hero_heal(game, hero, amount, tile):
-    """Team-written. [Owner: Cael] receives the game, the healer, the heal strength and the target tile; heals the hero there and returns how much was healed."""
+    """Team-written. [Owner: Cael] receives the game, the healer, the heal strength and the target tile; heals the hero there and returns how much was healed.
+
+    Called by: play_card
+    Uses: movement.hero_at, cards.heal_hero, logbook.say, logbook.add_float
+    Decides: if friend is None
+    """
     friend = movement.hero_at(game["heroes"], tile)
     if friend is None:
         return 0
@@ -200,7 +274,11 @@ def hero_heal(game, hero, amount, tile):
 
 
 def strike_style(hero, card):
-    """Team-written. [Owner: Cael] receives a hero and the attack card they play; returns how the attack looks on screen: "melee", "arrow", "bolt" or "ranged"."""
+    """Team-written. [Owner: Cael] receives a hero and the attack card they play; returns how the attack looks on screen: "melee", "arrow", "bolt" or "ranged".
+
+    Called by: play_card
+    Decides: if card["action"]["range"] <= 1; if hero["kind"] == "archer"; if hero["kind"] == "mage"
+    """
     if card["action"]["range"] <= 1:
         return "melee"
     elif hero["kind"] == "archer":
@@ -211,7 +289,17 @@ def strike_style(hero, card):
 
 
 def play_card(game, hero, name, tile):
-    """Team-written. [Owner: Cael] receives the game, a hero, the name of a card in their hand and the target tile; plays the card's action there and returns the action kind."""
+    """Team-written. [Owner: Cael] receives the game, a hero, the name of a card in their hand and the target tile; plays the card's action there and returns the action kind.
+
+    Called by: do_request
+    Uses: cards.choose_card, cards.use_element, strike_style, hero_attack, hero_heal, logbook.say,
+        cards.finish_card
+    Decides: if card is None; if action["kind"] == "attack"; if action["kind"] == "heal"; if action["kind"]
+        == "move"
+    Why: Takes the card out of the hand, adds the element bonus (+1 if that orb is glowing), does the action
+        by kind (attack, heal, dash or shield), then discards it and draws a new card. Sets acted so a hero
+        plays only one card a turn.
+    """
     card = cards.choose_card(hero, name)
     if card is None:
         return ""
@@ -238,7 +326,14 @@ def play_card(game, hero, name, tile):
 
 
 def do_request(game, hero, request):
-    """Team-written. [Owner: Team] receives the game, the hero whose turn it is and what the player asked for; carries it out and returns True if the turn is over."""
+    """Team-written. [Owner: Team] receives the game, the hero whose turn it is and what the player asked for; carries it out and returns True if the turn is over.
+
+    Called by: hero_turn
+    Uses: hero_move, ui.fly_card, play_card, ui.wait_effects, ui.pause, use_menu
+    Decides: if kind == "move"; if kind == "card"; if kind == "menu"
+    Why: The dispatcher: every player request comes through here. 'move' -> hero_move, 'card' -> play_card,
+        'menu' -> use_menu, anything else ('end') -> turn over. Returns True when the turn is over.
+    """
     kind = request["type"]
     if kind == "move":
         hero_move(game, hero, request["tile"])
@@ -255,7 +350,15 @@ def do_request(game, hero, request):
 
 
 def hero_turn(game, hero):
-    """Team-written. [Owner: Team] receives the game and a hero; lets the player walk and play one card until the turn ends; returns how many requests were carried out."""
+    """Team-written. [Owner: Team] receives the game and a hero; lets the player walk and play one card until the turn ends; returns how many requests were carried out.
+
+    Called by: take_turn
+    Uses: logbook.say, ui.get_hero_action, do_request
+    Loops: while not finished
+    Why: The hero gets their Move stat in moves and one card. The while loop keeps asking the player
+        (ui.get_hero_action) until do_request() says the turn is over: End turn, the hero falls, the Warlord
+        dies, or Quit.
+    """
     hero["moves_left"] = hero["move"] + hero["bonus_move"]
     hero["acted"] = False
     logbook.say(game, hero["name"] + "'s turn: " + str(hero["moves_left"]) + " moves and one card.")
@@ -269,7 +372,15 @@ def hero_turn(game, hero):
 
 
 def use_menu(game, choice):
-    """Team-written. [Owner: Cael] receives the game and a menu choice made during a turn ("rules", "status", "save" or "quit"); shows or does it; returns the choice."""
+    """Team-written. [Owner: Cael] receives the game and a menu choice made during a turn ("rules", "status", "save" or "quit"); shows or does it; returns the choice.
+
+    Called by: do_request
+    Uses: ui.show_rules, ui.show_status, save_game
+    Decides: if choice == "rules"; if choice == "status"; if choice == "save"
+    Why: The else branch is Quit: it sets game['running'] = False, which ends the main while loop. Only four
+        fixed values can arrive (the menu buttons and F1, F2, F3, F9). Rules, Status and Save do not end the
+        turn.
+    """
     if choice == "rules":
         ui.show_rules()
     elif choice == "status":
@@ -284,7 +395,12 @@ def use_menu(game, choice):
 # ---------------------------------------------------------------- Spears's units
 
 def damage_words(before, game):
-    """Team-written. [Owner: Cael] receives each hero's health before an enemy attacked and the game; returns words like "hits Pip for 3, Frodo for 2" (or "misses")."""
+    """Team-written. [Owner: Cael] receives each hero's health before an enemy attacked and the game; returns words like "hits Pip for 3, Frodo for 2" (or "misses").
+
+    Called by: spears_phase
+    Decides: if lost > 0; if len(hits) == 0
+    Loops: for hero in game["heroes"]
+    """
     hits = []
     for hero in game["heroes"]:
         lost = before[hero["name"]] - hero["hp"]
@@ -296,7 +412,11 @@ def damage_words(before, game):
 
 
 def health_now(game):
-    """Team-written. [Owner: Cael] receives the game; returns a dictionary of every hero's health right now."""
+    """Team-written. [Owner: Cael] receives the game; returns a dictionary of every hero's health right now.
+
+    Called by: spears_phase
+    Loops: for hero in game["heroes"]
+    """
     health = {}
     for hero in game["heroes"]:
         health[hero["name"]] = hero["hp"]
@@ -304,7 +424,17 @@ def health_now(game):
 
 
 def spears_phase(game, unit):
-    """Team-written. [Owner: Cael] receives the game and one enemy unit; runs its phases Move, Shoot, Charge, Fight, Morale while the screen shows each step; returns the damage it dealt."""
+    """Team-written. [Owner: Cael] receives the game and one enemy unit; runs its phases Move, Shoot, Charge, Fight, Morale while the screen shows each step; returns the damage it dealt.
+
+    Called by: take_turn
+    Uses: spears_ai.pick_target, spears_ai.unit_visible, logbook.tell, ui.follow, ui.caption,
+        spears_ai.move_unit, ui.play_moves, health_now, spears_ai.unit_shoot, spears_ai.unit_charge
+    Decides: if target is None; if visible; if unit["role"] == "ranged"; if spears_ai.unit_charge(game,
+        unit, target)
+    Why: One enemy unit's turn, in phases: move, then shoot (ranged units) or charge + fight (everyone
+        else), then morale. The ui calls (caption, play_moves, wait_effects) only show what happened on
+        screen.
+    """
     target = spears_ai.pick_target(game, unit)
     if target is None:
         return 0
@@ -336,7 +466,15 @@ def spears_phase(game, unit):
 
 
 def take_turn(game, entry):
-    """Team-written. [Owner: Team] receives the game and one [initiative, tie, kind, name] entry; gives that hero or unit its turn; returns the kind that acted."""
+    """Team-written. [Owner: Team] receives the game and one [initiative, tie, kind, name] entry; gives that hero or unit its turn; returns the kind that acted.
+
+    Called by: play_round
+    Uses: movement.refresh_vision, game_data.find_hero, ui.follow, hero_turn, spears_ai.find_unit,
+        spears_phase
+    Decides: if entry[2] == "hero"; if hero["exhausted"]; if unit is not None
+    Why: One entry of the turn order. A hero goes to hero_turn(), an enemy unit to spears_phase(). Exhausted
+        heroes and destroyed units are skipped.
+    """
     game["turn_name"] = entry[3]
     movement.refresh_vision(game)
     if entry[2] == "hero":
@@ -356,7 +494,11 @@ def take_turn(game, entry):
 # ---------------------------------------------------------------- the round
 
 def start_round(game):
-    """Team-written. [Owner: Cael] receives the game; resets the things that only last one round and returns the new round number."""
+    """Team-written. [Owner: Cael] receives the game; resets the things that only last one round and returns the new round number.
+
+    Called by: play_round
+    Uses: logbook.say
+    """
     game["round"] += 1
     game["order"] = []
     game["turn_name"] = ""
@@ -365,7 +507,12 @@ def start_round(game):
 
 
 def save_game(game):
-    """Team-written. [Owner: Cael] receives the game; asks the player to type a file name and saves the whole game to name.sav; returns True if it was saved."""
+    """Team-written. [Owner: Cael] receives the game; asks the player to type a file name and saves the whole game to name.sav; returns True if it was saved.
+
+    Called by: use_menu
+    Uses: ui.ask_text, savegame.save_game, logbook.say
+    Decides: if name is None; if saved
+    """
     name = ui.ask_text(game, "Name your save file (letters and numbers):", "name", 0, 0)
     if name is None:
         return False
@@ -378,13 +525,22 @@ def save_game(game):
 
 
 def set_initiative(game, hero):
-    """Team-written. [Owner: Cael] receives the game and a hero; rolls the hero's turn order for this round (speed plus a small random roll); returns it."""
+    """Team-written. [Owner: Cael] receives the game and a hero; rolls the hero's turn order for this round (speed plus a small random roll); returns it.
+
+    Called by: prepare_heroes
+    """
     hero["init"] = hero["speed"] + random.randint(0, 9)
     return hero["init"]
 
 
 def prepare_heroes(game):
-    """Team-written. [Owner: Cael] receives the game; rolls turn order for every standing hero and every enemy unit; returns how many heroes will act."""
+    """Team-written. [Owner: Cael] receives the game; rolls turn order for every standing hero and every enemy unit; returns how many heroes will act.
+
+    Called by: play_round
+    Uses: set_initiative, spears_ai.pick_initiative
+    Decides: if not hero["exhausted"]
+    Loops: for hero in game["heroes"]; for unit in game["units"]
+    """
     acting = 0
     for hero in game["heroes"]:
         if not hero["exhausted"]:
@@ -396,7 +552,16 @@ def prepare_heroes(game):
 
 
 def play_round(game):
-    """Team-written. [Owner: Team] receives the game; plays one full round (turn order, every hero and enemy unit takes a turn, end of round); returns the number of turns taken."""
+    """Team-written. [Owner: Team] receives the game; plays one full round (turn order, every hero and enemy unit takes a turn, end of round); returns the number of turns taken.
+
+    Called by: main
+    Uses: start_round, prepare_heroes, combat.sort_turn_order, take_turn, end_round
+    Decides: if game["warlord_dead"] or not game["running"]; if game["running"]
+    Loops: for entry in game["order"]
+    Why: One full round: roll the turn order (heroes by speed, enemies by role), give every hero and enemy
+        unit a turn, lowest number first, then end_round(). The for loop breaks early if the Warlord dies or
+        the player quits.
+    """
     start_round(game)
     prepare_heroes(game)
     game["order"] = combat.sort_turn_order(game["heroes"], game["units"])
@@ -414,7 +579,11 @@ def play_round(game):
 # ---------------------------------------------------------------- end of round
 
 def cleanup_cards(game):
-    """Team-written. [Owner: Cael] receives the game; clears the bonuses that only last one round (shields); returns how many heroes were reset."""
+    """Team-written. [Owner: Cael] receives the game; clears the bonuses that only last one round (shields); returns how many heroes were reset.
+
+    Called by: end_round
+    Loops: for hero in game["heroes"]
+    """
     reset = 0
     for hero in game["heroes"]:
         hero["shield"] = 0
@@ -424,7 +593,13 @@ def cleanup_cards(game):
 
 
 def mark_exhausted(game):
-    """Team-written. [Owner: Cael] receives the game; marks every hero with no hp or too few cards as exhausted; returns how many heroes still stand."""
+    """Team-written. [Owner: Cael] receives the game; marks every hero with no hp or too few cards as exhausted; returns how many heroes still stand.
+
+    Called by: end_round
+    Uses: cards.is_exhausted, spears_ai.hero_falls
+    Decides: if hero["exhausted"]; if cards.is_exhausted(hero)
+    Loops: for hero in game["heroes"]
+    """
     standing = 0
     for hero in game["heroes"]:
         if hero["exhausted"]:
@@ -437,7 +612,13 @@ def mark_exhausted(game):
 
 
 def count_clumping(game):
-    """Team-written. [Owner: Cael] receives the game; counts heroes standing next to another hero and tells Spears's memory; returns that count."""
+    """Team-written. [Owner: Cael] receives the game; counts heroes standing next to another hero and tells Spears's memory; returns that count.
+
+    Called by: end_round
+    Uses: movement.hero_tiles, movement.tile_distance
+    Decides: if movement.tile_distance(tile, other) == 1; if clumped >= 2
+    Loops: for tile in tiles; for other in tiles
+    """
     tiles = movement.hero_tiles(game["heroes"])
     clumped = 0
     for tile in tiles:
@@ -451,7 +632,15 @@ def count_clumping(game):
 
 
 def end_round(game):
-    """Team-written. [Owner: Cael] receives the game; runs the end of the round (shields wear off, elements wane, exhaustion, Spears's reinforcements, Doom +1, log file); returns the Doom Track value."""
+    """Team-written. [Owner: Cael] receives the game; runs the end of the round (shields wear off, elements wane, exhaustion, Spears's reinforcements, Doom +1, log file); returns the Doom Track value.
+
+    Called by: play_round
+    Uses: cleanup_cards, cards.wane_elements, mark_exhausted, count_clumping, spears_ai.reinforce,
+        spears_ai.advance_doom, logbook.say, logbook.write_log
+    Why: Shields wear off, element orbs fade, heroes at 0 HP are marked exhausted, huddling is counted for
+        Spears, Spears may prepare a chamber ahead, Doom goes up 1, and the round is written to
+        frodo_log.txt.
+    """
     cleanup_cards(game)
     cards.wane_elements(game["elements"])
     mark_exhausted(game)
@@ -469,7 +658,12 @@ def end_round(game):
 # ---------------------------------------------------------------- main
 
 def finish_game(game, result):
-    """Team-written. [Owner: Team] receives the game and "win", "lose" or "" (quit); writes the summary to the log and shows the end screen; returns True if the player wants to play again."""
+    """Team-written. [Owner: Team] receives the game and "win", "lose" or "" (quit); writes the summary to the log and shows the end screen; returns True if the player wants to play again.
+
+    Called by: main
+    Uses: logbook.write_log, logbook.write_summary, ui.end_screen, logbook.summary_lines
+    Decides: if result == "" or not game["running"]
+    """
     logbook.write_log(game["round_log"] + ["Result: " + str(result)], game["round"])
     summary = logbook.write_summary(game["stats"])
     if result == "" or not game["running"]:
@@ -478,7 +672,15 @@ def finish_game(game, result):
 
 
 def open_game(data, choice):
-    """Team-written. [Owner: Team] receives the loaded data and what the player chose on the title screen ({"party": [...]} or {"file": name}); returns a ready game, or None if a save could not be loaded."""
+    """Team-written. [Owner: Team] receives the loaded data and what the player chose on the title screen ({"party": [...]} or {"file": name}); returns a ready game, or None if a save could not be loaded.
+
+    Called by: choose_game
+    Uses: savegame.load_game, logbook.write_log, ui.show_chamber, movement.hero_tiles, game_data.new_game,
+        logbook.start_log, start_dungeon
+    Decides: if "file" in choice; if game is not None
+    Why: choice is a dictionary: {'file': name} loads a save; {'party': [...], 'difficulty': ...} starts a
+        new game and digs the first chamber.
+    """
     if "file" in choice:
         game = savegame.load_game(data, choice["file"])
         if game is not None:
@@ -492,7 +694,15 @@ def open_game(data, choice):
 
 
 def choose_game(data):
-    """Team-written. [Owner: Team] receives the loaded data; shows the title screens until the player starts a new game or loads one; returns the game (None if they quit)."""
+    """Team-written. [Owner: Team] receives the loaded data; shows the title screens until the player starts a new game or loads one; returns the game (None if they quit).
+
+    Called by: main
+    Uses: ui.reset_screen, ui.title_flow, open_game
+    Decides: if len(choice) == 0
+    Loops: while game is None
+    Why: Keeps showing the title screens until a new game starts or a save loads. If a save file is broken,
+        it shows a note and asks again instead of crashing.
+    """
     game = None
     note = ""
     ui.reset_screen()
@@ -506,7 +716,16 @@ def choose_game(data):
 
 
 def main():
-    """Team-written. [Owner: Team] receives nothing; loads the data, opens the window and runs each game round by round until win, lose or quit (then offers to play again); returns nothing."""
+    """Team-written. [Owner: Team] receives nothing; loads the data, opens the window and runs each game round by round until win, lose or quit (then offers to play again); returns nothing.
+
+    Called by: nobody in the game (only the tests, or not used)
+    Uses: game_data.load_dungeon, ui.init, choose_game, play_round, logbook.check_game_over, finish_game
+    Decides: if data is None; if again
+    Loops: while game is not None; while game["running"] and result == ""
+    Why: The ONE round-by-round loop the brief asks for. It stops when game['running'] becomes False (Quit
+        or closing the window) or check_game_over() returns 'win' or 'lose'. After the end screen, 'Play
+        again' goes back to choose_game().
+    """
     data = game_data.load_dungeon("dungeon_data.txt")
     if data is None:
         print("Could not open dungeon_data.txt - keep it in the same folder as frodo_game.py")

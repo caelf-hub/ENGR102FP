@@ -191,6 +191,20 @@ The brief says every function's docstring must **start** with its tag: `Team-wri
 
 ## 6. How to explain any function to a grader
 
+Every game-logic docstring has a reading guide under its first line, so you can answer by reading it:
+
+```
+Called by: do_request                      <- who calls it (search the name to see the call)
+Uses: ui.show_rules, ui.show_status, ...   <- the project functions it calls
+Decides: if choice == "rules"; ...         <- every if / elif it checks, in order
+Loops: for hero in game["heroes"]          <- what it loops over
+Why: The else branch is Quit ...           <- the reasoning (on the ~55 most-asked functions)
+```
+
+The turn chain to remember: `main` -> `play_round` -> `take_turn` -> `hero_turn` -> `do_request` ->
+`hero_move` / `play_card` / `use_menu`; enemies go `take_turn` -> `spears_phase`.
+
+
 Every docstring is written as **"receives ...; returns ..."** so you can read it out loud:
 
 1. **What it receives** - the parameters, in plain words.
